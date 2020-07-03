@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<button type="button" class="btn btn-outline-secondary btn-sml btn-block js-open-modal" data-modal="add-modal">Add customer</button>
+<input class="form-control" type="text" placeholder="Search..." id="search" onkeyup='tableSearch("search", "table")'>
+<table id="table" class="table table-hover">
+    <thead>
+      <tr>
+      	<th>Action</th>
+	      <th>ID <img src='{{ sort_icon() }}' onclick="sortTableByNums('table', 0, true)"></th>
+	      <th>Fullname <img src='{{ sort_icon() }}' onclick="sortTable('table', 1)"></th>
+	      <th>Card ID <img src='{{ sort_icon() }}' onclick="sortTableByNums('table', 2, false)"></th>
+	      <th>Address <img src='{{ sort_icon() }}' onclick="sortTable('table', 3)"></th>
+	      <th>Email <img src='{{ sort_icon() }}' onclick="sortTable('table', 4)"></th>
+	      <th>Telephone <img src='{{ sort_icon() }}' onclick="sortTable('table', 5)"></th>
+      </tr>
+  </thead>
+  <tbody>
+  	{% for customer in customers %}
+	  <tr id="row_{{ loop.index }}" onmouseover='showImages(`{{ loop.index }}`)' onmouseout='hideImages(`{{ loop.index }}`)'>
+	  	<th><img id="del_img_{{ loop.index }}" title="Delete" src="{{ delete_icon() }}" class="js-open-modal" data-modal="delete-modal" onclick='fillDeleteModal("row_{{ loop.index }}")'>     <img id="upd_img_{{ loop.index }}" title="Update" src="{{ update_icon() }}" class="js-open-modal" data-modal="update-modal" onclick='fillUpdateModal("row_{{ loop.index }}")'></th>
+	      <td scope="row"><strong>{{ customer.0 }}</strong></td>
+	      <td>{{ customer.1 }}</td>
+	      <td>{{ customer.2 }}</td>
+	      <td>{{ customer.3 }}</td>
+	      <td>{{ customer.4 }}</td>
+	      <td>{{ customer.5 }}</td>
+      </tr>
+	{% endfor %}
+    </tbody>
+</table>
+
+<div class="modal-window" data-modal="add-modal">
+   <img class="modal__cross js-modal-close" src='{{ close_icon() }}'>
+   <h4>New customer</h4>
+   <hr class="my hr4">
+    <form action="" id="add_form" method="post">
+        {{ form.hidden_tag() }}
+        {{ form.fullname.label }}
+        {{ form.fullname(class="form-control") }}<br>
+        {{ form.address.label }}
+        {{ form.address(class="form-control") }}<br>
+        {{ form.email.label }}
+        {{ form.email(class="form-control") }}<br>
+        {{ form.telephone.label }}
+        {{ form.telephone(class="form-control") }}<br>
+        {{ form.card_id.label }}
+        {{ form.card_id(class="form-control") }}<br>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary js-modal-close">Cancel</button>
+          {{ form.submit(value="Add", class="btn btn-outline-success") }}
+        </div>
+    </form>
+</div>
+
+<div class="modal-window" data-modal="update-modal">
+   <img class="modal__cross js-modal-close" src="{{ close_icon() }}">
+   <h4>Update</h4>
+   <hr class="my hr4">
+    <form action="" method="post">
+        <input type="hidden" id="upd_id" name="customer_id" value="">
+        {{ form.hidden_tag() }}
+        {{ form.fullname.label }}
+        {{ form.fullname(class="form-control") }}<br>
+        {{ form.address.label }}
+        {{ form.address(class="form-control") }}<br>
+        {{ form.email.label }}
+        {{ form.email(class="form-control") }}<br>
+        {{ form.telephone.label }}
+        {{ form.telephone(class="form-control") }}<br>
+        {{ form.card_id.label }}
+        {{ form.card_id(class="form-control") }}<br>
+        <div class="modal-footer">
+        	<button type="button" class="btn btn-outline-secondary js-modal-close">Cancel</button>
+        	{{ form.submit(value="Update", class="btn btn-outline-success") }}
+        </div>
+    </form>
+</div>
+
+<div class="modal-window" data-modal="delete-modal">
+   <img class="modal__cross js-modal-close" src="{{ close_icon() }}">
+   <h4>Delete</h4>
+   <hr class="my hr4">
+   <p id='del_info'></p>
+   <div class="modal-footer">
+    <form action="" method="post">
+       <input type="hidden" id="del_id" name="customer_id" value="">
+	     <button type="button" class="btn btn-outline-secondary js-modal-close">Cancel</button>
+       {{ form.submit(value="Delete", class="btn btn-outline-danger") }}
+    </form>
+   </div>
+</div>
+
+<!-- Подложка под модальным окном -->
+<div class="overlay js-overlay-modal"></div>
+
+<script src="{{ url_for('static', filename='js/customers.js') }}"></script>
+<script type="text/javascript">
+    main();
+</script>
+
+{% endblock content %}
