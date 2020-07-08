@@ -2,4 +2,13 @@
 
 {% block content %}
 
+<form action="{{ url_for('api') }}" id="form" method="post">
+    {{ form.hidden_tag() }}
+    {{ form.phrase.label }}
+    {{ form.phrase(class="form-control") }}<br>
+    {{ form.samples_count.label }}
+    {{ form.samples_count(class="form-control") }}<br>
+    {{ form.submit(class="btn btn-outline-success") }}
+</form>
+
 {% endblock %}

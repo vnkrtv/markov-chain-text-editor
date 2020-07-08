@@ -1,1 +1,1 @@
-# habr-textgen
+# articles-gen
