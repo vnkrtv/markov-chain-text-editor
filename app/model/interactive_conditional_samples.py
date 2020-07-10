@@ -43,7 +43,7 @@ def interact_model(
 
     enc = encoder.get_encoder(model_name)
     hparams = model.default_hparams()
-    with open(os.path.join(model_name, 'hparams.json')) as f:
+    with open(os.path.join('app', 'model', model_name, 'hparams.json')) as f:
         hparams.override_from_dict(json.load(f))
 
     if length is None:
@@ -63,7 +63,7 @@ def interact_model(
         )
 
         saver = tf.train.Saver()
-        ckpt = tf.train.latest_checkpoint(os.path.join(model_name))
+        ckpt = tf.train.latest_checkpoint(os.path.join('app', 'model', model_name))
         saver.restore(sess, ckpt)
 
         context_tokens = enc.encode(raw_text)
@@ -75,5 +75,5 @@ def interact_model(
             })[:, len(context_tokens):]
             for i in range(batch_size):
                 generated += 1
-                text_samples.append(enc.decode(out[i]))
+                text_samples.append(enc.decode(out[i]).replace('<|endoftext|>', ''))
         return text_samples

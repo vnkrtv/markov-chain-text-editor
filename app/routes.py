@@ -2,6 +2,8 @@ from app import app
 from app import forms
 from flask import render_template, flash
 from flask.views import MethodView
+from googletrans import Translator
+from app.model.interactive_conditional_samples import interact_model
 
 
 class ArticlesGenAPI(MethodView):
@@ -9,10 +11,12 @@ class ArticlesGenAPI(MethodView):
     context = {
         'title': 'Генератор определений',
     }
+    translator = Translator()
 
     def get(self):
         self.context['form'] = forms.PhraseForm()
         self.context['message'] = ''
+        self.context['text_samples'] = ''
         return render_template(self.template, **self.context)
 
     def post(self):
@@ -22,6 +26,11 @@ class ArticlesGenAPI(MethodView):
         else:
             self.context['message'] = 'blya'
         self.context['form'] = form
+        phrase = self.translator.translate(form.phrase.data).text
+        self.context['text_samples'] = [
+            self.translator.translate(text, dest='ru').text
+            for text in interact_model(phrase, nsamples=form.samples_count.data)
+        ]
         return render_template(self.template, **self.context)
 
 
