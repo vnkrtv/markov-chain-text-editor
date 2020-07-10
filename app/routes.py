@@ -16,7 +16,12 @@ class ArticlesGenAPI(MethodView):
         return render_template(self.template, **self.context)
 
     def post(self):
-        self.context['form'] = forms.PhraseForm()
+        form = forms.PhraseForm()
+        if form.validate_on_submit():
+            self.context['message'] = form.phrase.data
+        else:
+            self.context['message'] = 'blya'
+        self.context['form'] = form
         return render_template(self.template, **self.context)
 
 
