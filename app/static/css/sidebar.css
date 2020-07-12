@@ -7,24 +7,22 @@ body {
   background-color: #222;
 }
 
-img {
-  cursor: pointer;
-}
-
 .jumbotron {
-  background-color: #343a40;
-  color: white;
+    background-color: #343a40;
+    color: white;
 }
 
 .header{
- background-image: url('../images/background.jpg');
- background-attachment: fixed;
- background-size: cover;
- background-position: center;
-    height: 100vh;
+    background-image: url('../images/background.jpg');
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+    height: 95vh;
 }
 
-.phrase-form {
+.phrase-container {
+    position: absolute;
+    margin-top: 20vh;
     color: white;
 }
 
@@ -32,4 +30,11 @@ img {
  border:1px  solid #222;
  background:#343a40;
  color:#fff;
+}
+
+.output {
+    position: center;
+    padding-top: 2vh;
+    text-align: center;
+    color: white;
 }

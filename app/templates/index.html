@@ -2,8 +2,12 @@
 
 {% block content %}
 
+{% if text_samples %}
+    <h3 class="output">Вывод:</h3>
+{% endif %}
 {% for text_sample in text_samples %}
 	<div class="jumbotron">
+		<h3>Пример {{ loop.index }}</h3>
 		<p>{{ text_sample }}</p>
 	</div>
 {% endfor %}
