@@ -30,60 +30,39 @@
 
 <body>
 
-  <div class="d-flex" id="wrapper">
-
-    <!-- Sidebar -->
-    <div class="bg-light border-right" id="sidebar-wrapper">
-      <div class="sidebar-heading">Table</div>
-      <div class="list-group list-group-flush">
-        <a href="{{ url_for('api') }}" class="list-group-item list-group-item-action bg-light">API</a>
+      <div class="navbar navbar-dark bg-dark shadow-sm">
+      <div class="d-flex justify-content-between">
+        <a href="" class="navbar-brand d-flex align-items-center">
+          <img src="{{ url_for('static', filename='images/icon.png') }}" width="20" height="20" class="mr-2">
+          <strong>Генератор определений</strong>
+        </a>
+      </div>
+      <div class="d-flex justify-content-between">
+        <a href="" class="navbar-brand d-flex align-items-center"></a>
+        <a href="" class="navbar-brand d-flex align-items-center">Выйти</a>
       </div>
     </div>
-    <!-- /#sidebar-wrapper -->
+    <header class="header">
+  <div class="container">
+    <form action="{{ url_for('api') }}" id="form" method="post" class="phrase-form">
+      {{ form.hidden_tag() }}
+      {{ form.phrase.label }}
+      {{ form.phrase(class="form-control") }}<br>
+      {{ form.samples_count.label }}
+      {{ form.samples_count(class="form-control") }}<br>
+      {{ form.submit(class="btn btn-secondary", onclick="document.getElementById('loading-container').style.display =''") }}
+  </form>
+
+</header>
+
+  <div class="d-flex" id="wrapper">
 
     <!-- Page Content -->
     <div id="page-content-wrapper">
 
-      <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
-
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        
-        <h5>{{ table_name }}</h5>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
-            <li class="nav-item">
-              <a class="nav-link">Server:</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link">Database:</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link">User:</a>
-            </li>
-            <li class="nav-item active">
-              <a class="nav-link" href="#">Logout</a>
-            </li>
-          </ul>
-        </div>
-      </nav>
-
       <div class="container-fluid">
-        <br>
-
-        {% for error in get_flashed_messages() %}
-        <div class="alert alert-danger" role="alert">
-            {{ error }}
-        </div>
-        {% endfor %}
-        {% if message %}
-        <div class="alert alert-success" role="alert">
-            {{ message }}
-        </div>                    
-        {% endif %}
-
         {% block content %}
+            
         {% endblock content %}
       </div>
     </div>
@@ -92,6 +71,16 @@
   </div>
   <!-- /#wrapper -->
 
+<div id="loading-container">
+  <div id="loading-div">
+    <div class="lds-ring"><div></div><div></div><div></div><div></div></div>
+  </div>
+  <div id="overlay"></div>
+</div>
+
+<script type="text/javascript">
+  document.getElementById("loading-container").style.display = "none";
+</script>
 </body>
 
 </html>

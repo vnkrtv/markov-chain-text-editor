@@ -2,31 +2,10 @@
 
 {% block content %}
 
-<form action="{{ url_for('api') }}" id="form" method="post">
-    {{ form.hidden_tag() }}
-    {{ form.phrase.label }}
-    {{ form.phrase(class="form-control") }}<br>
-    {{ form.samples_count.label }}
-    {{ form.samples_count(class="form-control") }}<br>
-    {{ form.submit(class="btn btn-outline-success", onclick="document.getElementById('loading-container').style.display =''") }}
-</form>
-
 {% for text_sample in text_samples %}
-	<div>
+	<div class="jumbotron">
 		<p>{{ text_sample }}</p>
 	</div>
 {% endfor %}
-
-<div id="loading-container">
-	<div id="loading-div">
-		<h4>...</h4>
-		<div class="lds-ring"><div></div><div></div><div></div><div></div></div>
-	</div>
-	<div id="overlay"></div>
-</div>
-
-<script type="text/javascript">
-	document.getElementById("loading-container").style.display = "none";
-</script>
 
 {% endblock %}

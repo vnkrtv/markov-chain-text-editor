@@ -28,7 +28,7 @@ class ArticlesGenAPI(MethodView):
         self.context['form'] = form
         phrase = self.translator.translate(form.phrase.data).text
         self.context['text_samples'] = [
-            self.translator.translate(text, dest='ru').text
+            form.phrase.data + ' ' + self.translator.translate(text, dest='ru').text
             for text in interact_model(phrase, nsamples=form.samples_count.data)
         ]
         return render_template(self.template, **self.context)
