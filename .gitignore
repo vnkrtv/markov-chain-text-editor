@@ -1,5 +1,6 @@
 venv
 .idea
 app/model/gpt-2/model-752.data-00000-of-00001
+__pycache__
 
 *.pyc
