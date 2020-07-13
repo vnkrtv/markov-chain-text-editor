@@ -3,7 +3,7 @@ from app import forms
 from flask import render_template, flash
 from flask.views import MethodView
 from googletrans import Translator
-from app.model.interactive_conditional_samples import interact_model
+from app.model.generate_samples import interact_model
 
 
 class ArticlesGenAPI(MethodView):
@@ -29,7 +29,11 @@ class ArticlesGenAPI(MethodView):
         phrase = self.translator.translate(form.phrase.data).text
         self.context['text_samples'] = [
             form.phrase.data + ' ' + self.translator.translate(text, dest='ru').text
-            for text in interact_model(phrase, nsamples=form.samples_count.data)
+            for text in interact_model(
+                phrase,
+                nsamples=form.samples_count.data,
+                top_k=20,
+                temperature=0.7)
         ]
         return render_template(self.template, **self.context)
 
