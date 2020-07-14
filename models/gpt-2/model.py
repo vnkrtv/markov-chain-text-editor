@@ -156,7 +156,7 @@ def positions_for(tokens, past_length):
     return expand_tile(past_length + tf.range(nsteps), batch_size)
 
 
-def model(hparams, X, past=None, scope='model', reuse=tf.AUTO_REUSE):
+def model(hparams, X, past=None, scope='gpt-2', reuse=tf.AUTO_REUSE):
     with tf.variable_scope(scope, reuse=reuse):
         results = {}
         batch, sequence = shape_list(X)
@@ -180,7 +180,7 @@ def model(hparams, X, past=None, scope='model', reuse=tf.AUTO_REUSE):
         results['present'] = tf.stack(presents, axis=1)
         h = norm(h, 'ln_f')
 
-        # Language model loss.  Do tokens <n predict token n?
+        # Language gpt-2 loss.  Do tokens <n predict token n?
         h_flat = tf.reshape(h, [batch*sequence, hparams.n_embd])
         logits = tf.matmul(h_flat, wte, transpose_b=True)
         logits = tf.reshape(logits, [batch, sequence, hparams.n_vocab])

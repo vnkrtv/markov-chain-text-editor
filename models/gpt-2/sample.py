@@ -1,5 +1,5 @@
 import tensorflow as tf
-from app.model import model
+from models.model import model
 
 
 def top_k_logits(logits, k):

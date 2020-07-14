@@ -1,9 +1,9 @@
 from app import app
 from app import forms
-from flask import render_template, flash
+from flask import render_template
 from flask.views import MethodView
 from googletrans import Translator
-from app.model.generate_samples import interact_model
+from models.model import interact_model
 
 
 class ArticlesGenAPI(MethodView):

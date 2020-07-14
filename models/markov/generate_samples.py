@@ -1,11 +1,9 @@
 import random
-from collections import deque
-import re
 
 
 def generate_random_start(model):
     # Чтобы сгенерировать любое начальное слово, раскомментируйте строку:
-    # return random.choice(model.keys())
+    # return random.choice(gpt-2.keys())
 
     # Чтобы сгенерировать "правильное" начальное слово, используйте код ниже:
     # Правильные начальные слова - это те, что являлись началом предложений в корпусе
@@ -28,17 +26,18 @@ def generate_random_sentence(length, markov_model):
     sentence[0] = sentence[0].capitalize()
     return ' '.join(sentence) + '.'
 
-def generate_random_sentence_for_higher_model(length, markov_model):
+
+def generate_random_sentence_for_higher_model(length, higher_order_markov_model):
     current_words = generate_random_start(markov_model)
     sentence = list(current_words)
-    for i in range(0, length):
+    for _ in range(0, length):
         if isinstance(current_words, str):
             samples_list = []
             for i in higher_order_markov_model:
                 if i[0] == current_words:
                     samples_list.append(i)
             current_words = random.choice(samples_list)
-        current_dictogram = markov_model[current_words]
+        current_dictogram = higher_order_markov_model[current_words]
         random_weighted_words = current_dictogram.return_weighted_random_word()
         current_words = random_weighted_words            
         sentence.append(current_words)

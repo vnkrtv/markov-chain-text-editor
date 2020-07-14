@@ -1,4 +1,4 @@
-from app.markov.histograms import Dictogram
+from models.markov.histograms import Dictogram
 
 
 def make_markov_model(data):

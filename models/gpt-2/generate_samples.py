@@ -3,7 +3,8 @@ import os
 import json
 import numpy as np
 import tensorflow as tf
-from app.model import model, sample, encoder
+from models.model import model
+from models.model import encoder, sample
 
 
 def interact_model(
@@ -18,17 +19,17 @@ def interact_model(
     top_p=0.0
 ) -> list:
     """
-    Interactively run the model
-    :model_name=117M : String, which model to use
+    Interactively run the gpt-2
+    :model_name=117M : String, which gpt-2 to use
     :seed=None : Integer seed for random number generators, fix seed to reproduce
      results
     :nsamples=1 : Number of samples to return total
     :batch_size=1 : Number of batches (only affects speed/memory).  Must divide nsamples.
     :length=None : Number of tokens in generated text, if None (default), is
-     determined by model hyperparameters
+     determined by gpt-2 hyperparameters
     :temperature=1 : Float value controlling randomness in boltzmann
      distribution. Lower temperature results in less random completions. As the
-     temperature approaches zero, the model will become deterministic and
+     temperature approaches zero, the gpt-2 will become deterministic and
      repetitive. Higher temperature results in more random completions.
     :top_k=0 : Integer value controlling diversity. 1 means only 1 word is
      considered for each step (token), resulting in deterministic completions,
@@ -43,7 +44,7 @@ def interact_model(
 
     enc = encoder.get_encoder(model_name)
     hparams = model.default_hparams()
-    with open(os.path.join('app', 'model', model_name, 'hparams.json')) as f:
+    with open(os.path.join('app', 'gpt-2', model_name, 'hparams.json')) as f:
         hparams.override_from_dict(json.load(f))
 
     if length is None:
@@ -63,7 +64,7 @@ def interact_model(
         )
 
         saver = tf.train.Saver()
-        ckpt = tf.train.latest_checkpoint(os.path.join('app', 'model', model_name))
+        ckpt = tf.train.latest_checkpoint(os.path.join('app', 'gpt-2', model_name))
         saver.restore(sess, ckpt)
 
         context_tokens = enc.encode(raw_text)
