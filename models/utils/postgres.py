@@ -20,4 +20,4 @@ class PostgresStorage:
 
     def get_posts_texts(self) -> list:
         posts_list = self.get_posts()
-        return []
+        return [post[2] for post in posts_list]

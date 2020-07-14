@@ -2,6 +2,7 @@ import random
 
 
 class Dictogram(dict):
+
     def __init__(self, iterable=None):
         # Инициализируем наше распределение как новый объект класса,
         # добавляем имеющиеся элементы
