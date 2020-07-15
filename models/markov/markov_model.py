@@ -12,14 +12,22 @@ class MarkovModel:
     start_words: list
     start_phrases: list
 
-    def __init__(self, order=1):
-        self.model = dict()
+    def __init__(self, model=None, order=1, start_words=None, start_phrases=None):
+        if model is None:
+            model = {}
+        if start_words is None:
+            start_words = []
+        if start_phrases is None:
+            start_phrases = []
+        self.model = model
         self.order = order
-        self.start_words = []
-        self.start_phrases = []
+        self.start_words = start_words
+        self.start_phrases = start_phrases
 
     def train(self, texts_list: list):
         contain_rus = re.compile(r'[а-яА-Я]')
+        texts_list_len = len(texts_list)
+        i = 0
         for text in texts_list:
             if contain_rus.search(text):
                 text_words_list = []
@@ -31,6 +39,10 @@ class MarkovModel:
                     words_list[-1] = words_list[-1][:-1]
                     text_words_list += words_list
                 self.__update(text_words_list)
+            i += 1
+            print('(%d/%d) model length - %d' % (i, texts_list_len, len(self.model)))
+            if i > 10000:
+                break
 
     def generate_by_word(self, length, start_word=None):
         if not start_word:
@@ -59,20 +71,27 @@ class MarkovModel:
 
         samples_list = []
         for phrase in self.model:
-            if phrase[:len(sentence)] == sentence:
+            if [word.lower() for word in phrase[:len(sentence)]] == [word.lower() for word in sentence]:
                 samples_list.append(phrase)
         current_words = random.choice(samples_list)
 
         for _ in range(len(sentence), length):
             current_dictogram = self.model[current_words]
+            print(current_dictogram)
             random_weighted_words = current_dictogram.return_weighted_random_word()
-            current_words = random_weighted_words
-            sentence.append(current_words)
+            samples_list = []
+            for phrase in self.model:
+                if phrase[0].lower() == random_weighted_words:
+                    samples_list.append(phrase)
+            try:
+                current_words = random.choice(samples_list)
+            except:
+                break
+            sentence += current_words
 
-        sentence[0] = sentence[0].capitalize()
         return ' '.join(sentence) + '.'
 
-    def save(self, path='app/models/markov/'):
+    def save(self, path='models/markov/bin/'):
         with open(path + 'model.pickle', 'wb') as handle:
             pickle.dump(self.model, handle, protocol=pickle.HIGHEST_PROTOCOL)
         with open(path + 'order.pickle', 'wb') as handle:
@@ -82,20 +101,22 @@ class MarkovModel:
         with open(path + 'start_phrases.pickle', 'wb') as handle:
             pickle.dump(self.start_phrases, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    def load(self, path='app/models/markov/'):
+    @staticmethod
+    def load(path='models/markov/bin/'):
         with open(path + 'model.pickle', 'rb') as handle:
-            self.model = pickle.load(handle)
+            model = pickle.load(handle)
         with open(path + 'order.pickle', 'rb') as handle:
-            self.order = pickle.load(handle)
+            order = pickle.load(handle)
         with open(path + 'start_words.pickle', 'rb') as handle:
-            self.start_words = pickle.load(handle)
+            start_words = pickle.load(handle)
         with open(path + 'start_phrases.pickle', 'rb') as handle:
-            self.start_phrases = pickle.load(handle)
+            start_phrases = pickle.load(handle)
+        return MarkovModel(model=model, order=order, start_words=start_words, start_phrases=start_phrases)
 
     def __update(self, words_list: list):
         for i in range(0, len(words_list) - self.order):
             # Создаем окно
-            window = tuple(self.model[i: i + self.order])
+            window = tuple(words_list[i: i + self.order])
             # Добавляем в словарь
             if window in self.model:
                 # Присоединяем к уже существующему распределению

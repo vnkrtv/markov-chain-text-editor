@@ -9,7 +9,7 @@ class PostgresStorage:
 
     @staticmethod
     def connect(host, port=5432, user='postgres', password='password', dbname='habr'):
-        return PostgresStorage(psycopg2.connect(
+        return PostgresStorage(conn=psycopg2.connect(
             host=host, port=port, user=user, password=password, dbname=dbname)
         )
 
