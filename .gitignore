@@ -1,5 +1,6 @@
 venv
 .idea
+.ipynb_checkpoints
 model-752.data-00000-of-00001
 models/markov/bin
 __pycache__
