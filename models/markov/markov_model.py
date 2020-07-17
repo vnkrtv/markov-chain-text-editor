@@ -111,7 +111,12 @@ class MarkovModel:
             start_words = pickle.load(handle)
         with open(path + 'start_phrases.pickle', 'rb') as handle:
             start_phrases = pickle.load(handle)
-        return MarkovModel(model=model, order=order, start_words=start_words, start_phrases=start_phrases)
+        return MarkovModel(
+            model=model,
+            order=order,
+            start_words=start_words,
+            start_phrases=start_phrases
+        )
 
     def __update(self, words_list: list):
         for i in range(0, len(words_list) - self.order):
