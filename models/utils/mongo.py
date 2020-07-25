@@ -5,18 +5,26 @@ class MongoStorage:
     """Class for working with MongoDB"""
 
     db: pymongo.database.Database
+    col: pymongo.collection.Collection
 
-    def __init__(self, db: pymongo.database.Database):
+    def __init__(self, db: pymongo.database.Database, col: pymongo.collection.Collection):
         self.db = db
+        self.col = col
 
-    @staticmethod
-    def connect(host: str, port=27017, db_name='markov_model'):
+    @classmethod
+    def connect(cls, host: str, port=27017, db_name='wiki', col_name='articles'):
         db = pymongo.MongoClient(host, port)[db_name]
-        return MongoStorage(db)
+        return cls(
+            db=db,
+            col=db[col_name])
 
-    def add_condition(self, condition: tuple, iterable) -> None:
-        col = self.db['model']
-        col.insert_one()
+    def get_articles(self, count=0) -> list:
+        return list(self.col.find({}).limit(count))
 
-    def update_condition(self, condition: tuple, iterable) -> None:
-        col = self.db['model']
+    def get_article(self, title) -> dict:
+        doc = self.col.find_one({'title': title})
+        return doc if doc else {}
+
+    def get_articles_headings_texts(self, count=0) -> list:
+        articles = self.get_articles(count)
+        return [article['text']['Заголовок']['text'] for article in articles]

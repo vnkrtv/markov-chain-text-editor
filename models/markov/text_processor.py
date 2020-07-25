@@ -1,7 +1,7 @@
 import re
 
 
-class TextProcessor:
+class Tokenizer:
 
     to_sentences = re.compile(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s')
     remove_brackets = re.compile(r' \((.*?)\)')
@@ -24,3 +24,28 @@ class TextProcessor:
         if remove_brackets:
             return [cls.remove_brackets.sub('', sentence) for sentence in sentences]
         return sentences
+
+
+class TextProcessor:
+
+    tokenizer = Tokenizer()
+
+    @classmethod
+    def __process_text_list(cls, text_list: list, remove_brackets=True, remove_endings=True) -> list:
+        processed_text_list = []
+        for text in text_list:
+            processed_text_list += cls.tokenizer.tokenize(
+                text=text,
+                remove_brackets=remove_brackets,
+                remove_endings=remove_endings)
+
+    @classmethod
+    def process(cls, text_list: list, remove_brackets=True, remove_endings=True) -> str:
+        processed_text_list = cls.__process_text_list(
+            text_list=text_list,
+            remove_brackets=remove_brackets,
+            remove_endings=remove_endings)
+        processed_text = ''
+        for text in processed_text_list:
+            processed_text += (text + '\n')
+        return text
