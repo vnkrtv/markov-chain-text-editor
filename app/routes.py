@@ -7,6 +7,9 @@ from models.markov.markov_model import MarkovModel
 # from models.gpt2.generate_samples import interact_model
 
 
+markov_model = MarkovModel.load()
+
+
 class ArticlesGenAPI(MethodView):
     template = 'index.html'
     context = {
@@ -36,12 +39,16 @@ class ArticlesGenAPI(MethodView):
                     temperature=0.7)
             ]
             '''
-
-            markov_model = MarkovModel.load()
-            self.context['text_samples'] = [
-                markov_model.generate_by_phrase(30, phrase)
-                for _ in range(form.samples_count.data)
-            ]
+            if phrase:
+                self.context['text_samples'] = [
+                    markov_model.generate_sample(phrase)
+                    for _ in range(form.samples_count.data)
+                ]
+            else:
+                self.context['text_samples'] = [
+                    markov_model.model.make_short_sentence(500)
+                    for _ in range(form.samples_count.data)
+                ]
         return render_template(self.template, **self.context)
 
 
