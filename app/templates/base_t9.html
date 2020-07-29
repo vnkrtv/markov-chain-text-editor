@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
+  <link rel="icon" type="image/png" sizes="96x96" href="{{ url_for('static', filename='images/favicon-96x96.png') }}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='images/favicon-16x16.png') }}">
+
+  <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}"/>
+
+  <title>{{ title }}</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/header.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/scroller.css') }}">
+
+</head>
+
+<body>
+
+      <div class="navbar navbar-dark bg-dark shadow-sm fixed-top">
+      <div class="d-flex justify-content-between">
+        <a href="" class="navbar-brand d-flex align-items-center">
+          <img src="{{ url_for('static', filename='images/icon.png') }}" width="20" height="20" class="mr-2">
+          <strong>DOC Editor</strong>
+        </a>
+      </div>
+      <div class="d-flex justify-content-between">
+        <a href="" class="navbar-brand d-flex align-items-center"></a>
+        <a href="" class="navbar-brand d-flex align-items-center"></a>
+      </div>
+    </div>
+
+
+    {% block content %}
+        
+    {% endblock content %}
+
+
+<div id="loading-container">
+  <div id="loading-div">
+    <div class="lds-ring"><div></div><div></div><div></div><div></div></div>
+  </div>
+  <div id="overlay"></div>
+</div>
+
+<script type="text/javascript">
+  document.getElementById("loading-container").style.display = "none";
+</script>
+</body>
+
+</html>

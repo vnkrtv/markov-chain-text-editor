@@ -1,6 +1,6 @@
 from app import app
 from app import forms
-from flask import render_template
+from flask import render_template, jsonify
 from flask.views import MethodView
 from googletrans import Translator
 from .model import get_model
@@ -38,15 +38,16 @@ class ArticlesGenAPI(MethodView):
             '''
             markov_model = get_model()
             if phrase:
-                self.context['text_samples'] = [
+                text_samples = [
                     markov_model.generate_sample(phrase)
                     for _ in range(form.samples_count.data)
                 ]
             else:
-                self.context['text_samples'] = [
+                text_samples = [
                     markov_model.model.make_short_sentence(500)
                     for _ in range(form.samples_count.data)
                 ]
+            self.context['text_samples'] = text_samples
         return render_template(self.template, **self.context)
 
 
