@@ -3,11 +3,8 @@ from app import forms
 from flask import render_template
 from flask.views import MethodView
 from googletrans import Translator
-from models.markov.markov_model import MarkovModel
+from .model import get_model
 # from models.gpt2.generate_samples import interact_model
-
-
-markov_model = MarkovModel.load()
 
 
 class ArticlesGenAPI(MethodView):
@@ -39,6 +36,7 @@ class ArticlesGenAPI(MethodView):
                     temperature=0.7)
             ]
             '''
+            markov_model = get_model()
             if phrase:
                 self.context['text_samples'] = [
                     markov_model.generate_sample(phrase)

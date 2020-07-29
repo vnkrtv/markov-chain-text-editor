@@ -13,11 +13,14 @@ class PostgresStorage:
             host=host, port=port, user=user, password=password, dbname=dbname)
         )
 
-    def get_posts(self) -> list:
-        self.cursor.execute('SELECT * FROM posts')
+    def get_posts(self, count=0) -> list:
+        if count > 0:
+            self.cursor.execute('SELECT * FROM posts LIMIT %d' % count)
+        else:
+            self.cursor.execute('SELECT * FROM posts')
         posts = list(self.cursor.fetchall())
         return posts
 
-    def get_posts_texts(self) -> list:
-        posts_list = self.get_posts()
+    def get_posts_texts(self, count=0) -> list:
+        posts_list = self.get_posts(count)
         return [post[2] for post in posts_list]

@@ -31,21 +31,24 @@ class TextProcessor:
     tokenizer = Tokenizer()
 
     @classmethod
-    def __process_text_list(cls, text_list: list, remove_brackets=True, remove_endings=True) -> list:
-        processed_text_list = []
+    def __get_sentences_list(cls, text_list: list, remove_brackets=True, remove_endings=True) -> list:
+        sentences_list = []
         for text in text_list:
-            processed_text_list += cls.tokenizer.tokenize(
+            sentences_list += cls.tokenizer.tokenize(
                 text=text,
                 remove_brackets=remove_brackets,
                 remove_endings=remove_endings)
+        return sentences_list
 
     @classmethod
-    def process(cls, text_list: list, remove_brackets=True, remove_endings=True) -> str:
-        processed_text_list = cls.__process_text_list(
+    def process_text_list(cls, text_list: list, remove_brackets=True, remove_endings=True) -> str:
+        text = ''
+        sentences_list = cls.__get_sentences_list(
             text_list=text_list,
             remove_brackets=remove_brackets,
             remove_endings=remove_endings)
-        processed_text = ''
-        for text in processed_text_list:
-            processed_text += (text + '\n')
+        sentences_count = len(sentences_list)
+        for i in range(sentences_count):
+            text += sentences_list[i]
+            text += '\n' if i != sentences_count - 1 else ''
         return text

@@ -13,7 +13,7 @@ class MongoStorage:
 
     @classmethod
     def connect(cls, host: str, port=27017, db_name='wiki', col_name='articles'):
-        db = pymongo.MongoClient(host, port)[db_name]
+        db = pymongo.MongoClient(host, port, unicode_decode_error_handler='ignore')[db_name]
         return cls(
             db=db,
             col=db[col_name])
