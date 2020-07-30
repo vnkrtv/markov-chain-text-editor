@@ -1,6 +1,6 @@
 from app import app
 from app import forms
-from flask import render_template, jsonify
+from flask import render_template, jsonify, request
 from flask.views import MethodView
 from googletrans import Translator
 from .model import get_model
@@ -51,6 +51,23 @@ class ArticlesGenAPI(MethodView):
         return render_template(self.template, **self.context)
 
 
+class T9API(MethodView):
+    template = 'index.html'
+
+    def get(self):
+        return render_template(self.template, **self.context)
+
+    def post(self):
+        markov_model = get_model()
+        word = request.form['word']
+        return jsonify({
+            'words': markov_model.get_words_for_t9(word)
+        })
+
+
 app.add_url_rule('/',
                  view_func=ArticlesGenAPI.as_view('api'),
+                 methods=['POST', 'GET'])
+app.add_url_rule('/t9',
+                 view_func=T9API.as_view('t9'),
                  methods=['POST', 'GET'])

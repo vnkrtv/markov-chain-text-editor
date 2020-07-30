@@ -1,10 +1,10 @@
 function autocomplete(inp, arr) {
   /*the autocomplete function takes two arguments,
   the text field element and an array of possible autocompleted values:*/
-  var currentFocus;
+  let currentFocus;
   /*execute a function when someone writes in the text field:*/
   inp.addEventListener("input", function(e) {
-      var a, b, i, val = this.value;
+      let a, b, i, val = this.value;
       /*close any already open lists of autocompleted values*/
       closeAllLists();
       if (!val) { return false;}
@@ -20,8 +20,7 @@ function autocomplete(inp, arr) {
         /*check if the item starts with the same letters as the text field value:*/
         let phraseList = val.split(" ");
         let value = phraseList[phraseList.length - 1];
-        console.log(value);
-        if (arr[i].substr(0, value.length).toUpperCase() == value.toUpperCase()) {
+        if ((arr[i].substr(0, value.length).toUpperCase() === value.toUpperCase()) && (value.length > 0)) {
           /*create a DIV element for each matching element:*/
           b = document.createElement("DIV");
           b.className = 'form-control';
@@ -47,23 +46,37 @@ function autocomplete(inp, arr) {
         }
       }
   });
+
+  inp.addEventListener("input", function(e) {
+      let val = this.value;
+      let phraseList = val.split(" ");
+      if (phraseList.length > 1) {
+          $.post('/t9', {
+                word: phraseList[phraseList.length - 2],
+            }).done(function(response) {
+              arr = response['words']
+          });
+          console.log(arr)
+      }
+  });
+
   /*execute a function presses a key on the keyboard:*/
   inp.addEventListener("keydown", function(e) {
       var x = document.getElementById(this.id + "autocomplete-list");
       if (x) x = x.getElementsByTagName("div");
-      if (e.keyCode == 40) {
+      if (e.keyCode === 40) {
         /*If the arrow DOWN key is pressed,
         increase the currentFocus variable:*/
         currentFocus++;
         /*and and make the current item more visible:*/
         addActive(x);
-      } else if (e.keyCode == 38) { //up
+      } else if (e.keyCode === 38) { //up
         /*If the arrow UP key is pressed,
         decrease the currentFocus variable:*/
         currentFocus--;
         /*and and make the current item more visible:*/
         addActive(x);
-      } else if (e.keyCode == 13) {
+      } else if (e.keyCode === 13) {
         /*If the ENTER key is pressed, prevent the form from being submitted,*/
         e.preventDefault();
         if (currentFocus > -1) {
@@ -85,7 +98,7 @@ function autocomplete(inp, arr) {
   }
   function removeActive(x) {
     /*a function to remove the "active" class from all autocomplete items:*/
-    for (var i = 0; i < x.length; i++) {
+    for (let i = 0; i < x.length; i++) {
       x[i].classList.remove("autocomplete-active");
       x[i].style.backgroundColor = "white";
     }
@@ -93,9 +106,9 @@ function autocomplete(inp, arr) {
   function closeAllLists(elmnt) {
     /*close all autocomplete lists in the document,
     except the one passed as an argument:*/
-    var x = document.getElementsByClassName("autocomplete-items");
-    for (var i = 0; i < x.length; i++) {
-      if (elmnt != x[i] && elmnt != inp) {
+    const x = document.getElementsByClassName("autocomplete-items");
+    for (let i = 0; i < x.length; i++) {
+      if (elmnt !== x[i] && elmnt !== inp) {
       x[i].parentNode.removeChild(x[i]);
     }
   }

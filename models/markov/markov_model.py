@@ -30,3 +30,11 @@ class MarkovModel:
     def generate_sample(self, beginning: str) -> str:
         return self.model.make_sentence_with_start(beginning)
 
+    def get_words_for_t9(self, word: str, count=10) -> list:
+        words = []
+        for i in range(count):
+            phrase = self.generate_sample(word)
+            if phrase and len(phrase.split()) > 1:
+                words.append(phrase.split()[1])
+        return words
+
