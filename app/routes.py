@@ -10,7 +10,7 @@ from .model import get_model
 class ArticlesGenAPI(MethodView):
     template = 'index.html'
     context = {
-        'title': 'Генератор определений',
+        'title': 'DOC Editor',
     }
     translator = Translator()
 
