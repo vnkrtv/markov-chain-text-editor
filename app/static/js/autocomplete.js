@@ -2,6 +2,8 @@ function autocomplete(inp, arr) {
   /*the autocomplete function takes two arguments,
   the text field element and an array of possible autocompleted values:*/
   let currentFocus;
+  let bufferWord = "";
+
   /*execute a function when someone writes in the text field:*/
   inp.addEventListener("input", function(e) {
       let a, b, i, val = this.value;
@@ -48,21 +50,27 @@ function autocomplete(inp, arr) {
   });
 
   inp.addEventListener("input", function(e) {
-      let val = this.value;
-      let phraseList = val.split(" ");
-      if (phraseList.length > 1) {
-          $.post('/t9', {
-                word: phraseList[phraseList.length - 2],
-            }).done(function(response) {
-              arr = response['words']
-          });
-          console.log(arr)
+      let val = this.value.toString();
+      console.log(arr)
+      if (val[val.length - 1] === " ") {
+          console.log(val, val[val.length - 1], val.split(" "))
+          let phraseList = val.split(" ");
+          if (phraseList.length > 1) {
+              if (phraseList[phraseList.length - 2] !== bufferWord) {
+                  bufferWord = phraseList[phraseList.length - 2];
+                  $.post('/t9', {
+                    word: bufferWord.toLowerCase(),
+                    }).done(function(response) {
+                      arr = response['words']
+                  });
+              }
+          }
       }
   });
 
   /*execute a function presses a key on the keyboard:*/
   inp.addEventListener("keydown", function(e) {
-      var x = document.getElementById(this.id + "autocomplete-list");
+      let x = document.getElementById(this.id + "autocomplete-list");
       if (x) x = x.getElementsByTagName("div");
       if (e.keyCode === 40) {
         /*If the arrow DOWN key is pressed,
