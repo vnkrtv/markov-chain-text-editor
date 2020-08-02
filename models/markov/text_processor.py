@@ -54,4 +54,4 @@ class TextProcessor:
             sentence = sentences_list[sentence_num]
             for i in range(window_size):
                 text += (' '.join(sentence.split()[i:]) + '\n')
-        return text
+        return text[:-1]
