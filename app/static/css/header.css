@@ -39,3 +39,11 @@ body {
     text-align: center;
     color: white;
 }
+
+.phrases {
+    margin-top: 5vh;
+}
+
+.hide-element {
+    display: none;
+}

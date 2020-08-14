@@ -37,6 +37,6 @@ def get_model():
             postgres_storage=__get_postgres_storage(),
             model_state=3,
             wiki_articles_count=1000,
-            habr_posts_count=2000
+            habr_posts_count=1000
         )
         return __model

@@ -1,128 +1,153 @@
 function autocomplete(inp, arr) {
-  /*the autocomplete function takes two arguments,
-  the text field element and an array of possible autocompleted values:*/
-  let currentFocus;
-  let bufferWord = "";
+    let currentFocus;
+    let bufferWord = "";
+    let phraseLen = 5;
+    let activeItems;
 
-  /*execute a function when someone writes in the text field:*/
-  inp.addEventListener("input", function(e) {
-      let a, b, i, val = this.value;
-      /*close any already open lists of autocompleted values*/
-      closeAllLists();
-      if (!val) { return false;}
-      currentFocus = -1;
-      /*create a DIV element that will contain the items (values):*/
-      a = document.createElement("DIV");
-      a.setAttribute("id", this.id + "autocomplete-list");
-      a.setAttribute("class", "autocomplete-items");
-      /*append the DIV element as a child of the autocomplete container:*/
-      this.parentNode.appendChild(a);
-      /*for each item in the array...*/
-      for (i = 0; i < arr.length; i++) {
-        /*check if the item starts with the same letters as the text field value:*/
-        let phraseList = val.split(" ");
-        let value = phraseList[phraseList.length - 1];
-        if ((arr[i].substr(0, value.length).toUpperCase() === value.toUpperCase()) && (value.length > 0)) {
-          /*create a DIV element for each matching element:*/
-          b = document.createElement("DIV");
-          b.className = 'form-control';
-          b.style.cursor = "pointer";
-          /*make the matching letters bold:*/
-          b.innerHTML = "<strong>" + arr[i].substr(0, value.length) + "</strong>";
-          b.innerHTML += arr[i].substr(value.length);
-          /*insert a input field that will hold the current array item's value:*/
-          b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
-          /*execute a function when someone clicks on the item value (DIV element):*/
-          b.addEventListener("click", function(e) {
-              /*insert the value for the autocomplete text field:*/
-              inp.value = "";
-              for (let i = 0; i < phraseList.length - 1; i++) {
-                inp.value += (phraseList[i] + " ");
-              }
-              inp.value += this.getElementsByTagName("input")[0].value;
-              /*close the list of autocompleted values,
-              (or any other open lists of autocompleted values:*/
-              closeAllLists();
-          });
-          a.appendChild(b);
+    inp.addEventListener("input", function(e) {
+        let wordsContainer, phrasesContainer, wordInput, phraseInput
+        let val = this.value;
+        closeAllLists();
+        if (!val) { return false;}
+        currentFocus = -1;
+
+        wordsContainer = document.createElement("DIV");
+        wordsContainer.setAttribute("id", "autocomplete-list-words");
+        wordsContainer.setAttribute("class", "autocomplete-items");
+        document.getElementById("t9-words").appendChild(wordsContainer);
+
+        phrasesContainer = document.createElement("DIV");
+        phrasesContainer.setAttribute("id", "autocomplete-list-phrases");
+        phrasesContainer.setAttribute("class", "autocomplete-items");
+        document.getElementById("t9-phrases").appendChild(phrasesContainer);
+
+        for (let i = 0; i < arr.length; i++) {
+            let phraseList = val.split(" ");
+            let value = phraseList[phraseList.length - 1];
+            let firstWord = arr[i].split(" ")[0];
+            if ((arr[i].substr(0, value.length).toUpperCase() === value.toUpperCase()) && (value.length > 0)) {
+                wordInput = document.createElement("DIV");
+                wordInput.className = 'form-control';
+                wordInput.style.cursor = "pointer";
+
+                wordInput.innerHTML = "<strong>" + firstWord.substr(0, value.length) + "</strong>";
+                wordInput.innerHTML += firstWord.substr(value.length);
+
+                wordInput.innerHTML += "<input type='hidden' value='" + firstWord + "'>";
+
+                wordInput.addEventListener("click", function(e) {
+                    inp.value = "";
+                    for (let i = 0; i < phraseList.length - 1; i++) {
+                        inp.value += (phraseList[i] + " ");
+                    }
+                    inp.value += this.getElementsByTagName("input")[0].value;
+                    closeAllLists();
+                });
+                wordsContainer.appendChild(wordInput);
+
+                phraseInput = document.createElement("DIV");
+                phraseInput.className = 'form-control';
+                phraseInput.style.cursor = "pointer";
+
+                phraseInput.innerHTML = "<strong>" + arr[i].substr(0, value.length) + "</strong>";
+                phraseInput.innerHTML += arr[i].substr(value.length);
+
+                phraseInput.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+
+                phraseInput.addEventListener("click", function(e) {
+                    inp.value = "";
+                    for (let i = 0; i < phraseList.length - 1; i++) {
+                        inp.value += (phraseList[i] + " ");
+                    }
+                    inp.value += this.getElementsByTagName("input")[0].value;
+                    closeAllLists();
+                });
+                phrasesContainer.appendChild(phraseInput);
+            }
         }
-      }
-  });
+        activeItems = document.getElementById("autocomplete-list-phrases").getElementsByTagName("div");
+    });
 
-  inp.addEventListener("input", function(e) {
-      let val = this.value.toString();
-      console.log(arr)
-      if (val[val.length - 1] === " ") {
-          console.log(val, val[val.length - 1], val.split(" "))
-          let phraseList = val.split(" ");
-          if (phraseList.length > 1) {
-              if (phraseList[phraseList.length - 2] !== bufferWord) {
-                  bufferWord = phraseList[phraseList.length - 2];
-                  $.post('/t9', {
-                    word: bufferWord.toLowerCase(),
+    inp.addEventListener("input", function(e) {
+        let val = this.value.toString();
+        console.log(arr)
+        if (val[val.length - 1] === " ") {
+            console.log(val, val[val.length - 1], val.split(" "))
+            let phraseList = val.split(" ");
+            if (phraseList.length > 1) {
+                if (phraseList[phraseList.length - 2] !== bufferWord) {
+                    bufferWord = phraseList[phraseList.length - 2];
+                    $.post('/t9', {
+                        word: bufferWord.toLowerCase(),
                     }).done(function(response) {
-                      arr = response['words']
-                  });
-              }
-          }
-      }
-  });
-
-  /*execute a function presses a key on the keyboard:*/
-  inp.addEventListener("keydown", function(e) {
-      let x = document.getElementById(this.id + "autocomplete-list");
-      if (x) x = x.getElementsByTagName("div");
-      if (e.keyCode === 40) {
-        /*If the arrow DOWN key is pressed,
-        increase the currentFocus variable:*/
-        currentFocus++;
-        /*and and make the current item more visible:*/
-        addActive(x);
-      } else if (e.keyCode === 38) { //up
-        /*If the arrow UP key is pressed,
-        decrease the currentFocus variable:*/
-        currentFocus--;
-        /*and and make the current item more visible:*/
-        addActive(x);
-      } else if (e.keyCode === 13) {
-        /*If the ENTER key is pressed, prevent the form from being submitted,*/
-        e.preventDefault();
-        if (currentFocus > -1) {
-          /*and simulate a click on the "active" item:*/
-          if (x) x[currentFocus].click();
+                        arr = response['words']
+                    });
+                }
+            }
         }
-      }
-  });
-  function addActive(x) {
-    /*a function to classify an item as "active":*/
-    if (!x) return false;
-    /*start by removing the "active" class on all items:*/
-    removeActive(x);
-    if (currentFocus >= x.length) currentFocus = 0;
-    if (currentFocus < 0) currentFocus = (x.length - 1);
-    /*add class "autocomplete-active":*/
-    x[currentFocus].classList.add("autocomplete-active");
-    x[currentFocus].style.backgroundColor = "DodgerBlue";
-  }
-  function removeActive(x) {
-    /*a function to remove the "active" class from all autocomplete items:*/
-    for (let i = 0; i < x.length; i++) {
-      x[i].classList.remove("autocomplete-active");
-      x[i].style.backgroundColor = "white";
+    });
+
+    function changeActiveItems() {
+        if (this.counter === undefined) {
+            this.counter = 0;
+        }
+        this.counter += 1;
+        document.getElementById("t9-words").classList.toggle("hide-element");
+        document.getElementById("t9-phrases").classList.toggle("hide-element");
+        if (this.counter % 2) {
+            activeItems = document.getElementById("autocomplete-list-phrases");
+        } else {
+            activeItems = document.getElementById("autocomplete-list-words");
+        }
+        if (activeItems) activeItems = activeItems.getElementsByTagName("div");
     }
-  }
-  function closeAllLists(elmnt) {
-    /*close all autocomplete lists in the document,
-    except the one passed as an argument:*/
-    const x = document.getElementsByClassName("autocomplete-items");
-    for (let i = 0; i < x.length; i++) {
-      if (elmnt !== x[i] && elmnt !== inp) {
-      x[i].parentNode.removeChild(x[i]);
+
+    inp.addEventListener("keydown", function(e) {
+        if (e.keyCode === 37 || e.keyCode === 39) {
+            changeActiveItems();
+            currentFocus = activeItems.length - 1;
+            removeActive(activeItems);
+        }
+        else if (e.keyCode === 40) {
+            currentFocus++;
+            addActive(activeItems);
+        } else if (e.keyCode === 38) { //up
+            currentFocus--;
+            addActive(activeItems);
+        } else if (e.keyCode === 13) {
+            e.preventDefault();
+            if (currentFocus > -1) {
+                if (activeItems) activeItems[currentFocus].click();
+            }
+        }
+    });
+
+    function addActive(x) {
+        if (!x) return false;
+        removeActive(x);
+        if (currentFocus >= x.length) currentFocus = 0;
+        if (currentFocus < 0) currentFocus = (x.length - 1);
+        x[currentFocus].classList.add("autocomplete-active");
+        x[currentFocus].style.backgroundColor = "DodgerBlue";
     }
-  }
-}
-/*execute a function when someone clicks in the document:*/
-document.addEventListener("click", function (e) {
-    closeAllLists(e.target);
-});
+
+    function removeActive(x) {
+        for (let i = 0; i < x.length; i++) {
+            x[i].classList.remove("autocomplete-active");
+            x[i].style.backgroundColor = "white";
+        }
+    }
+
+    function closeAllLists(elmnt) {
+        const x = document.getElementsByClassName("autocomplete-items");
+        for (let i = 0; i < x.length; i++) {
+            if (elmnt !== x[i] && elmnt !== inp) {
+                x[i].parentNode.removeChild(x[i]);
+            }
+        }
+    }
+
+    document.addEventListener("click", function (e) {
+        closeAllLists(e.target);
+    });
 }
