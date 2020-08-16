@@ -1,4 +1,6 @@
 function autocomplete(inp, arr) {
+    const wordsDiv = document.getElementById("t9-words");
+    const phrasesDiv = document.getElementById("t9-phrases");
     let currentFocus;
     let bufferWord = "";
     let phraseLen = 5;
@@ -14,12 +16,12 @@ function autocomplete(inp, arr) {
         wordsContainer = document.createElement("DIV");
         wordsContainer.setAttribute("id", "autocomplete-list-words");
         wordsContainer.setAttribute("class", "autocomplete-items");
-        document.getElementById("t9-words").appendChild(wordsContainer);
+        wordsDiv.appendChild(wordsContainer);
 
         phrasesContainer = document.createElement("DIV");
         phrasesContainer.setAttribute("id", "autocomplete-list-phrases");
         phrasesContainer.setAttribute("class", "autocomplete-items");
-        document.getElementById("t9-phrases").appendChild(phrasesContainer);
+        phrasesDiv.appendChild(phrasesContainer);
 
         for (let i = 0; i < arr.length; i++) {
             let phraseList = val.split(" ");
@@ -92,17 +94,29 @@ function autocomplete(inp, arr) {
             this.counter = 0;
         }
         this.counter += 1;
-        document.getElementById("t9-words").classList.toggle("hide-element");
-        document.getElementById("t9-phrases").classList.toggle("hide-element");
+        wordsDiv.classList.toggle("hide-element");
+        phrasesDiv.classList.toggle("hide-element");
+
+        console.log();
         if (this.counter % 2) {
-            activeItems = document.getElementById("autocomplete-list-phrases");
+            console.log('phrases');
+            activeItems = phrasesDiv.children[0];
         } else {
-            activeItems = document.getElementById("autocomplete-list-words");
+            console.log('words');
+            activeItems = wordsDiv.children[0];
         }
         if (activeItems) activeItems = activeItems.getElementsByTagName("div");
+        console.log(activeItems);
+        console.log(phrasesDiv.children[0]);
+        console.log(wordsDiv.children[0]);
     }
 
     inp.addEventListener("keydown", function(e) {
+        if (activeItems === undefined) {
+            changeActiveItems();
+            currentFocus = activeItems.length - 1;
+            removeActive(activeItems);
+        }
         if (e.keyCode === 37 || e.keyCode === 39) {
             changeActiveItems();
             currentFocus = activeItems.length - 1;
@@ -140,11 +154,19 @@ function autocomplete(inp, arr) {
 
     function closeAllLists(elmnt) {
         const x = document.getElementsByClassName("autocomplete-items");
-        for (let i = 0; i < x.length; i++) {
-            if (elmnt !== x[i] && elmnt !== inp) {
-                x[i].parentNode.removeChild(x[i]);
+        console.log();
+        console.log('Before: ', x);
+        console.log();
+        for (let item of x) {
+            item.remove();
+        }
+        if (x) {
+            for (let item of x) {
+                item.remove();
             }
         }
+        console.log();
+        console.log('After: ', x);
     }
 
     document.addEventListener("click", function (e) {
