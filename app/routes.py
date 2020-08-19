@@ -61,7 +61,7 @@ class T9API(MethodView):
         markov_model = get_model()
         word = request.form['word']
         return jsonify({
-            'words': markov_model.get_words_for_t9(word)
+            'words': markov_model.get_phrases_for_t9(word)
         })
 
 

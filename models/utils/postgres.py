@@ -1,3 +1,4 @@
+from typing import Generator
 import psycopg2
 
 
@@ -24,3 +25,19 @@ class PostgresStorage:
     def get_posts_texts(self, count=0) -> list:
         posts_list = self.get_posts(count)
         return [post[2] for post in posts_list]
+
+    def get_posts_gen(self, count=0) -> Generator:
+        if count > 0:
+            self.cursor.execute('SELECT * FROM posts LIMIT %d' % count)
+        else:
+            self.cursor.execute('SELECT * FROM posts')
+        posts_gen = (post for post in self.cursor.fetchall())
+        return posts_gen
+
+    def get_posts_texts_gen(self, count=0) -> Generator:
+        if count > 0:
+            self.cursor.execute('SELECT * FROM posts LIMIT %d' % count)
+        else:
+            self.cursor.execute('SELECT * FROM posts')
+        posts_gen = (post[2] for post in self.cursor.fetchall())
+        return posts_gen
