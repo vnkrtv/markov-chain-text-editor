@@ -3,9 +3,10 @@ function autocomplete(inp, arr) {
     const wordsDiv = document.getElementById("t9-words");
     const phrasesDiv = document.getElementById("t9-phrases");
     const phraseLenInput = document.getElementById("phrase-len");
+    const firstWordsInput = document.getElementById("first-words");
 
     let currentFocus;
-    let bufferWord = "";
+    let bufferPhrase = "";
     let activeItems;
 
     function updateLists() {
@@ -87,24 +88,41 @@ function autocomplete(inp, arr) {
         updateLists();
     }
 
-    inp.addEventListener("input", function(e) {
-        let val = this.value.toString();
+    function updateT9Phrases() {
+        let val = textInput.value.toString();
         console.log(arr)
         if (val[val.length - 1] === " ") {
             console.log(val, val[val.length - 1], val.split(" "))
             let phraseList = val.split(" ");
             if (phraseList.length > 1) {
-                if (phraseList[phraseList.length - 2] !== bufferWord) {
-                    bufferWord = phraseList[phraseList.length - 2];
+                if (phraseList[phraseList.length - 2] !== bufferPhrase) {
+                    let wordsCount = parseInt(firstWordsInput.value);
+                    let bufArray = [];
+                    for (let i = 0; i < (wordsCount < phraseList.length ? wordsCount : phraseList.length); i++) {
+                        bufArray.push(phraseList[phraseList.length - (i + 2)]);
+                    }
+                    bufferPhrase = '';
+                    for (let i = bufArray.length - 1; i >= 0; i--) {
+                        bufferPhrase += (bufArray[i] + ' ');
+                    }
                     $.post('/t9', {
-                        word: bufferWord.toLowerCase(),
+                        beginning: bufferPhrase.substr(0, bufferPhrase.length - 1).toLowerCase(),
+                        first_words_count: wordsCount,
                     }).done(function(response) {
                         arr = response['words']
                     });
                 }
             }
         }
+    }
+
+    inp.addEventListener("input", function(e) {
+        updateT9Phrases();
     });
+
+    firstWordsInput.onkeyup = firstWordsInput.onchange = () => {
+        updateT9Phrases();
+    }
 
     function changeActiveItems() {
         if (this.counter === undefined) {
