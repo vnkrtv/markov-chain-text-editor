@@ -42,6 +42,6 @@ class MarkovModel:
             if phrase:
                 words_list = phrase.split()
                 if len(words_list) > 1:
-                    phrases.add(" ".join(words_list[1:6]))
+                    phrases.add(" ".join(words_list[1:]))
         return list(phrases)
 

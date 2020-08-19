@@ -1,14 +1,16 @@
 function autocomplete(inp, arr) {
+    const textInput = document.getElementById("text");
     const wordsDiv = document.getElementById("t9-words");
     const phrasesDiv = document.getElementById("t9-phrases");
+    const phraseLenInput = document.getElementById("phrase-len");
+
     let currentFocus;
     let bufferWord = "";
-    let phraseLen = 5;
     let activeItems;
 
-    inp.addEventListener("input", function(e) {
+    function updateLists() {
         let wordsContainer, phrasesContainer, wordInput, phraseInput
-        let val = this.value;
+        let val = textInput.value;
         closeAllLists();
         if (!val) { return false;}
         currentFocus = -1;
@@ -23,11 +25,18 @@ function autocomplete(inp, arr) {
         phrasesContainer.setAttribute("class", "autocomplete-items");
         phrasesDiv.appendChild(phrasesContainer);
 
+        let phraseLen = parseInt(phraseLenInput.value);
+
         for (let i = 0; i < arr.length; i++) {
             let phraseList = val.split(" ");
             let value = phraseList[phraseList.length - 1];
-            let firstWord = arr[i].split(" ")[0];
-            if ((arr[i].substr(0, value.length).toUpperCase() === value.toUpperCase()) && (value.length > 0)) {
+            let phraseWords = arr[i].split(" ");
+            let firstWord = phraseWords[0];
+            let phrase = '';
+            for (let i = 0; i < (phraseWords.length - 1 < phraseLen ? phraseWords.length - 1: phraseLen); i++) {
+                phrase += (phraseWords[i] + " ");
+            }
+            if ((phrase.substr(0, value.length).toUpperCase() === value.toUpperCase()) && (value.length > 0)) {
                 wordInput = document.createElement("DIV");
                 wordInput.className = 'form-control';
                 wordInput.style.cursor = "pointer";
@@ -51,10 +60,10 @@ function autocomplete(inp, arr) {
                 phraseInput.className = 'form-control';
                 phraseInput.style.cursor = "pointer";
 
-                phraseInput.innerHTML = "<strong>" + arr[i].substr(0, value.length) + "</strong>";
-                phraseInput.innerHTML += arr[i].substr(value.length);
+                phraseInput.innerHTML = "<strong>" + phrase.substr(0, value.length) + "</strong>";
+                phraseInput.innerHTML += phrase.substr(value.length);
 
-                phraseInput.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+                phraseInput.innerHTML += "<input type='hidden' value='" + phrase + "'>";
 
                 phraseInput.addEventListener("click", function(e) {
                     inp.value = "";
@@ -68,7 +77,15 @@ function autocomplete(inp, arr) {
             }
         }
         activeItems = document.getElementById("autocomplete-list-phrases").getElementsByTagName("div");
+    }
+
+    inp.addEventListener("input", function(e) {
+        updateLists();
     });
+
+    phraseLenInput.onkeyup = phraseLenInput.onchange = () => {
+        updateLists();
+    }
 
     inp.addEventListener("input", function(e) {
         let val = this.value.toString();
