@@ -4,7 +4,6 @@ from nltk import ngrams
 
 
 class Tokenizer:
-
     to_sentences = re.compile(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s')
     remove_brackets = re.compile(r' \((.*?)\)')
     remove_punctuation = re.compile(r'[^a-zA-Zа-яА-Я ]')
@@ -24,7 +23,6 @@ class Tokenizer:
 
 
 class TextProcessor:
-
     tokenizer = Tokenizer()
 
     @classmethod
@@ -56,8 +54,18 @@ class TextProcessor:
         return text[:-1]
 
     @classmethod
-    def get_text_gen(cls, text_gen: Generator, window_size=1) -> Generator:
-        for sentences_gen in cls.__get_sentences_gens(text_gen):
-            for sentence in sentences_gen:
-                for ngram in (' '.join(ngram) for ngram in ngrams(sentence.split(), window_size)):
-                    yield ngram
+    def get_text_gen(cls, text_gens_gen: Generator, window_size=1) -> Generator:
+        for text_gen in text_gens_gen:
+            for sentences_gen in cls.__get_sentences_gens(text_gen):
+                for sentence in sentences_gen:
+                    for ngram in (' '.join(ngram) for ngram in ngrams(sentence.split(), window_size)):
+                        yield ngram
+
+    @classmethod
+    def process_text_gen(cls, text_gens_gen: Generator, window_size=1) -> str:
+        text = ''
+        for sentence in cls.get_text_gen(
+                text_gens_gen=text_gens_gen,
+                window_size=window_size):
+            text += (sentence + '\n')
+        return text[:-1]

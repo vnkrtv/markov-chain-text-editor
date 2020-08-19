@@ -31,13 +31,8 @@ class PostgresStorage:
             self.cursor.execute('SELECT * FROM posts LIMIT %d' % count)
         else:
             self.cursor.execute('SELECT * FROM posts')
-        posts_gen = (post for post in self.cursor.fetchall())
-        return posts_gen
+        return self.cursor.fetchall()
 
     def get_posts_texts_gen(self, count=0) -> Generator:
-        if count > 0:
-            self.cursor.execute('SELECT * FROM posts LIMIT %d' % count)
-        else:
-            self.cursor.execute('SELECT * FROM posts')
-        posts_gen = (post[2] for post in self.cursor.fetchall())
-        return posts_gen
+        for post in self.get_posts_gen(count=count):
+            yield post[2]

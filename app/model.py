@@ -1,4 +1,4 @@
-from models.markov.train import get_markov_model
+from models.markov.train import get_markov_model, get_markov_model_with_gen_inputs
 from models.utils import mongo, postgres
 from models.markov.markov_model import MarkovModel
 
