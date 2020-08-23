@@ -90,9 +90,9 @@ function autocomplete(inp, arr) {
 
     function updateT9Phrases() {
         let val = textInput.value.toString();
-        console.log(arr)
+        // console.log(arr)
         if (val[val.length - 1] === " ") {
-            console.log(val, val[val.length - 1], val.split(" "))
+            // console.log(val, val[val.length - 1], val.split(" "))
             let phraseList = val.split(" ");
             if (phraseList.length > 1) {
                 if (phraseList[phraseList.length - 2] !== bufferPhrase) {
@@ -132,18 +132,18 @@ function autocomplete(inp, arr) {
         wordsDiv.classList.toggle("hide-element");
         phrasesDiv.classList.toggle("hide-element");
 
-        console.log();
+        // console.log();
         if (this.counter % 2) {
-            console.log('phrases');
+            // console.log('phrases');
             activeItems = phrasesDiv.children[0];
         } else {
-            console.log('words');
+            // console.log('words');
             activeItems = wordsDiv.children[0];
         }
         if (activeItems) activeItems = activeItems.getElementsByTagName("div");
-        console.log(activeItems);
-        console.log(phrasesDiv.children[0]);
-        console.log(wordsDiv.children[0]);
+        // console.log(activeItems);
+        // console.log(phrasesDiv.children[0]);
+        // console.log(wordsDiv.children[0]);
     }
 
     inp.addEventListener("keydown", function(e) {
@@ -189,9 +189,9 @@ function autocomplete(inp, arr) {
 
     function closeAllLists(elmnt) {
         const x = document.getElementsByClassName("autocomplete-items");
-        console.log();
-        console.log('Before: ', x);
-        console.log();
+        // console.log();
+        // console.log('Before: ', x);
+        // console.log();
         for (let item of x) {
             item.remove();
         }
@@ -200,8 +200,8 @@ function autocomplete(inp, arr) {
                 item.remove();
             }
         }
-        console.log();
-        console.log('After: ', x);
+        // console.log();
+        // console.log('After: ', x);
     }
 
     document.addEventListener("click", function (e) {
