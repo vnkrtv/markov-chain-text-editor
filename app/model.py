@@ -35,4 +35,5 @@ def get_model(model_name=None) -> MarkovModel:
                 wiki_articles_count=10000,
                 habr_posts_count=10000
             )
+            __model.save(model_name)
     return __model

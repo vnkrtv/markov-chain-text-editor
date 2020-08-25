@@ -24,7 +24,7 @@ class MarkovModel:
         with open(os.path.join(models_path, model_name), 'r') as f:
             model_json = f.read()
         model = EncodedText.from_json(model_json)
-        return cls(model=model)
+        return cls(None, model=model)
 
     def save(self, model_name, models_path='models/markov/bin'):
         with open(os.path.join(models_path, model_name), 'w') as f:

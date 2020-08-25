@@ -92,7 +92,7 @@ class EncodedText(object):
             "state_size": self.state_size,
             "chain": self.chain.to_json(),
             "parsed_sentences": self.parsed_sentences if self.retain_original else None,
-            "encoder": self.encoder
+            "encoder": self.encoder.to_json()
         }
 
     def to_json(self):
@@ -108,7 +108,7 @@ class EncodedText(object):
             state_size=obj["state_size"],
             chain=EncodedChain.from_json(obj["chain"]),
             parsed_sentences=obj.get("parsed_sentences"),
-            encoder=obj["encoder"]
+            encoder=WordsEncoder.from_json(obj["encoder"])
         )
 
     @classmethod
