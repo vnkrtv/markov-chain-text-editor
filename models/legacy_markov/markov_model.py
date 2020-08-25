@@ -2,7 +2,7 @@ import re
 import random
 import pickle
 from models.markov.histograms import Dictogram
-from models.markov.text_processor import TextProcessor
+from models.utils.text_processor import TextProcessor
 
 
 class MarkovModel:

@@ -1,6 +1,6 @@
-import re
 from typing import Generator
-from nltk import ngrams
+import re
+import nltk
 
 
 class Tokenizer:
@@ -58,7 +58,7 @@ class TextProcessor:
         for text_gen in text_gens_gen:
             for sentences_gen in cls.__get_sentences_gens(text_gen):
                 for sentence in sentences_gen:
-                    for ngram in (' '.join(ngram) for ngram in ngrams(sentence.split(), window_size)):
+                    for ngram in (' '.join(ngram) for ngram in nltk.ngrams(sentence.split(), window_size)):
                         yield ngram
 
     @classmethod

@@ -1,21 +1,19 @@
 import os
 from typing import Generator
-import markovify
+from .text import EncodedText, EncodedNewlineText
 
 
 class MarkovModel:
 
-    model: markovify.Text
+    model: EncodedText
 
-    def __init__(self, train_input, model=None, state_size=2):
+    def __init__(self, train_input, model=None, encoder=None, state_size=2):
         if model:
             self.model = model
         elif isinstance(train_input, str):
-            self.model = markovify.NewlineText(train_input, state_size=state_size)
-        elif isinstance(train_input, Generator):
-            self.model = markovify.Text(next(train_input), state_size=state_size)
-            for sent in train_input:
-                self.model = markovify.combine([self.model, markovify.Text(sent, state_size=state_size)])
+            self.model = EncodedNewlineText(train_input, state_size=state_size)
+        elif isinstance(train_input, Generator) and encoder:
+            self.model = EncodedText(train_input, state_size=state_size, encoder=encoder)
 
     def compile(self):
         self.model.compile(inplace=True)
@@ -25,11 +23,11 @@ class MarkovModel:
     def load(cls, model_name='model1.0-habr-10000.json', models_path='models/markov/bin'):
         with open(os.path.join(models_path, model_name), 'r') as f:
             model_json = f.read()
-        model = markovify.Text.from_json(model_json)
+        model = EncodedText.from_json(model_json)
         return cls(model=model)
 
-    def save(self, model_name):
-        with open(f'models/markov/bin/{model_name}.json', 'w') as f:
+    def save(self, model_name, models_path='models/markov/bin'):
+        with open(os.path.join(models_path, model_name), 'w') as f:
             f.write(self.model.to_json())
 
     def generate_sample(self, beginning: str) -> str:

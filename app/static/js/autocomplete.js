@@ -89,6 +89,7 @@ function autocomplete(inp, arr) {
     }
 
     function updateT9Phrases() {
+        console.log('Updating T9...');
         let val = textInput.value.toString();
         // console.log(arr)
         if (val[val.length - 1] === " ") {
@@ -132,18 +133,18 @@ function autocomplete(inp, arr) {
         wordsDiv.classList.toggle("hide-element");
         phrasesDiv.classList.toggle("hide-element");
 
-        // console.log();
+        console.log();
         if (this.counter % 2) {
-            // console.log('phrases');
+            console.log('phrases');
             activeItems = phrasesDiv.children[0];
         } else {
-            // console.log('words');
+            console.log('words');
             activeItems = wordsDiv.children[0];
         }
         if (activeItems) activeItems = activeItems.getElementsByTagName("div");
-        // console.log(activeItems);
-        // console.log(phrasesDiv.children[0]);
-        // console.log(wordsDiv.children[0]);
+        console.log(activeItems);
+        console.log(phrasesDiv.children[0]);
+        console.log(wordsDiv.children[0]);
     }
 
     inp.addEventListener("keydown", function(e) {
@@ -168,6 +169,8 @@ function autocomplete(inp, arr) {
             if (currentFocus > -1) {
                 if (activeItems) activeItems[currentFocus].click();
             }
+        } else if (e.keyCode === 220) {
+            console.log(arr);
         }
     });
 
