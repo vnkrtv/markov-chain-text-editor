@@ -8,16 +8,14 @@ def get_text_gen(
         mongo_storage: MongoStorage,
         postgres_storage: PostgresStorage,
         wiki_articles_count=1000,
-        habr_posts_count=1000,
-        model_state=3
+        habr_posts_count=1000
 ):
     habr_posts_gen = postgres_storage.get_posts_texts_gen(
         count=habr_posts_count)
     wiki_articles_gen = mongo_storage.get_articles_headings_texts_gen(
         count=wiki_articles_count)
     return TextProcessor.get_text_gen(
-        text_gens_gen=(text_gen for text_gen in (habr_posts_gen, wiki_articles_gen)),
-        window_size=model_state)
+        text_gens_gen=(text_gen for text_gen in (habr_posts_gen, wiki_articles_gen)))
 
 
 def get_markov_model(
@@ -49,8 +47,7 @@ def get_markov_model_with_gen_inputs(
         mongo_storage=mongo_storage,
         postgres_storage=postgres_storage,
         wiki_articles_count=wiki_articles_count,
-        habr_posts_count=habr_posts_count,
-        model_state=model_state)
+        habr_posts_count=habr_posts_count)
     print('Get posts and articles')
     encoder = WordsEncoder(
         text_corpus=get_text_gen(**kwargs))
@@ -61,5 +58,5 @@ def get_markov_model_with_gen_inputs(
         train_input=train_corpus,
         state_size=model_state,
         encoder=encoder)
-    print('Complete training model')
+    print('Complete training self')
     return model.compile()

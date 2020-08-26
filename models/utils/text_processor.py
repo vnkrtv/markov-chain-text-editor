@@ -54,7 +54,14 @@ class TextProcessor:
         return text[:-1]
 
     @classmethod
-    def get_text_gen(cls, text_gens_gen: Generator, window_size=1) -> Generator:
+    def get_text_gen(cls, text_gens_gen: Generator) -> Generator:
+        for text_gen in text_gens_gen:
+            for sentences_gen in cls.__get_sentences_gens(text_gen):
+                for sentence in sentences_gen:
+                    yield sentence
+
+    @classmethod
+    def get_ngrams_gen(cls, text_gens_gen: Generator, window_size=1) -> Generator:
         for text_gen in text_gens_gen:
             for sentences_gen in cls.__get_sentences_gens(text_gen):
                 for sentence in sentences_gen:

@@ -66,13 +66,16 @@ class WordsEncoder:
     @classmethod
     def from_dict(cls, obj):
 
-        word2int = obj["word2int"]
-        word2int[END] = word2int.pop(str(END))
-        word2int[BEGIN] = word2int.pop(str(BEGIN))
-
         int2word = obj["int2word"]
         for key in int2word:
             int2word[int(key)] = int2word.pop(key)
+
+        int2word[END] = END
+        int2word[BEGIN] = BEGIN
+
+        word2int = obj["word2int"]
+        word2int[END] = int(word2int.pop(str(END)))
+        word2int[BEGIN] = int(word2int.pop(str(BEGIN)))
 
         return cls(
             None,

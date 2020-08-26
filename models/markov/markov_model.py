@@ -20,7 +20,7 @@ class MarkovModel:
         return self
 
     @classmethod
-    def load(cls, model_name='model1.0-habr-10000.json', models_path='models/markov/bin'):
+    def load(cls, model_name, models_path='models/markov/bin'):
         with open(os.path.join(models_path, model_name), 'r') as f:
             model_json = f.read()
         model = EncodedText.from_json(model_json)
@@ -30,13 +30,13 @@ class MarkovModel:
         with open(os.path.join(models_path, model_name), 'w') as f:
             f.write(self.model.to_json())
 
-    def generate_sample(self, beginning: str) -> str:
-        return self.model.make_sentence_with_start(beginning)
+    def generate_sample(self, beginning: str, **kwargs) -> str:
+        return self.model.make_sentence_with_start(beginning, **kwargs)
 
-    def get_phrases_for_t9(self, beginning: str, first_words_count=1, count=20) -> list:
+    def get_phrases_for_t9(self, beginning: str, first_words_count=1, count=20, **kwargs) -> list:
         phrases = set()
         for i in range(count):
-            phrase = self.generate_sample(beginning)
+            phrase = self.generate_sample(beginning, **kwargs)
             if phrase:
                 words_list = phrase.split()
                 if len(words_list) > 1:

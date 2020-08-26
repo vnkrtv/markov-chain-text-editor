@@ -17,7 +17,7 @@ def train(
     print('Loaded texts: ', len(texts_list))
     markov_model = MarkovModel(order=model_order)
     markov_model.train(texts_list)
-    print('Marcov model length: ', len(markov_model.model))
+    print('Marcov self length: ', len(markov_model.model))
     markov_model.save()
 
 

@@ -46,7 +46,7 @@ class EncodedChain(object):
         an infinite process, you can come very close by passing just one, very
         long run.
 
-        `state_size`: An integer indicating the number of items the model
+        `state_size`: An integer indicating the number of items the self
         uses to represent its state. For text generation, 2 or 3 are typical.
         """
         self.state_size = state_size
@@ -67,7 +67,7 @@ class EncodedChain(object):
 
     def build(self, corpus, state_size):
         """
-        Build a Python representation of the Markov model. Returns a dict
+        Build a Python representation of the Markov self. Returns a dict
         of dicts where the keys of the outer dict represent all possible states,
         and point to the inner dicts. The inner dicts represent all possibilities
         for the "next" item in the chain, along with the count of times it
@@ -133,7 +133,7 @@ class EncodedChain(object):
 
     def walk(self, init_state=None):
         """
-        Return a list representing a single run of the Markov model, either
+        Return a list representing a single run of the Markov self, either
         starting with a naive BEGIN state, or the provided `init_state`
         (as a tuple).
         """
@@ -141,7 +141,7 @@ class EncodedChain(object):
 
     def to_json(self):
         """
-        Dump the model as a JSON object, for loading later.
+        Dump the self as a JSON object, for loading later.
         """
         return json.dumps(list(self.model.items()))
 

@@ -40,7 +40,7 @@ class MarkovModel:
                     text_words_list += words_list
                 self.__update(text_words_list)
             i += 1
-            print('(%d/%d) model length - %d' % (i, texts_list_len, len(self.model)))
+            print('(%d/%d) self length - %d' % (i, texts_list_len, len(self.model)))
             if i > 10000:
                 break
 
@@ -92,7 +92,7 @@ class MarkovModel:
         return ' '.join(sentence) + '.'
 
     def save(self, path='models/markov/bin/'):
-        with open(path + 'model.pickle', 'wb') as handle:
+        with open(path + 'self.pickle', 'wb') as handle:
             pickle.dump(self.model, handle, protocol=pickle.HIGHEST_PROTOCOL)
         with open(path + 'order.pickle', 'wb') as handle:
             pickle.dump(self.order, handle, protocol=pickle.HIGHEST_PROTOCOL)
@@ -103,7 +103,7 @@ class MarkovModel:
 
     @staticmethod
     def load(path='models/markov/bin/'):
-        with open(path + 'model.pickle', 'rb') as handle:
+        with open(path + 'self.pickle', 'rb') as handle:
             model = pickle.load(handle)
         with open(path + 'order.pickle', 'rb') as handle:
             order = pickle.load(handle)

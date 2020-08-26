@@ -7,6 +7,7 @@ from .encoder import WordsEncoder
 from .chain import EncodedChain, BEGIN
 from .splitters import split_into_sentences
 
+
 DEFAULT_MAX_OVERLAP_RATIO = 0.7
 DEFAULT_MAX_OVERLAP_TOTAL = 15
 DEFAULT_TRIES = 10
@@ -26,7 +27,7 @@ class EncodedText(object):
                  well_formed=True, reject_reg='', encoder=None):
         """
         input_text: A string.
-        state_size: An integer, indicating the number of words in the model's state.
+        state_size: An integer, indicating the number of words in the self's state.
         chain: A trained markovify.Chain instance for this text, if pre-processed.
         parsed_sentences: A list of lists, where each outer list is a "run"
               of the process (e.g. a single sentence), and each inner list
@@ -45,11 +46,13 @@ class EncodedText(object):
             self.reject_pat = re.compile(reject_reg)
 
         self.state_size = state_size
-
-        if isinstance(input_text, Generator) and encoder:
+        if encoder:
             self.retain_original = None
             self.encoder = encoder
-            self.chain = chain or EncodedChain(input_text, state_size)
+            if chain:
+                self.chain = chain
+            elif isinstance(input_text, Generator):
+                self.chain = EncodedChain(input_text, state_size)
         else:
             can_make_sentences = parsed_sentences is not None or input_text is not None
             self.retain_original = retain_original and can_make_sentences
@@ -196,14 +199,14 @@ class EncodedText(object):
     def make_sentence(self, init_state=None, **kwargs):
         """
         Attempts `tries` (default: 10) times to generate a valid sentence,
-        based on the model and `test_sentence_output`. Passes `max_overlap_ratio`
+        based on the self and `test_sentence_output`. Passes `max_overlap_ratio`
         and `max_overlap_total` to `test_sentence_output`.
 
         If successful, returns the sentence as a string. If not, returns None.
 
         If `init_state` (a tuple of `self.chain.state_size` words) is not specified,
         this method chooses a sentence-start at random, in accordance with
-        the model.
+        the self.
 
         If `test_output` is set as False then the `test_sentence_output` check
         will be skipped.
@@ -211,34 +214,37 @@ class EncodedText(object):
         If `max_words` or `min_words` are specified, the word count for the sentence will be
         evaluated against the provided limit(s).
         """
-        tries = kwargs.get('tries', DEFAULT_TRIES)
-        mor = kwargs.get('max_overlap_ratio', DEFAULT_MAX_OVERLAP_RATIO)
-        mot = kwargs.get('max_overlap_total', DEFAULT_MAX_OVERLAP_TOTAL)
+        tries = kwargs.get('tries', 10)
+        mor = kwargs.get('max_overlap_ratio', 0.7)
+        mot = kwargs.get('max_overlap_total', 15)
         test_output = kwargs.get('test_output', True)
         max_words = kwargs.get('max_words', None)
         min_words = kwargs.get('min_words', None)
 
-        if init_state != None:
-            init_state = tuple(self.encoder.encode_words_list(init_state))
-            prefix = list(init_state)
-            for word in prefix:
-                if word == BEGIN:
-                    prefix = prefix[1:]
-                else:
-                    break
-        else:
-            prefix = []
-
-        for _ in range(tries):
-            words_codes = prefix + self.chain.walk(init_state)
-            words = self.encoder.decode_codes_list(words_codes)
-            if (max_words != None and len(words) > max_words) or (min_words != None and len(words) < min_words):
-                continue
-            if test_output and hasattr(self, "rejoined_text"):
-                if self.test_sentence_output(words, mor, mot):
-                    return self.word_join(words)
+        try:
+            if init_state != None:
+                init_state = tuple(self.encoder.encode_words_list(init_state))
+                prefix = list(init_state)
+                for word in prefix:
+                    if word == BEGIN:
+                        prefix = prefix[1:]
+                    else:
+                        break
             else:
-                return self.word_join(words)
+                prefix = []
+
+            for _ in range(tries):
+                words_codes = prefix + self.chain.walk(init_state)
+                words = self.encoder.decode_codes_list(words_codes)
+                if (max_words != None and len(words) > max_words) or (min_words != None and len(words) < min_words):
+                    continue
+                if test_output and hasattr(self, "rejoined_text"):
+                    if self.test_sentence_output(words, mor, mot):
+                        return self.word_join(words)
+                else:
+                    return self.word_join(words)
+        except KeyError:
+            pass
         return None
 
     def make_short_sentence(self, max_chars, min_chars=0, **kwargs):
@@ -284,7 +290,7 @@ class EncodedText(object):
 
                 random.shuffle(init_states)
         else:
-            err_msg = "`make_sentence_with_start` for this model requires a string containing 1 to {0} words. Yours has {1}: {2}".format(
+            err_msg = "`make_sentence_with_start` for this self requires a string containing 1 to {0} words. Yours has {1}: {2}".format(
                 self.state_size, word_count, str(split))
             raise ParamError(err_msg)
 

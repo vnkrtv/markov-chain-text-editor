@@ -89,10 +89,10 @@ function autocomplete(inp, arr) {
     }
 
     function updateT9Phrases() {
-        console.log('Updating T9...');
         let val = textInput.value.toString();
         // console.log(arr)
         if (val[val.length - 1] === " ") {
+            console.log('Updating T9...');
             // console.log(val, val[val.length - 1], val.split(" "))
             let phraseList = val.split(" ");
             if (phraseList.length > 1) {
@@ -106,6 +106,8 @@ function autocomplete(inp, arr) {
                     for (let i = bufArray.length - 1; i >= 0; i--) {
                         bufferPhrase += (bufArray[i] + ' ');
                     }
+                    console.log('T9 phrase: ', bufferPhrase.substr(0, bufferPhrase.length - 1).toLowerCase());
+                    console.log('T9 words count: ', wordsCount);
                     $.post('/t9', {
                         beginning: bufferPhrase.substr(0, bufferPhrase.length - 1).toLowerCase(),
                         first_words_count: wordsCount,
