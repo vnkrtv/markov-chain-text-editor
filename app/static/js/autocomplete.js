@@ -183,6 +183,7 @@ function autocomplete(inp, arr) {
         if (currentFocus < 0) currentFocus = (x.length - 1);
         x[currentFocus].classList.add("autocomplete-active");
         x[currentFocus].style.backgroundColor = "DodgerBlue";
+        console.log(currentFocus);
     }
 
     function removeActive(x) {

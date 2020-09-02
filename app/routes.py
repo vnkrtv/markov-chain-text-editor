@@ -11,6 +11,11 @@ def index():
     return render_template('index.html', title='DOC Editor')
 
 
+@app.route('/login/', methods=['GET', 'POST'])
+def login():
+    return render_template('login.html', title='DOC Editor')
+
+
 class T9API(MethodView):
 
     def get(self):
