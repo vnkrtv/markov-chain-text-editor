@@ -48,15 +48,12 @@ def get_markov_model_with_gen_inputs(
         postgres_storage=postgres_storage,
         wiki_articles_count=wiki_articles_count,
         habr_posts_count=habr_posts_count)
-    print('Get posts and articles')
     encoder = WordsEncoder(
         text_corpus=get_text_gen(**kwargs))
     train_corpus = encoder.encode_text_corpus_gen(
         text_corpus_gen=get_text_gen(**kwargs))
-    print('Get text_gen')
     model = MarkovModel(
         train_input=train_corpus,
         state_size=model_state,
         encoder=encoder)
-    print('Complete training self')
     return model.compile()

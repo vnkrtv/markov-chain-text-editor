@@ -8,7 +8,7 @@ body {
 }
 
 .header{
-    background-image: url('../images/background.jpg');
+    /*background-image: url('../images/background.jpg');*/
     background-attachment: fixed;
     background-size: cover;
     background-position: center;
@@ -16,14 +16,13 @@ body {
 }
 
 .header > div {
-    padding-top: 10vh;
+    margin-top: 5vh;
     margin-left: 5vh;
     margin-right: 5vh;
 }
 
 .phrase-container {
     position: absolute;
-    margin-top: 20vh;
     color: white;
 }
 
@@ -42,4 +41,11 @@ body {
 
 .hide-element {
     display: none;
+}
+
+@media (min-width: 768px) {
+  .dropdown-menu-right {
+    right: 0;
+    left: auto;
+  }
 }

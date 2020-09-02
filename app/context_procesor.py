@@ -1,10 +1,10 @@
 import flask
 
 
-def close_icon_path():
-    def close_icon():
-        return flask.url_for('static', filename='images/icons/close.svg')
-    return dict(close_icon=close_icon)
+def save_icon_path():
+    def save_icon():
+        return flask.url_for('static', filename='images/icons/save.svg')
+    return dict(save_icon=save_icon)
 
 
 def sort_icon_path():
