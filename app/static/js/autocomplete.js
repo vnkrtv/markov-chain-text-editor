@@ -111,6 +111,7 @@ function autocomplete(inp, arr) {
                     $.post('/t9', {
                         beginning: bufferPhrase.substr(0, bufferPhrase.length - 1).toLowerCase(),
                         first_words_count: wordsCount,
+                        phrase_length: phraseLenInput.value,
                     }).done(function(response) {
                         arr = response['words']
                     });

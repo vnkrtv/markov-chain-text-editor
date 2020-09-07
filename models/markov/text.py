@@ -295,7 +295,7 @@ class EncodedText(object):
             raise ParamError(err_msg)
 
         for init_state in init_states:
-            output = self.make_sentence(init_state, **kwargs)
+            output = self.make_sentence(init_state, min_words=kwargs.get('min_words'), **kwargs)
             if output is not None:
                 return output
 

@@ -22,11 +22,12 @@ class T9API(MethodView):
         return redirect(url_for('index'))
 
     def post(self):
-        markov_model = get_model(MODEL_NAME)
+        markov_model = get_model()
         beginning = request.form['beginning']
         first_words_count = int(request.form['first_words_count'])
+        phrase_len = int(request.form['phrase_length'])
         return jsonify({
-            'words': markov_model.get_phrases_for_t9(beginning, first_words_count)
+            'words': markov_model.get_phrases_for_t9(beginning, first_words_count, phrase_len)
         })
 
 

@@ -32,8 +32,8 @@ def get_model(model_name=None) -> MarkovModel:
                 mongo_storage=__get_mongo_storage(),
                 postgres_storage=__get_postgres_storage(),
                 model_state=3,
-                wiki_articles_count=10000,
-                habr_posts_count=10000
+                wiki_articles_count=1000,
+                habr_posts_count=1000
             )
-            __model.save(model_name)
+            # __model.save(model_name)
     return __model

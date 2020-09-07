@@ -30,13 +30,14 @@ class MarkovModel:
         with open(os.path.join(models_path, model_name), 'w') as f:
             f.write(self.model.to_json())
 
-    def generate_sample(self, beginning: str, **kwargs) -> str:
-        return self.model.make_sentence_with_start(beginning, **kwargs)
+    def generate_sample(self, beginning: str, phrase_len: int, **kwargs) -> str:
+        return self.model.make_sentence_with_start(beginning, phrase_len, **kwargs)
 
-    def get_phrases_for_t9(self, beginning: str, first_words_count=1, count=20, **kwargs) -> list:
+    def get_phrases_for_t9(self, beginning: str, first_words_count=1, count=20, phrase_len=5, **kwargs) -> list:
         phrases = set()
         for i in range(count):
-            phrase = self.generate_sample(beginning, **kwargs)
+            phrase = self.generate_sample(beginning, phrase_len, **kwargs)
+            print(phrase)
             if phrase:
                 words_list = phrase.split()
                 if len(words_list) > 1:
