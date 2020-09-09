@@ -22,7 +22,7 @@ class T9API(MethodView):
         return redirect(url_for('index'))
 
     def post(self):
-        markov_model = get_model()
+        markov_model = get_model(MODEL_NAME)
         beginning = request.form['beginning']
         first_words_count = int(request.form['first_words_count'])
         phrase_len = int(request.form['phrase_length'])

@@ -37,7 +37,7 @@ function autocomplete(inp, arr) {
             for (let i = 0; i < (phraseWords.length - 1 < phraseLen ? phraseWords.length - 1: phraseLen); i++) {
                 phrase += (phraseWords[i] + " ");
             }
-            if ((phrase.substr(0, value.length).toUpperCase() === value.toUpperCase()) && (value.length > 0)) {
+            if (((phrase.substr(0, value.length).toUpperCase() === value.toUpperCase()) || (value.length = 0))) {
                 wordInput = document.createElement("DIV");
                 wordInput.className = 'form-control';
                 wordInput.style.cursor = "pointer";
@@ -77,7 +77,7 @@ function autocomplete(inp, arr) {
                 phrasesContainer.appendChild(phraseInput);
             }
         }
-        activeItems = document.getElementById("autocomplete-list-phrases").getElementsByTagName("div");
+        changeActiveItems();
     }
 
     inp.addEventListener("input", function(e) {
@@ -93,7 +93,6 @@ function autocomplete(inp, arr) {
         // console.log(arr)
         if (val[val.length - 1] === " ") {
             console.log('Updating T9...');
-            // console.log(val, val[val.length - 1], val.split(" "))
             let phraseList = val.split(" ");
             if (phraseList.length > 1) {
                 if (phraseList[phraseList.length - 2] !== bufferPhrase) {
@@ -129,15 +128,10 @@ function autocomplete(inp, arr) {
     }
 
     function changeActiveItems() {
-        if (this.counter === undefined) {
-            this.counter = 0;
-        }
-        this.counter += 1;
         wordsDiv.classList.toggle("hide-element");
         phrasesDiv.classList.toggle("hide-element");
-
         console.log();
-        if (this.counter % 2) {
+        if (wordsDiv.classList.contains("hide-element")) {
             console.log('phrases');
             activeItems = phrasesDiv.children[0];
         } else {
@@ -145,7 +139,7 @@ function autocomplete(inp, arr) {
             activeItems = wordsDiv.children[0];
         }
         if (activeItems) activeItems = activeItems.getElementsByTagName("div");
-        console.log(activeItems);
+        console.log('changeActiveItems: ', activeItems);
         console.log(phrasesDiv.children[0]);
         console.log(wordsDiv.children[0]);
     }
@@ -163,9 +157,15 @@ function autocomplete(inp, arr) {
         }
         else if (e.keyCode === 40) {
             currentFocus++;
+            console.log('40: ', activeItems);
+            console.log(phrasesDiv.children[0]);
+            console.log(wordsDiv.children[0]);
             addActive(activeItems);
         } else if (e.keyCode === 38) { //up
             currentFocus--;
+            console.log('38: ', activeItems);
+            console.log(phrasesDiv.children[0]);
+            console.log(wordsDiv.children[0]);
             addActive(activeItems);
         } else if (e.keyCode === 13) {
             e.preventDefault();
@@ -182,9 +182,11 @@ function autocomplete(inp, arr) {
         removeActive(x);
         if (currentFocus >= x.length) currentFocus = 0;
         if (currentFocus < 0) currentFocus = (x.length - 1);
+        console.log('Before adding active style: ', x[currentFocus].innerHTML);
         x[currentFocus].classList.add("autocomplete-active");
         x[currentFocus].style.backgroundColor = "DodgerBlue";
-        console.log(currentFocus);
+        console.log('After adding active style: ', x[currentFocus].innerHTML);
+        console.log('currentFocus: ', currentFocus);
     }
 
     function removeActive(x) {
@@ -196,9 +198,6 @@ function autocomplete(inp, arr) {
 
     function closeAllLists(elmnt) {
         const x = document.getElementsByClassName("autocomplete-items");
-        // console.log();
-        // console.log('Before: ', x);
-        // console.log();
         for (let item of x) {
             item.remove();
         }
@@ -207,8 +206,6 @@ function autocomplete(inp, arr) {
                 item.remove();
             }
         }
-        // console.log();
-        // console.log('After: ', x);
     }
 
     document.addEventListener("click", function (e) {

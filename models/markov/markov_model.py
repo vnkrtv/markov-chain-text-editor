@@ -35,12 +35,13 @@ class MarkovModel:
 
     def get_phrases_for_t9(self, beginning: str, first_words_count=1, count=20, phrase_len=5, **kwargs) -> list:
         phrases = set()
+        print('\nBeginning: ', beginning)
         for i in range(count):
             phrase = self.generate_sample(beginning, phrase_len, **kwargs)
             print(phrase)
             if phrase:
                 words_list = phrase.split()
-                if len(words_list) > 1:
+                if 1 < len(words_list) >= phrase_len:
                     phrases.add(" ".join(words_list[first_words_count:]))
+        print('\nFinally:\n', '\n'.join(phrases))
         return list(phrases)
-
