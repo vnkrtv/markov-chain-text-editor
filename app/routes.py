@@ -2,7 +2,7 @@ from app import app, db
 from flask import render_template, jsonify, request, redirect, url_for, flash
 from flask.views import MethodView
 from flask_login import login_user, logout_user, login_required, current_user
-from .models import User
+from .models import User, Document
 from .model import get_model
 from .forms import LoginForm, RegistrationForm
 
@@ -13,6 +13,13 @@ MODEL_NAME = '10k.json'
 @login_required
 def index():
     return render_template('index.html', title='DOC Editor')
+
+
+@app.route('/documents', methods=['GET', 'POST'])
+@login_required
+def docs():
+    documents = Document.query.filter_by(user_id=current_user.id)
+    return render_template('documents.html', title='Documents', documents=documents)
 
 
 @app.route('/logout', methods=['GET'])
@@ -32,7 +39,6 @@ def register():
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        flash('Congratulations, you are now a registered user!')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 

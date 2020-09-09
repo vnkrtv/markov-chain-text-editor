@@ -31,7 +31,7 @@ class Document(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(256))
     body = db.Column(db.Text())
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    last_update = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
