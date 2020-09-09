@@ -1,4 +1,4 @@
-from app import app, db
+from app import app, db, csrf
 from flask import render_template, jsonify, request, redirect, url_for, flash
 from flask.views import MethodView
 from flask_login import login_user, logout_user, login_required, current_user
@@ -67,6 +67,7 @@ class LoginView(MethodView):
 
 
 class T9API(MethodView):
+    decorators = [csrf.exempt]
 
     def get(self):
         return redirect(url_for('index'))

@@ -208,6 +208,12 @@ function autocomplete(inp, arr) {
         }
     }
 
+    inp.addEventListener('keyup', function(){
+        if(this.scrollTop > 0){
+          this.style.height = this.scrollHeight + "px";
+        }
+      });
+
     document.addEventListener("click", function (e) {
         closeAllLists(e.target);
     });
