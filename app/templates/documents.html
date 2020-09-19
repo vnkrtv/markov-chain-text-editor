@@ -3,7 +3,7 @@
 {% block navbar %}
           
   <div class="d-flex justify-content-between">
-    <a href="" class="navbar-brand d-flex align-items-center" data-toggle="modal" data-target="#gridSystemModal">
+    <a href="" class="navbar-brand d-flex align-items-center" data-toggle="modal" data-target="#newDocModal">
       New doc
     </a>
     <div class="nav-item dropdown">
@@ -11,7 +11,7 @@
         <strong>{{ current_user.username }}</strong>
       </a>
       <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
-        <a class="dropdown-item" href="{{ url_for('docs') }}">My docs</a>
+        <a class="dropdown-item" href="{{ url_for('index') }}">My docs</a>
         <a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a>
       </div>
     </div>
@@ -41,5 +41,35 @@
 		</table>
 	</div>
 </header>
+
+
+<div id="newDocModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="gridModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="gridModalLabel">New document</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <form action="" method="post">
+	     {{ form.hidden_tag() }}
+      <div class="modal-body">
+        <div class="container-fluid bd-example-row">
+        	<div class="col">
+        		{{ form.title.label }}<br>
+        		{{ form.title(size=20, class="form-control") }}<br>
+        	</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      	{{ form.submit(class="btn btn-light") }}
+      </div>
+    </form>
+    </div>
+  </div>
+</div>
+
+ <script src="{{ url_for('static', filename='js/jquery-3.5.1.js') }}"></script>
+
 
 {% endblock content %}

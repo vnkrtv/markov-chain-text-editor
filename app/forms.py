@@ -11,6 +11,11 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Authorize')
 
 
+class DocumentForm(FlaskForm):
+    title = StringField('Document name', validators=[DataRequired()])
+    submit = SubmitField('Create')
+
+
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])

@@ -4,22 +4,20 @@ from flask.views import MethodView
 from flask_login import login_user, logout_user, login_required, current_user
 from .models import User, Document
 from .model import get_model
-from .forms import LoginForm, RegistrationForm
+from .forms import LoginForm, RegistrationForm, DocumentForm
 
 MODEL_NAME = '10k.json'
 
 
-@app.route('/', methods=['GET', 'POST'])
-@login_required
-def index():
-    return render_template('index.html', title='DOC Editor')
-
-
 @app.route('/documents', methods=['GET', 'POST'])
 @login_required
-def docs():
-    documents = Document.query.filter_by(user_id=current_user.id)
-    return render_template('documents.html', title='Documents', documents=documents)
+def index():
+    context = {
+        'title': 'Documents',
+        'documents': Document.query.filter_by(user_id=current_user.id),
+        'form': DocumentForm()
+    }
+    return render_template('documents.html', **context)
 
 
 @app.route('/logout', methods=['GET'])
@@ -43,6 +41,21 @@ def register():
     return render_template('register.html', title='Register', form=form)
 
 
+class DocumentView(MethodView):
+    template = 'editor.html'
+    decorators = [login_required]
+
+    def get(self):
+        return redirect(url_for('index'))
+
+    def post(self):
+        context = {
+            'title': 0,
+            'form': DocumentForm()
+        }
+        return render_template(self.template, )
+
+
 class LoginView(MethodView):
     title = 'Login'
     template = 'login.html'
@@ -63,7 +76,7 @@ class LoginView(MethodView):
                 return redirect(url_for('login'))
             login_user(user, remember=form.remember_me.data)
             return redirect(url_for('index'))
-        return render_template('login.html', title=self.title, form=form)
+        return render_template(self.template, title=self.title, form=form)
 
 
 class T9API(MethodView):
@@ -84,6 +97,9 @@ class T9API(MethodView):
 
 app.add_url_rule('/login',
                  view_func=LoginView.as_view('login'),
+                 methods=['POST', 'GET'])
+app.add_url_rule('/',
+                 view_func=DocumentView.as_view('document'),
                  methods=['POST', 'GET'])
 app.add_url_rule('/t9',
                  view_func=T9API.as_view('t9'),
