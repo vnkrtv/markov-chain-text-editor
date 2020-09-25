@@ -9,17 +9,6 @@ from .forms import LoginForm, RegistrationForm, DocumentForm
 MODEL_NAME = '10k.json'
 
 
-@app.route('/documents', methods=['GET', 'POST'])
-@login_required
-def index():
-    context = {
-        'title': 'Documents',
-        'documents': Document.query.filter_by(user_id=current_user.id),
-        'form': DocumentForm()
-    }
-    return render_template('documents.html', **context)
-
-
 @app.route('/logout', methods=['GET'])
 @login_required
 def logout():
@@ -41,19 +30,43 @@ def register():
     return render_template('register.html', title='Register', form=form)
 
 
-class DocumentView(MethodView):
-    template = 'editor.html'
+@app.route('/document/<int:document_id>', methods=['GET', 'POST'])
+@login_required
+def document(document_id):
+    form = DocumentForm()
+    doc = Document.query.filter_by(id=document_id).first()
+    if current_user.id == doc.user_id:
+        if request.method == 'POST' and form.submit():
+            doc.title = request.form.get('title', doc.title)
+            doc.body = request.form.get('doc-body', doc.body)
+            db.session.commit()
+            flash("Document '%s' has been successfully updated." % doc.title)
+            return redirect(url_for('index'))
+        return render_template('editor.html', title=doc.title, doc=doc, form=form)
+    return redirect(url_for('index'))
+
+
+class IndexView(MethodView):
+    template = 'documents.html'
     decorators = [login_required]
 
     def get(self):
-        return redirect(url_for('index'))
-
-    def post(self):
         context = {
-            'title': 0,
+            'title': 'Documents',
+            'documents': Document.query.filter_by(user_id=current_user.id).all(),
             'form': DocumentForm()
         }
-        return render_template(self.template, )
+        return render_template(self.template, **context)
+
+    def post(self):
+        form = DocumentForm()
+        if form.validate_on_submit():
+            doc = Document(title=form.title.data, user_id=current_user.id)
+            db.session.add(doc)
+            db.session.commit()
+            return redirect(url_for('document', document_id=doc.id))
+        flash(''.join(form.title.errors))
+        return self.get()
 
 
 class LoginView(MethodView):
@@ -95,11 +108,11 @@ class T9API(MethodView):
         })
 
 
-app.add_url_rule('/login',
-                 view_func=LoginView.as_view('login'),
+app.add_url_rule('/documents',
+                 view_func=IndexView.as_view('index'),
                  methods=['POST', 'GET'])
 app.add_url_rule('/',
-                 view_func=DocumentView.as_view('document'),
+                 view_func=LoginView.as_view('login'),
                  methods=['POST', 'GET'])
 app.add_url_rule('/t9',
                  view_func=T9API.as_view('t9'),

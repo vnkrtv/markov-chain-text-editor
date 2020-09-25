@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import ValidationError, DataRequired, EqualTo
-from app.models import User
+from app.models import User, Document
 
 
 class LoginForm(FlaskForm):
@@ -14,6 +14,11 @@ class LoginForm(FlaskForm):
 class DocumentForm(FlaskForm):
     title = StringField('Document name', validators=[DataRequired()])
     submit = SubmitField('Create')
+
+    def validate_title(self, title):
+        doc = Document.query.filter_by(title=title.data).first()
+        if doc is not None:
+            raise ValidationError('Please use a different document title.')
 
 
 class RegistrationForm(FlaskForm):
