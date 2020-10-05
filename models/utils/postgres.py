@@ -17,7 +17,7 @@ class PostgresStorage:
     def get_posts(self, habs_list: list = None, tags_list: list = None, count=0) -> Generator:
         if not habs_list and not tags_list:
             sql = 'SELECT * FROM posts'
-            sql = sql + 'LIMIT %d' % count if count > 0 else sql
+            sql = sql + ' LIMIT %d' % count if count > 0 else sql
             self.cursor.execute(sql)
         elif habs_list:
             self.__get_posts_by_habs(habs_list, count)

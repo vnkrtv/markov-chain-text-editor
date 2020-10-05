@@ -52,7 +52,8 @@ function autocomplete(inp, arr) {
                     for (let i = 0; i < phraseList.length - 1; i++) {
                         inp.value += (phraseList[i] + " ");
                     }
-                    inp.value += this.getElementsByTagName("input")[0].value;
+                    let clickedValue = this.getElementsByTagName("input")[0].value;
+                    inp.value += clickedValue.substr(0, clickedValue.length - 1);
                     closeAllLists();
                 });
                 wordsContainer.appendChild(wordInput);
@@ -71,7 +72,8 @@ function autocomplete(inp, arr) {
                     for (let i = 0; i < phraseList.length - 1; i++) {
                         inp.value += (phraseList[i] + " ");
                     }
-                    inp.value += this.getElementsByTagName("input")[0].value;
+                    let clickedValue = this.getElementsByTagName("input")[0].value;
+                    inp.value += clickedValue.substr(0, clickedValue.length - 1);
                     closeAllLists();
                 });
                 phrasesContainer.appendChild(phraseInput);

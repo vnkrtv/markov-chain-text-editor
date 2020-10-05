@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 
-
 {% block navbar %}
           
       <div class="d-flex justify-content-between">
@@ -26,6 +25,7 @@
 
 <form action="" method="post">
 {{ form.hidden_tag() }}
+    
 <header class="header">
 	<div class='jumbotron'>
 		<div class="form-group shadow-textarea autocomplete">
@@ -47,6 +47,19 @@
       <div class="modal-body">
         <div class="container-fluid bd-example-row">
         	<div class="col">
+            <div class="row">
+              <h5>Select model</h5>
+              <!--div class="form-control">
+                <select id="model-select" class="form-control" multiple size="3">
+                  {% for model in models %}                    
+                    <option value="{{ model }}">{{ model }}</option>
+                  {% endfor %}
+                </select>
+              </div-->
+              <label for="model-select"></label>
+              <select class="form-control custom-select" id="model-select"></select>
+            </div>
+            <br>
         		<div class="row">
         	        <h5>First words count</h5> <input class="form-control" value="1" type="number" min="1" max="6" id="first-words">
         		</div>
@@ -87,11 +100,38 @@
   </div>
 </div>
 </form>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/vanillaSelectBox.css') }}" type="text/css"/>
  <script src="{{ url_for('static', filename='js/autocomplete.js') }}"></script>
- <script src="{{ url_for('static', filename='js/jquery-3.5.1.js') }}"></script>
+ <script src="{{ url_for('static', filename='js/vanillaSelectBox.js') }}"></script>
  <script>
+    /*let modelSelect = new vanillaSelectBox("#model-select",{
+        search: true,
+        disableSelectAll: true
+    });*/
+    const modelSelect = document.getElementById('model-select');
+    let modelsArr = [];
+    $.get('/api/models').done(function(response) {
+        modelsArr = response['models'];
+        for (let model of modelsArr) {
+          const modelOption = document.createElement('option');
+          modelOption.value = model;
+          modelOption.innerText = model;
+          modelSelect.appendChild(modelOption);
+        }
+    });
+    $('#model-select').on('change', function (e) {
+        let optionSelected = $("option:selected", this);
+        let valueSelected = this.value;
+        $.post('/api/models', {
+          model_name: valueSelected,
+        }).then(function () {
+          loadingContainer.style.display = "";
+        }).done(function(response) {
+          loadingContainer.style.display = "none";
+      });
+    });
     let textarea = document.getElementById("text");
     let words = ['Чтобы Т9 заработал', 'начните вбивать какой-либо текст', 'модель возьмет последние слова', 'и на их основании предложит', 'продолжение фразы'];
-     autocomplete(textarea, words);
-</script> 
+    autocomplete(textarea, words);
+  </script>
 {% endblock %}

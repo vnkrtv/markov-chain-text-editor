@@ -1,12 +1,13 @@
+import re
 from app import app, db, csrf
 from flask import render_template, jsonify, request, redirect, url_for, flash
 from flask.views import MethodView
 from flask_login import login_user, logout_user, login_required, current_user
-from .models import User, Document
+from .models import User, Document, MarkovModel
 from .model import get_model
 from .forms import LoginForm, RegistrationForm, DocumentForm
 
-MODEL_NAME = '10k.json'
+MODEL_NAME = "ml_habs.json"
 
 
 @app.route('/logout', methods=['GET'])
@@ -94,17 +95,35 @@ class LoginView(MethodView):
 
 class T9API(MethodView):
     decorators = [csrf.exempt]
+    remove_punctuation = re.compile(r'[^a-zA-Zа-яА-Я ]')
 
     def get(self):
         return redirect(url_for('index'))
 
     def post(self):
         markov_model = get_model(MODEL_NAME)
-        beginning = request.form['beginning']
+        beginning = self.remove_punctuation.sub('', request.form['beginning'])
+
         first_words_count = int(request.form['first_words_count'])
         phrase_len = int(request.form['phrase_length'])
         return jsonify({
             'words': markov_model.get_phrases_for_t9(beginning, first_words_count, phrase_len)
+        })
+
+
+class ModelsAPI(MethodView):
+    decorators = [csrf.exempt]
+
+    def get(self):
+        # models = MarkovModel.query.all()
+        return jsonify({
+            'models': ['math_habs.json', 'ml_habs.json']
+        })
+
+    def post(self):
+        get_model(request.form['model_name'])
+        return jsonify({
+            'success': "ok"
         })
 
 
@@ -116,4 +135,8 @@ app.add_url_rule('/',
                  methods=['POST', 'GET'])
 app.add_url_rule('/t9',
                  view_func=T9API.as_view('t9'),
+                 methods=['POST', 'GET'])
+
+app.add_url_rule('/api/models',
+                 view_func=ModelsAPI.as_view('models_api'),
                  methods=['POST', 'GET'])

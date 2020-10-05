@@ -17,7 +17,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
 
     def __repr__(self):
-        return '<User {}>'.format(self.username)
+        return '<User: {}>'.format(self.username)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -36,4 +36,13 @@ class Document(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def __repr__(self):
-        return '<Document {}>'.format(self.title)
+        return '<Document: {}>'.format(self.title)
+
+
+class MarkovModel(db.Model):
+    __tablename__ = 'markov_models'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128))
+
+    def __repr__(self):
+        return '<Markov model: {}>'.format(self.name)
