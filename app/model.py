@@ -1,5 +1,5 @@
 from models import (
-    MarkovModel, MongoStorage, PostgresStorage, get_markov_model_with_gen_inputs)
+    MarkovModel, MongoStorage, PostgresStorage, get_markov_model)
 
 __mongo_storage: MongoStorage = None
 __postgres_storage: PostgresStorage = None
@@ -28,12 +28,12 @@ def get_model(model_name=None) -> MarkovModel:
         if model_name:
             __model = MarkovModel.load(model_name)
         else:
-            __model = get_markov_model_with_gen_inputs(
+            __model = get_markov_model(
                 mongo_storage=__get_mongo_storage(),
                 postgres_storage=__get_postgres_storage(),
                 model_state=3,
                 wiki_articles_count=1000,
                 habr_posts_count=1000
             )
-            # __model.save(model_name)
+            __model.save(model_name)
     return __model
