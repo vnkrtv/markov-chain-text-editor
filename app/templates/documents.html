@@ -43,7 +43,7 @@
 		      <td>{{ doc.title }}</td>
 		      <td>{{ doc.created }}</td>
 		      <td>{{ doc.last_update }}</td>
-		      <td><a href="{{ url_for('document', document_id=doc.id) }}" type="button" class="btn btn-light btn-sm">Edit »</a></td>
+		      <td><a href="{{ url_for('document', document_id=doc.id) }}" type="button" class="btn btn-light btn-sm" onclick="document.getElementById('loading-container').style.display = ''">Edit »</a></td>
 		    </tr>
 		  {% endfor %}
 		  </tbody>

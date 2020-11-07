@@ -152,7 +152,7 @@ function autocomplete(inp, arr) {
             currentFocus = activeItems.length - 1;
             removeActive(activeItems);
         }
-        if (e.keyCode === 37 || e.keyCode === 39) {
+        if (e.keyCode === 39) {
             changeActiveItems();
             currentFocus = activeItems.length - 1;
             removeActive(activeItems);

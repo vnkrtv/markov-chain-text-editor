@@ -43,6 +43,7 @@ def document(document_id):
             db.session.commit()
             flash("Document '%s' has been successfully updated." % doc.title)
             return redirect(url_for('index'))
+        get_model(MODEL_NAME)
         return render_template('editor.html', title=doc.title, doc=doc, form=form)
     return redirect(url_for('index'))
 
