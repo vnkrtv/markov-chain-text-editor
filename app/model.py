@@ -1,5 +1,11 @@
+import os
+
+from config import BASE_DIR
 from models import (
     MarkovModel, MongoStorage, PostgresStorage, get_markov_model)
+
+MODELS_LIST = os.listdir(os.path.join(BASE_DIR, 'models', 'markov', 'bin'))
+MODEL_NAME = MODELS_LIST[0] if MODELS_LIST else None
 
 __mongo_storage: MongoStorage = None
 __postgres_storage: PostgresStorage = None
@@ -41,5 +47,5 @@ def get_model(model_name: str = None,
     return __model
 
 
-def combine_models(models_names_list: list) -> MarkovModel:
+def combine_models(models_names_list: list):
     global __model

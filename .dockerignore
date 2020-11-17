@@ -1,0 +1,12 @@
+.idea
+.git
+
+venv/
+notebooks/
+__pycache__/
+models/markov/bin/
+
+*.db
+*.pyc
+
+!models/markov/bin/math_habs.json

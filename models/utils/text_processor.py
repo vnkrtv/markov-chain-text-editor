@@ -72,7 +72,6 @@ class TextProcessor:
     def process_text_gen(cls, text_gens_gen: Generator, window_size=1) -> str:
         text = ''
         for sentence in cls.get_text_gen(
-                text_gens_gen=text_gens_gen,
-                window_size=window_size):
+                text_gens_gen=text_gens_gen):
             text += (sentence + '\n')
         return text[:-1]

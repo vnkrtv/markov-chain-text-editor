@@ -1,0 +1,12 @@
+#!/bin/bash
+
+cd /usr/share/python3
+. venv/bin/activate
+
+export FLASK_APP=wsgi.py
+
+flask db init
+flask db migrate
+flask db upgrade
+
+gunicorn wsgi:app -b 0.0.0.0:5000

@@ -1,13 +1,13 @@
 import re
-from app import app, db, csrf
+
 from flask import render_template, jsonify, request, redirect, url_for, flash
 from flask.views import MethodView
 from flask_login import login_user, logout_user, login_required, current_user
-from .models import User, Document, MarkovModel
-from .model import get_model
-from .forms import LoginForm, RegistrationForm, DocumentForm
 
-MODEL_NAME = "ml_habs.json"
+from app import app, db, csrf
+from .models import User, Document
+from .model import get_model, MODEL_NAME
+from .forms import LoginForm, RegistrationForm, DocumentForm
 
 
 @app.route('/logout', methods=['GET'])
