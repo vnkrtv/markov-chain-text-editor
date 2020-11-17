@@ -1,6 +1,6 @@
 # markov-chain-text-editor
 
-[![Build Status](https://travis-ci.com/vnkrtv/markov-chain-text-editor.svg?branch=master)](https://travis-ci.com/vnkrtv/markov-chain-text-editor)
+[![Build Status](https://travis-ci.com/vnkrtv/article-gen.svg?branch=master)](https://travis-ci.com/vnkrtv/article-gen)
 
 ## Description  
 
