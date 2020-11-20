@@ -4,9 +4,9 @@ import nltk
 
 
 class Tokenizer:
-    to_sentences = re.compile(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s')
+    to_sentences = re.compile(r'(?<!\w\.\w.)(?<![A-Z][a-z][а-я][А-Я]ёЁ\.)(?<=\.|\?)\s')
     remove_brackets = re.compile(r' \((.*?)\)')
-    remove_punctuation = re.compile(r'[^a-zA-Zа-яА-Я ]')
+    remove_punctuation = re.compile(r'[^a-zA-Zа-яА-ЯёЁ ]')
 
     @classmethod
     def tokenize(cls, text: str, remove_punctuation=True, remove_brackets=True) -> Generator:
