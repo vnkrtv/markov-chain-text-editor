@@ -164,7 +164,7 @@ class EncodedText(object):
 class EncodedNewlineText(EncodedText):
     """
     A (usable) example of subclassing markovify.Text. This one lets you markovify
-    text where the sentences are separated by newlines instead of ". "
+    text where the texts are separated by newlines instead of ". "
     """
 
     def sentence_split(self, text):

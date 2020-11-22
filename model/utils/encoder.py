@@ -1,5 +1,5 @@
 import json
-from typing import Generator
+from typing import Generator, Iterable
 
 
 class WordsEncoder:
@@ -25,13 +25,13 @@ class WordsEncoder:
             self.end_word: self.end_word
         }
         for sentence in text_corpus:
-            for word in sentence.split():
+            for word in sentence:
                 if word not in self.word2int:
                     self.counter += 1
                     self.word2int[word] = self.counter
                     self.int2word[self.counter] = word
 
-    def fit_encode(self, text_corpus) -> Generator:
+    def fit_encode(self, text_corpus: Iterable) -> Generator:
         corpus = list(text_corpus) if isinstance(text_corpus, Generator) else text_corpus
         self.fit(corpus)
         return self.encode_text_corpus_gen(corpus)
@@ -43,9 +43,9 @@ class WordsEncoder:
         """List of lists of words"""
         return [self.encode_words_list(words_list) for words_list in text_corpus]
 
-    def encode_text_corpus_gen(self, text_corpus_gen: Generator) -> Generator:
+    def encode_text_corpus_gen(self, text_corpus_gen: Iterable) -> Generator:
         """List of lists of words"""
-        return (self.encode_words_list(sentence.split()) for sentence in text_corpus_gen)
+        return (self.encode_words_list(sentence) for sentence in text_corpus_gen)
 
     def decode_codes_list(self, codes_list: list) -> list:
         return [self.int2word[code] for code in codes_list]

@@ -4,7 +4,6 @@ from .text import EncodedText, EncodedNewlineText
 
 
 class MarkovModel:
-
     model: EncodedText
 
     def __init__(self, train_input, model=None, encoder=None, state_size=2):

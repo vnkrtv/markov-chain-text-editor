@@ -1,4 +1,4 @@
-from typing import Generator
+from typing import Generator, Iterable
 import re
 import nltk
 
@@ -26,24 +26,23 @@ class TextProcessor:
     tokenizer = Tokenizer()
 
     @classmethod
-    def __get_sentences_gens(cls, text_gen: Generator, remove_punctuation=True, remove_brackets=True) -> Generator:
-        for text in text_gen:
+    def get_sentences_gens(cls, texts: Iterable, remove_punctuation=True, remove_brackets=True) -> Generator:
+        for text in texts:
             yield cls.tokenizer.tokenize(
                 text=text,
                 remove_punctuation=remove_punctuation,
                 remove_brackets=remove_brackets)
 
     @classmethod
-    def get_text_gen(cls, text_gens_gen) -> Generator:
+    def get_text_gen(cls, text_gens_gen: Iterable) -> Generator:
         for text_gen in text_gens_gen:
-            for sentences_gen in cls.__get_sentences_gens(text_gen):
+            for sentences_gen in cls.get_sentences_gens(text_gen):
                 for sentence in sentences_gen:
-                    yield sentence
+                    yield sentence.split()
 
     @classmethod
-    def get_ngram_gen(cls, text_gens_gen: Generator, state_size=1) -> Generator:
+    def get_ngram_gen(cls, text_gens_gen: Iterable, ngram_size: int = 3) -> Generator:
         for text_gen in text_gens_gen:
-            for sentences_gen in cls.__get_sentences_gens(text_gen):
+            for sentences_gen in cls.get_sentences_gens(text_gen):
                 for sentence in sentences_gen:
-                    for ngram in (' '.join(ngram) for ngram in nltk.ngrams(sentence.split(), state_size)):
-                        yield ngram
+                    yield [''.join(item) for item in nltk.ngrams(sentence, ngram_size)]

@@ -1,3 +1,5 @@
+from typing import Iterable
+
 from .utils import PostgresStorage
 from .chain import compile_next
 
@@ -6,7 +8,7 @@ class ChainStorage(PostgresStorage):
     begin_word: int = 0
     end_word: int = -1
 
-    def add_model(self, model_name: str, train_corpus, state_size: int):
+    def add_model(self, model_name: str, train_corpus: Iterable, state_size: int):
         model_dict = self.__build_model(train_corpus, state_size)
 
         cursor = self.conn.cursor()

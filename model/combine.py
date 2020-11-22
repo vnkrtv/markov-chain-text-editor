@@ -21,14 +21,14 @@ def get_model_dict(thing):
 
 def combine(models, weights=None):
     if weights == None:
-        weights = [ 1 for _ in range(len(models)) ]
+        weights = [1 for _ in range(len(models))]
 
     if len(models) != len(weights):
         raise ValueError("`models` and `weights` lengths must be equal.")
 
     model_dicts = list(map(get_model_dict, models))
-    state_sizes = [ len(list(md.keys())[0])
-        for md in model_dicts ]
+    state_sizes = [len(list(md.keys())[0])
+                   for md in model_dicts]
 
     if len(set(state_sizes)) != 1:
         raise ValueError("All `models` must have the same state size.")

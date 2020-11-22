@@ -28,6 +28,7 @@ class EncodedChain(object):
     A Markov chain representing processes that have both beginnings and ends.
     For example: Sentences.
     """
+
     def __init__(self, corpus, state_size, model=None):
         """
         `corpus`: A list of lists, where each outer list is a "run"
@@ -41,16 +42,16 @@ class EncodedChain(object):
         """
         self.state_size = state_size
         self.model = model or self.build(corpus, self.state_size)
-        self.compiled = (len(self.model) > 0) and (type(self.model[tuple([BEGIN]*state_size)]) == list)
+        self.compiled = (len(self.model) > 0) and (type(self.model[tuple([BEGIN] * state_size)]) == list)
         if not self.compiled:
             self.precompute_begin_state()
 
-    def compile(self, inplace = False):
+    def compile(self, inplace=False):
         if self.compiled:
             if inplace: return self
-            return EncodedChain(None, self.state_size, model = copy.deepcopy(self.model))
-        mdict = { state: compile_next(next_dict) for (state, next_dict) in self.model.items() }
-        if not inplace: return EncodedChain(None, self.state_size, model = mdict)
+            return EncodedChain(None, self.state_size, model=copy.deepcopy(self.model))
+        mdict = {state: compile_next(next_dict) for (state, next_dict) in self.model.items()}
+        if not inplace: return EncodedChain(None, self.state_size, model=mdict)
         self.model = mdict
         self.compiled = True
         return self
@@ -69,10 +70,10 @@ class EncodedChain(object):
         model = {}
 
         for run in corpus:
-            items = ([ BEGIN ] * state_size) + run + [ END ]
+            items = ([BEGIN] * state_size) + run + [END]
             for i in range(len(run) + 1):
-                state = tuple(items[i:i+state_size])
-                follow = items[i+state_size]
+                state = tuple(items[i:i + state_size])
+                follow = items[i + state_size]
                 if state not in model:
                     model[state] = {}
 
@@ -87,7 +88,7 @@ class EncodedChain(object):
         Caches the summation calculation and available choices for BEGIN * state_size.
         Significantly speeds up chain generation on large corpora. Thanks, @schollz!
         """
-        begin_state = tuple([ BEGIN ] * self.state_size)
+        begin_state = tuple([BEGIN] * self.state_size)
         choices, cumdist = compile_next(self.model[begin_state])
         self.begin_cumdist = cumdist
         self.begin_choices = choices
@@ -98,7 +99,7 @@ class EncodedChain(object):
         """
         if self.compiled:
             choices, cumdist = self.model[state]
-        elif state == tuple([ BEGIN ] * self.state_size):
+        elif state == tuple([BEGIN] * self.state_size):
             choices = self.begin_choices
             cumdist = self.begin_cumdist
         else:
