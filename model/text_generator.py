@@ -32,18 +32,25 @@ class TextGenerator:
         self.ngram_size = ngram_size
 
         if input_text:
-            if use_ngrams:
-                train_corpus = list(TextProcessor.get_ngram_gen(input_text, ngram_size))
-            else:
-                train_corpus = list(TextProcessor.get_text_gen(input_text))
-
-            self.encoder = WordsEncoder()
-            encoded_train_corpus = self.encoder.fit_encode(train_corpus)
-
-            self.pg_encoder.add_encoder(model_name, self.encoder)
-            self.pg_chain.add_model(model_name, encoded_train_corpus, state_size)
+            self.train_model(input_text)
         else:
             self.encoder = self.pg_encoder.load_encoder(model_name)
+
+    def train_model(self, input_text: Iterable):
+        if self.use_ngrams:
+            train_corpus = list(TextProcessor.get_ngram_gen(input_text, self.ngram_size))
+        else:
+            train_corpus = list(TextProcessor.get_text_gen(input_text))
+
+        self.encoder = WordsEncoder()
+        encoded_train_corpus = self.encoder.fit_encode(train_corpus)
+
+        self.pg_encoder.add_encoder(self.model_name, self.encoder)
+        self.pg_chain.add_model(self.model_name, encoded_train_corpus, self.state_size)
+
+    def delete_model(self):
+        self.pg_chain.delete_model(self.model_name)
+        self.pg_encoder.delete_encoder(self.model_name)
 
     def ngrams_split(self, sentence: str) -> list:
         processed_sentence = self.re_process.sub('', sentence.lower())
@@ -103,12 +110,16 @@ class TextGenerator:
 
         return self.make_sentence(init_state, **kwargs)
 
-    def make_sentences_for_t9(self, beginning: str, first_words_count=1, count=20) -> list:
+    def make_sentences_for_t9(self, beginning: str, first_words_count=1, count=30, phrase_len=5, **kwargs) -> list:
         phrases = set()
+        print('\nBeginning: ', beginning)
         for i in range(count):
-            phrase = self.make_sentence_with_start(beginning)
+            phrase = self.make_sentence_with_start(beginning, min_words=phrase_len, **kwargs)
+            print(phrase)
             if phrase:
                 words_list = phrase.split()
-                if len(words_list) > 1:
+                if 1 < len(words_list) >= phrase_len:
                     phrases.add(" ".join(words_list[first_words_count:]))
+        print('\nFinally:\n', '\n'.join(phrases))
         return list(phrases)
+

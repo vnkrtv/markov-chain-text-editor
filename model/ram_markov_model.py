@@ -32,7 +32,7 @@ class MarkovModel:
     def generate_sample(self, beginning: str, phrase_len: int, **kwargs) -> str:
         return self.model.make_sentence_with_start(beginning, phrase_len, **kwargs)
 
-    def get_phrases_for_t9(self, beginning: str, first_words_count=1, count=30, phrase_len=5, **kwargs) -> list:
+    def make_sentences_for_t9(self, beginning: str, first_words_count=1, count=30, phrase_len=5, **kwargs) -> list:
         phrases = set()
         print('\nBeginning: ', beginning)
         for i in range(count):

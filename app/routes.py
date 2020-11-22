@@ -6,7 +6,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 
 from app import app, db, csrf
 from .models import User, Document
-from .markov import get_model, MODEL_NAME
+from .markov import load_ram_model, load_db_model, RAM_MODEL_NAME, DB_MODEL_NAME
 from .forms import LoginForm, RegistrationForm, DocumentForm
 
 
@@ -43,7 +43,7 @@ def document(document_id):
             db.session.commit()
             flash("Document '%s' has been successfully updated." % doc.title)
             return redirect(url_for('index'))
-        get_model(MODEL_NAME)
+        load_db_model(model_name=DB_MODEL_NAME)
         return render_template('editor.html', title=doc.title, doc=doc, form=form)
     return redirect(url_for('index'))
 
@@ -102,13 +102,14 @@ class T9API(MethodView):
         return redirect(url_for('index'))
 
     def post(self):
-        markov_model = get_model(MODEL_NAME)
-        beginning = self.remove_punctuation.sub('', request.form['beginning'])
+        markov_model = load_db_model(model_name=DB_MODEL_NAME)
+        beginning = self.remove_punctuation.sub('', request.form['beginning']).strip()
 
         first_words_count = int(request.form['first_words_count'])
         phrase_len = int(request.form['phrase_length'])
         return jsonify({
-            'words': markov_model.get_phrases_for_t9(beginning, first_words_count, phrase_len)
+            'words': markov_model.make_sentences_for_t9(
+                beginning, first_words_count, phrase_len)
         })
 
 
@@ -122,7 +123,7 @@ class ModelsAPI(MethodView):
         })
 
     def post(self):
-        get_model(request.form['model_name'])
+        get_ram_model(request.form['model_name'])
         return jsonify({
             'success': "ok"
         })
