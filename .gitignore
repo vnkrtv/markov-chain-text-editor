@@ -4,7 +4,7 @@
 venv/
 migrations/
 notebooks/.ipynb_checkpoints
-models/markov/bin
+models/bin
 __pycache__
 
 users.db

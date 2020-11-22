@@ -1,7 +1,7 @@
 import os
 
 from config import BASE_DIR
-from models import (
+from model import (
     MarkovModel, MongoStorage, PostgresStorage, get_markov_model)
 
 MODELS_LIST = os.listdir(os.path.join(BASE_DIR, 'models', 'markov', 'bin'))
