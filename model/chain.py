@@ -4,21 +4,11 @@ import bisect
 import json
 import copy
 
-# Python3 compatibility
-try: # pragma: no cover
-    basestring
-except NameError: # pragma: no cover
-    basestring = str
-
 BEGIN = 0
 END = -1
 
 
 def accumulate(iterable, func=operator.add):
-    """
-    Cumulative calculations. (Summation, by default.)
-    Via: https://docs.python.org/3/library/itertools.html#itertools.accumulate
-    """
     it = iter(iterable)
     total = next(it)
     yield total
@@ -58,9 +48,9 @@ class EncodedChain(object):
     def compile(self, inplace = False):
         if self.compiled:
             if inplace: return self
-            return Chain(None, self.state_size, model = copy.deepcopy(self.model))
+            return EncodedChain(None, self.state_size, model = copy.deepcopy(self.model))
         mdict = { state: compile_next(next_dict) for (state, next_dict) in self.model.items() }
-        if not inplace: return Chain(None, self.state_size, model = mdict)
+        if not inplace: return EncodedChain(None, self.state_size, model = mdict)
         self.model = mdict
         self.compiled = True
         return self
@@ -152,7 +142,7 @@ class EncodedChain(object):
         return the corresponding markovify.Chain.
         """
 
-        if isinstance(json_thing, basestring):
+        if isinstance(json_thing, str):
             obj = json.loads(json_thing)
         else:
             obj = json_thing

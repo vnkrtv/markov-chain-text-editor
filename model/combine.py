@@ -56,7 +56,7 @@ def combine(models, weights=None):
             for m in models:
                 if m.retain_original:
                     combined_sentences += m.parsed_sentences
-            return ret_inst.from_chain(c, parsed_sentences=combined_sentences)
+            return ret_inst.from_chain(c)
         else:
             return ret_inst.from_chain(c)
     if isinstance(ret_inst, list):

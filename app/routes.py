@@ -6,7 +6,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 
 from app import app, db, csrf
 from .models import User, Document
-from .model import get_model, MODEL_NAME
+from .markov import get_model, MODEL_NAME
 from .forms import LoginForm, RegistrationForm, DocumentForm
 
 

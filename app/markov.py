@@ -2,28 +2,28 @@ import os
 
 from config import BASE_DIR
 from model import (
-    MarkovModel, MongoStorage, PostgresStorage, get_markov_model)
+    MarkovModel, WikiStorage, HabrStorage, get_ram_model)
 
-MODELS_LIST = os.listdir(os.path.join(BASE_DIR, 'model', 'bin'))
-MODEL_NAME = MODELS_LIST[0] if MODELS_LIST else None
+RAM_MODELS_LIST = os.listdir(os.path.join(BASE_DIR, 'model', 'bin'))
+MODEL_NAME = RAM_MODELS_LIST[0] if RAM_MODELS_LIST else None
 
-__mongo_storage: MongoStorage = None
-__postgres_storage: PostgresStorage = None
+__mongo_storage: WikiStorage = None
+__postgres_storage: HabrStorage = None
 __model: MarkovModel = None
 
 
-def __get_mongo_storage(mongo_host: str) -> MongoStorage:
+def __get_mongo_storage(mongo_host: str) -> WikiStorage:
     global __mongo_storage
     if not __mongo_storage:
-        __mongo_storage = MongoStorage.connect(
+        __mongo_storage = WikiStorage.connect(
             host=mongo_host)
     return __mongo_storage
 
 
-def __get_postgres_storage(postgres_host: str) -> PostgresStorage:
+def __get_postgres_storage(postgres_host: str) -> HabrStorage:
     global __postgres_storage
     if not __postgres_storage:
-        __postgres_storage = PostgresStorage.connect(
+        __postgres_storage = HabrStorage.connect(
             host=postgres_host)
     return __postgres_storage
 
@@ -36,7 +36,7 @@ def get_model(model_name: str = None,
         if model_name:
             __model = MarkovModel.load(model_name)
         else:
-            __model = get_markov_model(
+            __model = get_ram_model(
                 mongo_storage=__get_mongo_storage(mongo_host),
                 postgres_storage=__get_postgres_storage(postgres_host),
                 model_state=3,
@@ -45,7 +45,3 @@ def get_model(model_name: str = None,
             )
             __model.save(model_name)
     return __model
-
-
-def combine_models(models_names_list: list):
-    global __model

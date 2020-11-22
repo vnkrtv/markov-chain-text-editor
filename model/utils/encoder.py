@@ -1,37 +1,40 @@
 import json
 from typing import Generator
-from .chain import BEGIN, END
 
 
 class WordsEncoder:
     counter: int
     word2int: dict
     int2word: dict
+    begin_word: int = 0
+    end_word: int = -1
 
-    def __init__(self, text_corpus, counter=None, word2int=None, int2word=None):
-        if not text_corpus:
-            self.counter = counter
-            self.word2int = word2int
-            self.int2word = int2word
-        else:
-            self.counter = 0
-            self.word2int = {
-                BEGIN: 0,
-                END: -1
-            }
-            self.int2word = {
-                0: BEGIN,
-                -1: END
-            }
-            is_gen = isinstance(text_corpus, Generator)
-            for sentence in text_corpus:
-                if is_gen:
-                    sentence = sentence.split()
-                for word in sentence:
-                    if word not in self.word2int:
-                        self.counter += 1
-                        self.word2int[word] = self.counter
-                        self.int2word[self.counter] = word
+    def __init__(self, counter: int = None, word2int: dict = None, int2word: dict = None):
+        self.counter = counter
+        self.word2int = word2int
+        self.int2word = int2word
+
+    def fit(self, text_corpus):
+        self.counter = 0
+        self.word2int = {
+            self.begin_word: self.begin_word,
+            self.end_word: self.end_word
+        }
+        self.int2word = {
+            self.begin_word: self.begin_word,
+            self.end_word: self.end_word
+        }
+        for sentence in text_corpus:
+            for word in sentence.split():
+                if word not in self.word2int:
+                    self.counter += 1
+                    self.word2int[word] = self.counter
+                    self.int2word[self.counter] = word
+
+    def fit_encode(self, text_corpus) -> Generator:
+        corpus = list(text_corpus) if isinstance(text_corpus, Generator) else text_corpus
+        self.fit(corpus)
+        return self.encode_text_corpus_gen(corpus)
 
     def encode_words_list(self, words_list: list) -> list:
         return [self.word2int[word] for word in words_list]
@@ -70,15 +73,14 @@ class WordsEncoder:
         for key in int2word:
             int2word[int(key)] = int2word.pop(key)
 
-        int2word[END] = END
-        int2word[BEGIN] = BEGIN
+        int2word[cls.end_word] = cls.end_word
+        int2word[cls.begin_word] = cls.begin_word
 
         word2int = obj["word2int"]
-        word2int[END] = int(word2int.pop(str(END)))
-        word2int[BEGIN] = int(word2int.pop(str(BEGIN)))
+        word2int[cls.end_word] = int(word2int.pop(str(cls.end_word)))
+        word2int[cls.begin_word] = int(word2int.pop(str(cls.begin_word)))
 
         return cls(
-            None,
             counter=obj["counter"],
             word2int=word2int,
             int2word=int2word

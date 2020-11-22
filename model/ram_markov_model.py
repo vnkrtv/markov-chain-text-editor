@@ -20,7 +20,7 @@ class MarkovModel:
         return self
 
     @classmethod
-    def load(cls, model_name, models_path='models/markov/bin'):
+    def load(cls, model_name, models_path='model/bin'):
         with open(os.path.join(models_path, model_name), 'r') as f:
             model_json = f.read()
         model = EncodedText.from_json(model_json)
