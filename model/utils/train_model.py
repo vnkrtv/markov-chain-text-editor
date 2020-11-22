@@ -1,4 +1,4 @@
-from models.markov import MarkovModel, WordsEncoder
+from model import MarkovModel, WordsEncoder
 from .text_processor import TextProcessor
 from .mongo import MongoStorage
 from .postgres import PostgresStorage

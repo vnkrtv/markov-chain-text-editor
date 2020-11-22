@@ -4,7 +4,7 @@ from config import BASE_DIR
 from model import (
     MarkovModel, MongoStorage, PostgresStorage, get_markov_model)
 
-MODELS_LIST = os.listdir(os.path.join(BASE_DIR, 'models', 'markov', 'bin'))
+MODELS_LIST = os.listdir(os.path.join(BASE_DIR, 'model', 'bin'))
 MODEL_NAME = MODELS_LIST[0] if MODELS_LIST else None
 
 __mongo_storage: MongoStorage = None
