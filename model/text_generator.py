@@ -14,7 +14,7 @@ class TextGenerator:
     state_size: int
     use_ngrams: bool
     ngram_size: int
-    re_process: re.Pattern = re.compile(r'[^a-zA-Zа-яА-Я ]')
+    re_process: re.Pattern = re.compile(r'[^a-zA-Zа-яА-ЯёЁ ]')
 
     def __init__(self,
                  pg_chain: ChainStorage,

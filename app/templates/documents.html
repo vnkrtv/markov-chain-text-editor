@@ -6,6 +6,9 @@
     <a href="" class="navbar-brand d-flex align-items-center" data-toggle="modal" data-target="#newDocModal">
       New doc
     </a>
+    <a href="" class="navbar-brand d-flex align-items-center" data-toggle="modal" data-target="#addModelModal">
+      Add model
+    </a>
     <div class="nav-item dropdown">
       <a class="nav-link dropdown-toggle navbar-brand d-flex align-items-center" href="" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <strong>{{ current_user.username }}</strong>
@@ -41,8 +44,8 @@
 		  	<tr>
 		      <th scope="row">{{ loop.index }}</th>
 		      <td>{{ doc.title }}</td>
-		      <td>{{ doc.created }}</td>
-		      <td>{{ doc.last_update }}</td>
+		      <td>{{ doc.created.strftime('%d.%m.%Y %H:%M') }}</td>
+		      <td>{{ doc.last_update .strftime('%d.%m.%Y %H:%M')}}</td>
 		      <td><a href="{{ url_for('document', document_id=doc.id) }}" type="button" class="btn btn-light btn-sm" onclick="document.getElementById('loading-container').style.display = ''">Edit »</a></td>
 		    </tr>
 		  {% endfor %}
@@ -60,18 +63,65 @@
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
       </div>
       <form action="" method="post">
-	     {{ form.hidden_tag() }}
+	     {{ doc_form.hidden_tag() }}
       <div class="modal-body">
         <div class="container-fluid bd-example-row">
         	<div class="col">
-        		{{ form.title.label }}<br>
-        		{{ form.title(size=20, class="form-control") }}<br>
+        		{{ doc_form.title.label }}<br>
+        		{{ doc_form.title(size=20, class="form-control") }}<br>
         	</div>
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      	{{ form.submit(class="btn btn-light", onclick="document.getElementById('loading-container').style.display = ''") }}
+      	{{ doc_form.submit(class="btn btn-light", onclick="document.getElementById('loading-container').style.display = ''") }}
+      </div>
+    </form>
+    </div>
+  </div>
+</div>
+
+<div id="addModelModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="gridModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="gridModalLabel">New model</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <form action="" method="post">
+       {{ model_form.hidden_tag() }}
+      <div class="modal-body">
+        <div class="container-fluid bd-example-row">
+          <div class="col">
+            {{ model_form.name.label }}<br>
+            {{ model_form.name(size=20, class="form-control") }}<br>
+            {{ model_form.state_size.label }}<br>
+            {{ model_form.state_size(type="number", min=1, size=20, class="form-control") }}<br>
+              <div class="custom-control custom-checkbox mr-sm-2">
+                {{ model_form.use_ngrams(id="use_ngrams", class="custom-control-input", onclick='toggleNgamsSizeVisible()') }}
+                {{ model_form.use_ngrams.label(class="custom-control-label") }}
+              </div><br>
+            {{ model_form.ngram_size.label(id="ngram_size_label") }}<br id="ngram_size_br_1">
+            {{ model_form.ngram_size(type="number", min=1, size=20, class="form-control") }}<br id="ngram_size_br_2">
+            <label>Text corpus file</label>
+            <div class="input-group">
+              <!--div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroupFileAddon01">Text corpus file</span>
+              </div-->
+              <div class="custom-file">
+                <input type="file" class="custom-file-input" id="inputGroupFile01"
+                  aria-describedby="inputGroupFileAddon01">
+                <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+              </div>
+            </div><br>
+            <label for="texts-separator">Texts separator</label>
+            <input type="email" class="form-control" id="texts-separator" aria-describedby="emailHelp" placeholder="<|endoftext|>">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        {{ model_form.submit(class="btn btn-light", onclick="document.getElementById('loading-container').style.display = ''") }}
       </div>
     </form>
     </div>
@@ -79,6 +129,26 @@
 </div>
 
  <script src="{{ url_for('static', filename='js/jquery-3.5.1.js') }}"></script>
+ <script type="text/javascript">
+  document.getElementById('ngram_size').style.display = 'none';
+  document.getElementById('ngram_size_label').style.display = 'none';
+  document.getElementById('ngram_size_br_1').style.display = 'none';
+  document.getElementById('ngram_size_br_2').style.display = 'none';
+  
+  function toggleNgamsSizeVisible() {
+    if (document.getElementById('use_ngrams').checked) {
+      document.getElementById('ngram_size').style.display = '';
+      document.getElementById('ngram_size_label').style.display = '';
+      document.getElementById('ngram_size_br_1').style.display = '';
+      document.getElementById('ngram_size_br_2').style.display = '';
+    } else {
+      document.getElementById('ngram_size').style.display = 'none';
+      document.getElementById('ngram_size_label').style.display = 'none';
+      document.getElementById('ngram_size_br_1').style.display = 'none';
+      document.getElementById('ngram_size_br_2').style.display = 'none';
+    }
+  }
+ </script>
 
 
 {% endblock content %}

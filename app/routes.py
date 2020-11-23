@@ -1,13 +1,17 @@
 import re
+from datetime import datetime, timedelta
 
 from flask import render_template, jsonify, request, redirect, url_for, flash
 from flask.views import MethodView
 from flask_login import login_user, logout_user, login_required, current_user
 
 from app import app, db, csrf
-from .models import User, Document
-from .markov import load_ram_model, load_db_model, RAM_MODEL_NAME, DB_MODEL_NAME
-from .forms import LoginForm, RegistrationForm, DocumentForm
+from .models import (
+    User, Document, MarkovModel)
+from .markov import (
+    load_ram_model, load_db_model, RAM_MODEL_NAME, RAM_MODELS_LIST, DB_MODEL_NAME)
+from .forms import (
+    LoginForm, RegistrationForm, DocumentForm, ModelForm)
 
 
 @app.route('/logout', methods=['GET'])
@@ -38,6 +42,8 @@ def document(document_id):
     doc = Document.query.filter_by(id=document_id).first()
     if current_user.id == doc.user_id:
         if request.method == 'POST' and form.submit():
+            doc.created = doc.created
+            doc.last_update = datetime.utcnow() + timedelta(hours=3)
             doc.title = request.form.get('title', doc.title)
             doc.body = request.form.get('doc-body', doc.body)
             db.session.commit()
@@ -56,18 +62,36 @@ class IndexView(MethodView):
         context = {
             'title': 'Documents',
             'documents': Document.query.filter_by(user_id=current_user.id).all(),
-            'form': DocumentForm()
+            'doc_form': DocumentForm(),
+            'model_form': ModelForm()
         }
         return render_template(self.template, **context)
 
     def post(self):
-        form = DocumentForm()
-        if form.validate_on_submit():
-            doc = Document(title=form.title.data, user_id=current_user.id)
+        doc_form = DocumentForm()
+        model_form = ModelForm()
+        if doc_form.validate_on_submit():
+            doc = Document(title=doc_form.title.data, user_id=current_user.id)
             db.session.add(doc)
             db.session.commit()
             return redirect(url_for('document', document_id=doc.id))
-        flash(''.join(form.title.errors))
+        elif doc_form.is_submitted():
+            flash(''.join(doc_form.title.errors))
+
+        if model_form.validate_on_submit():
+            model = MarkovModel(name=model_form.name.data,
+                                state_size=model_form.state_size.data,
+                                use_ngrams=model_form.use_ngrams.data,
+                                ngram_size=model_form.ngram_size.data)
+            load_db_model(model_name=model.name,
+                          train=True,
+                          use_ngrams=model.use_ngrams,
+                          ngram_size=model.ngram_size)
+            db.session.add(model)
+            db.session.commit()
+        elif model_form.is_submitted():
+            flash(''.join(model_form.title.errors))
+
         return self.get()
 
 
@@ -119,7 +143,7 @@ class ModelsAPI(MethodView):
     def get(self):
         # models = MarkovModel.query.all()
         return jsonify({
-            'models': ['math_habs.json', 'ml_habs.json']
+            'models': RAM_MODELS_LIST
         })
 
     def post(self):

@@ -1,7 +1,10 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
-from wtforms.validators import ValidationError, DataRequired, EqualTo
-from app.models import User, Document
+from wtforms import (
+    StringField, PasswordField, SubmitField, BooleanField, IntegerField)
+from wtforms.validators import (
+    ValidationError, DataRequired, EqualTo, NumberRange)
+
+from app.models import User, Document, MarkovModel
 
 
 class LoginForm(FlaskForm):
@@ -32,3 +35,16 @@ class RegistrationForm(FlaskForm):
         user = User.query.filter_by(username=username.data).first()
         if user is not None:
             raise ValidationError('Please use a different username.')
+
+
+class ModelForm(FlaskForm):
+    name = StringField('Model name', validators=[DataRequired()])
+    state_size = IntegerField('State size', validators=[NumberRange(min=1)], default=3)
+    use_ngrams = BooleanField('Use ngrams', default=False)
+    ngram_size = IntegerField('Ngrams size', validators=[NumberRange(min=1)], default=3)
+    submit = SubmitField('Add')
+
+    def validate_name(self, name):
+        model = User.query.filter_by(name=name.data).first()
+        if model is not None:
+            raise ValidationError('Please use a different model name.')
