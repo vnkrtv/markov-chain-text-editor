@@ -10,6 +10,8 @@ from .models import (
     User, Document, MarkovModel)
 from .markov import (
     load_ram_model, load_db_model, RAM_MODEL_NAME, RAM_MODELS_LIST, DB_MODEL_NAME)
+from .markov import (
+    get_text_corpus_from_file, get_text_corpus_from_postgres)
 from .forms import (
     LoginForm, RegistrationForm, DocumentForm, ModelForm)
 
@@ -79,16 +81,26 @@ class IndexView(MethodView):
             flash(''.join(doc_form.title.errors))
 
         if model_form.validate_on_submit():
+            data_source = request.form.get('data_source')
+            if data_source == 'file':
+                train_corpus = get_text_corpus_from_file(request)
+            elif data_source == 'postgres':
+                train_corpus = get_text_corpus_from_postgres(request.form)
+            else:
+                flash('Data source must be specified for added model.')
+                return self.get()
             model = MarkovModel(name=model_form.name.data,
                                 state_size=model_form.state_size.data,
                                 use_ngrams=model_form.use_ngrams.data,
                                 ngram_size=model_form.ngram_size.data)
             load_db_model(model_name=model.name,
                           train=True,
+                          train_corpus=train_corpus,
                           use_ngrams=model.use_ngrams,
                           ngram_size=model.ngram_size)
             db.session.add(model)
             db.session.commit()
+            flash("New model '%s' was successfully added." % model.name)
         elif model_form.is_submitted():
             flash(''.join(model_form.title.errors))
 

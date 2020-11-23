@@ -1,8 +1,10 @@
 import os
+import re
+from typing import Generator, Iterable
 
 from config import BASE_DIR
 from model import (
-    WikiStorage, HabrStorage, EncoderStorage, ChainStorage)
+    PostgresStorage, WikiStorage, HabrStorage, EncoderStorage, ChainStorage)
 from model import (
     MarkovModel, TextGenerator)
 from model import (
@@ -51,6 +53,28 @@ def __get_chain_storage(pg_chain_host: str) -> ChainStorage:
     return __chain_storage
 
 
+def get_postgres_storage(request_dict: dict) -> PostgresStorage:
+    pg_host = request_dict.get('pg_host')
+    pg_port = request_dict.get('pg_port')
+    pg_dbname = request_dict.get('pg_dbname')
+    pg_user = request_dict.get('pg_user')
+    pg_password = request_dict.get('pg_password')
+    return PostgresStorage.connect(
+        host=pg_host, port=pg_port, dbname=pg_dbname, user=pg_user, password=pg_password)
+
+
+def get_text_corpus_from_postgres(request_dict: dict) -> Generator:
+    pg_storage = get_postgres_storage(request_dict)
+    query = re.sub(r'[^\w ]', '', request_dict.get('sql_query'))
+    return (gen for gen in (pg_storage.exec_query(query),))
+
+
+def get_text_corpus_from_file(request) -> Generator:
+    file = request.files['train_file']
+    separator = request.form.get('text_separator')
+    return (text for text in file.read().decode('utf-8').split(separator))
+
+
 def load_ram_model(model_name: str = None,
                    pg_habs_host: str = '172.17.0.3',
                    mongo_wiki_host: str = 'localhost') -> MarkovModel:
@@ -72,6 +96,7 @@ def load_ram_model(model_name: str = None,
 
 def load_db_model(model_name: str = DB_MODEL_NAME,
                   train: bool = False,
+                  train_corpus: Iterable = None,
                   pg_chain_host: str = '172.17.0.2',
                   pg_encoder_host: str = '172.17.0.2',
                   pg_habs_host: str = '172.17.0.3',
@@ -83,6 +108,14 @@ def load_db_model(model_name: str = DB_MODEL_NAME,
         if not train:
             __model = TextGenerator(pg_chain=__get_chain_storage(pg_chain_host),
                                     pg_encoder=__get_encoder_storage(pg_encoder_host),
+                                    model_name=model_name,
+                                    state_size=3,
+                                    use_ngrams=use_ngrams,
+                                    ngram_size=ngram_size)
+        elif train_corpus and train:
+            __model = TextGenerator(pg_chain=__get_chain_storage(pg_chain_host),
+                                    pg_encoder=__get_encoder_storage(pg_encoder_host),
+                                    input_text=train_corpus,
                                     model_name=model_name,
                                     state_size=3,
                                     use_ngrams=use_ngrams,

@@ -1,3 +1,5 @@
+from typing import Generator
+
 import psycopg2
 
 
@@ -21,3 +23,8 @@ class PostgresStorage:
         return cls(conn=psycopg2.connect(
             host=host, port=port, user=user, password=password, dbname=dbname)
         )
+
+    def exec_query(self, query: str) -> Generator:
+        cursor = self.conn.cursor()
+        cursor.execute(query)
+        return (row[0] for row in cursor.fetchall())

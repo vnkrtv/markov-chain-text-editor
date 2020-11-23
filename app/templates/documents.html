@@ -89,7 +89,7 @@
         <h4 class="modal-title" id="gridModalLabel">New model</h4>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
       </div>
-      <form action="" method="post">
+      <form action="" method="post" enctype="multipart/form-data">
        {{ model_form.hidden_tag() }}
       <div class="modal-body">
         <div class="container-fluid bd-example-row">
@@ -115,10 +115,10 @@
               <div class="input-group-prepend">
                 <label class="input-group-text" for="dataSourceOptionSelect">Data source</label>
               </div>
-              <select class="custom-select" id="dataSourceOptionSelect" onchange="dataSourceChange()">
-                <option value="0" selected>Choose...</option>
-                <option value="1">Text file</option>
-                <option value="2">PostgreSQL</option>
+              <select class="custom-select" id="dataSourceOptionSelect" name="data_source" onchange="dataSourceChange()">
+                <option value="" selected>Choose...</option>
+                <option value="file">Text file</option>
+                <option value="postgres">PostgreSQL</option>
               </select>
             </div>
           </div>
@@ -126,28 +126,27 @@
             <label>Text corpus file</label>
             <div class="input-group">
               <div class="custom-file">
-                <input type="file" class="custom-file-input" id="trainTextFile"
-                  aria-describedby="inputGroupFileAddon01">
-                <label class="custom-file-label" for="trainTextFile">Choose file</label>
+                <input type="file" name='train_file' class="custom-file-input" id="trainTextFile"
+                  aria-describedby="trainTextFile" onchange="setFileLabel()">
+                <label id="fileLabel" class="custom-file-label" for="trainTextFile">Choose file</label>
               </div>
             </div><br>
             <label for="textsSeparator">Texts separator</label>
-            <input type="text" class="form-control" id="textsSeparator" placeholder="<|endoftext|>" value="<|endoftext|>"><br>
+            <input type="text" name='text_separator' class="form-control" id="textsSeparator" placeholder="<|endoftext|>" value="<|endoftext|>"><br>
           </div>
           <div class="col" id='pgOption'>
-            <label>PostgreSQL connection data</label>
             <label for="pgHost">Host</label>
-            <input type="text" aria-label="Host" id="pgHost" class="form-control" value="localhost"><br>
+            <input type="text" aria-label="Host" name="pg_host" id="pgHost" class="form-control" value="localhost"><br>
             <label for="pgPort">Port</label>
-            <input type="number" aria-label="Port" id="pgPort" class="form-control" value="5432" min="1", max="65535"><br>
+            <input type="number" aria-label="Port" name="pg_port" id="pgPort" class="form-control" value="5432" min="1", max="65535"><br>
             <label for="pgDBName">DN name</label>
-            <input type="text" aria-label="DB" id="pgDBName" class="form-control" value="postgres"><br>
+            <input type="text" aria-label="DB" id="pgDBName" name="pg_dbname" class="form-control" value="postgres"><br>
             <label for="pgUser">User</label>
-            <input type="text" aria-label="User" id="pgUser" class="form-control" value="postgres"><br>
+            <input type="text" aria-label="User" id="pgUser" name="pg_user" class="form-control" value="postgres"><br>
             <label for="pgPassword">Password</label>
-            <input type="text" aria-label="Password" id="pgPassword" class="form-control" value="postgres"><br>
+            <input type="text" aria-label="Password" id="pgPassword" name="pg_password" class="form-control" value="postgres"><br>
             <label for="queryTextarea" id="queryTextarea">SQL query</label>
-            <textarea class="form-control" rows='2' id="queryTextarea" placeholder="SELECT text statement">SELECT text &#13;&#10;  FROM tabel_name</textarea>
+            <textarea class="form-control" rows='2' id="queryTextarea" name='sql_query' placeholder="SELECT text statement">SELECT text &#13;&#10;  FROM tabel_name</textarea>
           </div>
         </div>
       </div>
@@ -165,9 +164,10 @@
   const ngramElementsIds = ['ngram_size', 'ngram_size_label', 'ngram_size_br_1', 'ngram_size_br_2'];
   const ngramsCheckbox = document.getElementById('use_ngrams');
   const dataSource = document.getElementById("dataSourceOptionSelect");
-
   const fileOptionDiv = document.getElementById("fileOption");
   const pgOptionDiv = document.getElementById("pgOption");
+  const fileLabel = document.getElementById('fileLabel');
+  const fileInput = document.getElementById('trainTextFile');
 
   for (const elemID of ngramElementsIds) {
     document.getElementById(elemID).style.display = 'none';
@@ -198,6 +198,10 @@
             document.getElementById(elemID).style.display = '';
         }       
       }
+  };
+
+  const setFileLabel = () => {
+      fileLabel.innerText = fileInput.files[0].name;
   };
  </script>
 

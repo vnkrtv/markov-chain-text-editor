@@ -45,6 +45,6 @@ class ModelForm(FlaskForm):
     submit = SubmitField('Add')
 
     def validate_name(self, name):
-        model = User.query.filter_by(name=name.data).first()
+        model = MarkovModel.query.filter_by(name=name.data).first()
         if model is not None:
             raise ValidationError('Please use a different model name.')

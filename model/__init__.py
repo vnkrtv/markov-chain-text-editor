@@ -1,5 +1,5 @@
 from .utils import (
-    HabrStorage, WikiStorage, EncoderStorage, WordsEncoder, TextProcessor)
+    PostgresStorage, HabrStorage, WikiStorage, EncoderStorage, WordsEncoder, TextProcessor)
 
 from .chain_storage import ChainStorage
 from .ram_markov_model import MarkovModel
