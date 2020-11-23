@@ -18,6 +18,7 @@
         <a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a>
       </div>
     </div>
+  </div>
 {% endblock navbar %}
 
 {% block content %}
@@ -92,30 +93,61 @@
        {{ model_form.hidden_tag() }}
       <div class="modal-body">
         <div class="container-fluid bd-example-row">
+          <h5>Model parameters</h5><br>
           <div class="col">
             {{ model_form.name.label }}<br>
             {{ model_form.name(size=20, class="form-control") }}<br>
             {{ model_form.state_size.label }}<br>
             {{ model_form.state_size(type="number", min=1, size=20, class="form-control") }}<br>
+          </div>
+          <h5>Ngrams</h5><br>
+          <div class="col">
               <div class="custom-control custom-checkbox mr-sm-2">
-                {{ model_form.use_ngrams(id="use_ngrams", class="custom-control-input", onclick='toggleNgamsSizeVisible()') }}
-                {{ model_form.use_ngrams.label(class="custom-control-label") }}
+                {{ model_form.use_ngrams(id="use_ngrams", class="custom-control-input") }}
+                {{ model_form.use_ngrams.label(class="custom-control-label", onclick="ngramsCheckboxChange()") }}
               </div><br>
             {{ model_form.ngram_size.label(id="ngram_size_label") }}<br id="ngram_size_br_1">
             {{ model_form.ngram_size(type="number", min=1, size=20, class="form-control") }}<br id="ngram_size_br_2">
+          </div>
+          <h5>Train data</h5><br>
+          <div class="col">
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <label class="input-group-text" for="dataSourceOptionSelect">Data source</label>
+              </div>
+              <select class="custom-select" id="dataSourceOptionSelect" onchange="dataSourceChange()">
+                <option value="0" selected>Choose...</option>
+                <option value="1">Text file</option>
+                <option value="2">PostgreSQL</option>
+              </select>
+            </div>
+          </div>
+          <div class="col" id='fileOption'>
             <label>Text corpus file</label>
             <div class="input-group">
-              <!--div class="input-group-prepend">
-                <span class="input-group-text" id="inputGroupFileAddon01">Text corpus file</span>
-              </div-->
               <div class="custom-file">
-                <input type="file" class="custom-file-input" id="inputGroupFile01"
+                <input type="file" class="custom-file-input" id="trainTextFile"
                   aria-describedby="inputGroupFileAddon01">
-                <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+                <label class="custom-file-label" for="trainTextFile">Choose file</label>
               </div>
             </div><br>
-            <label for="texts-separator">Texts separator</label>
-            <input type="email" class="form-control" id="texts-separator" aria-describedby="emailHelp" placeholder="<|endoftext|>">
+            <label for="textsSeparator">Texts separator</label>
+            <input type="text" class="form-control" id="textsSeparator" placeholder="<|endoftext|>" value="<|endoftext|>"><br>
+          </div>
+          <div class="col" id='pgOption'>
+            <label>PostgreSQL connection data</label>
+            <label for="pgHost">Host</label>
+            <input type="text" aria-label="Host" id="pgHost" class="form-control" value="localhost"><br>
+            <label for="pgPort">Port</label>
+            <input type="number" aria-label="Port" id="pgPort" class="form-control" value="5432" min="1", max="65535"><br>
+            <label for="pgDBName">DN name</label>
+            <input type="text" aria-label="DB" id="pgDBName" class="form-control" value="postgres"><br>
+            <label for="pgUser">User</label>
+            <input type="text" aria-label="User" id="pgUser" class="form-control" value="postgres"><br>
+            <label for="pgPassword">Password</label>
+            <input type="text" aria-label="Password" id="pgPassword" class="form-control" value="postgres"><br>
+            <label for="queryTextarea" id="queryTextarea">SQL query</label>
+            <textarea class="form-control" rows='2' id="queryTextarea" placeholder="SELECT text statement">SELECT text &#13;&#10;  FROM tabel_name</textarea>
           </div>
         </div>
       </div>
@@ -130,25 +162,43 @@
 
  <script src="{{ url_for('static', filename='js/jquery-3.5.1.js') }}"></script>
  <script type="text/javascript">
-  document.getElementById('ngram_size').style.display = 'none';
-  document.getElementById('ngram_size_label').style.display = 'none';
-  document.getElementById('ngram_size_br_1').style.display = 'none';
-  document.getElementById('ngram_size_br_2').style.display = 'none';
-  
-  function toggleNgamsSizeVisible() {
-    if (document.getElementById('use_ngrams').checked) {
-      document.getElementById('ngram_size').style.display = '';
-      document.getElementById('ngram_size_label').style.display = '';
-      document.getElementById('ngram_size_br_1').style.display = '';
-      document.getElementById('ngram_size_br_2').style.display = '';
-    } else {
-      document.getElementById('ngram_size').style.display = 'none';
-      document.getElementById('ngram_size_label').style.display = 'none';
-      document.getElementById('ngram_size_br_1').style.display = 'none';
-      document.getElementById('ngram_size_br_2').style.display = 'none';
-    }
-  }
- </script>
+  const ngramElementsIds = ['ngram_size', 'ngram_size_label', 'ngram_size_br_1', 'ngram_size_br_2'];
+  const ngramsCheckbox = document.getElementById('use_ngrams');
+  const dataSource = document.getElementById("dataSourceOptionSelect");
 
+  const fileOptionDiv = document.getElementById("fileOption");
+  const pgOptionDiv = document.getElementById("pgOption");
+
+  for (const elemID of ngramElementsIds) {
+    document.getElementById(elemID).style.display = 'none';
+  }
+  fileOptionDiv.style.display = 'none';
+  pgOptionDiv.style.display = 'none';
+
+  const dataSourceChange = () => {
+      if(dataSource.selectedIndex === 1) {
+          fileOptionDiv.style.display = '';
+          pgOptionDiv.style.display = 'none';
+      } else if(dataSource.selectedIndex === 2)  {
+          pgOptionDiv.style.display = '';
+          fileOptionDiv.style.display = 'none';
+      } else {
+          pgOptionDiv.style.display = 'none';
+          fileOptionDiv.style.display = 'none';
+      }
+  };
+
+  const ngramsCheckboxChange = () => {
+      if(ngramsCheckbox.checked) {
+        for (const elemID of ngramElementsIds) {
+            document.getElementById(elemID).style.display = 'none';
+        }
+      } else {
+        for (const elemID of ngramElementsIds) {
+            document.getElementById(elemID).style.display = '';
+        }       
+      }
+  };
+ </script>
 
 {% endblock content %}

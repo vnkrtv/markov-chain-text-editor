@@ -10,7 +10,7 @@ from model import (
 
 RAM_MODELS_LIST = os.listdir(os.path.join(BASE_DIR, 'model', 'bin'))
 RAM_MODEL_NAME = RAM_MODELS_LIST[0] if RAM_MODELS_LIST else None
-DB_MODEL_NAME = 'test_model'
+DB_MODEL_NAME = 'ngram'
 
 __wiki_storage: WikiStorage = None
 __habr_storage: HabrStorage = None
