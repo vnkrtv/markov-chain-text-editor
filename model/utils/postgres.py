@@ -24,7 +24,7 @@ class PostgresStorage:
             host=host, port=port, user=user, password=password, dbname=dbname)
         )
 
-    def exec_query(self, query: str) -> Generator:
+    def exec_query(self, query: str, params: list) -> Generator:
         cursor = self.conn.cursor()
-        cursor.execute(query)
+        cursor.execute(query, params)
         return (row[0] for row in cursor.fetchall())
