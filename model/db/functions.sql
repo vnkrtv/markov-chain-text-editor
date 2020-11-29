@@ -1,12 +1,12 @@
 -- Help function for getting occurrences of words - accumulate array: [4, 5, 1] => [4, 9, 10]
-CREATE OR REPLACE FUNCTION accumulate(arr int4[])
-    RETURNS int4[]
+CREATE OR REPLACE FUNCTION accumulate(arr int8[])
+    RETURNS int8[]
     LANGUAGE plpgsql
 AS
 $$
 DECLARE
-    total_count int4;
-    buf_arr     int4[];
+    total_count int8;
+    buf_arr     int8[];
 BEGIN
     total_count := 0;
     FOR i IN 1 .. array_upper(arr, 1)
@@ -19,7 +19,7 @@ END
 $$;
 
 -- Help function - binary search algorithm for weighted word selection for the continuation of a phrase
-CREATE OR REPLACE FUNCTION binary_search(arr int4[], elem float)
+CREATE OR REPLACE FUNCTION binary_search(arr int8[], elem float)
     RETURNS integer
     LANGUAGE plpgsql
 AS
@@ -43,3 +43,23 @@ BEGIN
     RETURN right_index;
 END
 $$;
+
+-- Help function for getting occurrences of words - accumulate array: [4, 5, 1] => [4, 9, 10]
+CREATE OR REPLACE FUNCTION accumulate(arr int8[]) RETURNS int8[]
+    LANGUAGE plpgsql
+AS
+$$
+DECLARE
+    total_count integer;
+    buf_arr     integer[];
+BEGIN
+    total_count := 0;
+    FOR i IN 1 .. array_upper(arr, 1)
+        LOOP
+            total_count = total_count + arr[i];
+            buf_arr := array_append(buf_arr, total_count);
+        END LOOP;
+    RETURN buf_arr;
+END
+$$;
+
