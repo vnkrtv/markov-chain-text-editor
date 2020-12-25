@@ -9,7 +9,7 @@ from app import app, db, csrf
 from .models import (
     User, Document, MarkovModel)
 from .markov import (
-    load_ram_model, load_db_model, RAM_MODEL_NAME, RAM_MODELS_LIST, DB_MODEL_NAME)
+    load_model, DB_MODEL_NAME)
 from .markov import (
     get_text_corpus_from_file, get_text_corpus_from_postgres)
 from .forms import (
@@ -51,7 +51,7 @@ def document(document_id):
             db.session.commit()
             flash("Document '%s' has been successfully updated." % doc.title)
             return redirect(url_for('index'))
-        load_db_model(model_name=DB_MODEL_NAME)
+        load_model(model_name=DB_MODEL_NAME)
         return render_template('editor.html', title=doc.title, doc=doc, form=form)
     return redirect(url_for('index'))
 
@@ -93,11 +93,11 @@ class IndexView(MethodView):
                                 state_size=model_form.state_size.data,
                                 use_ngrams=model_form.use_ngrams.data,
                                 ngram_size=model_form.ngram_size.data)
-            load_db_model(model_name=model.name,
-                          train=True,
-                          train_corpus=train_corpus,
-                          use_ngrams=model.use_ngrams,
-                          ngram_size=model.ngram_size)
+            load_model(model_name=model.name,
+                       train=True,
+                       train_corpus=train_corpus,
+                       use_ngrams=model.use_ngrams,
+                       ngram_size=model.ngram_size)
             db.session.add(model)
             db.session.commit()
             flash("New model '%s' was successfully added." % model.name)
@@ -138,7 +138,7 @@ class T9API(MethodView):
         return redirect(url_for('index'))
 
     def post(self):
-        markov_model = load_db_model(model_name=DB_MODEL_NAME)
+        markov_model = load_model(model_name=DB_MODEL_NAME)
         beginning = self.remove_punctuation.sub('', request.form['beginning']).strip()
 
         first_words_count = int(request.form['first_words_count'])
@@ -155,11 +155,11 @@ class ModelsAPI(MethodView):
     def get(self):
         # models = MarkovModel.query.all()
         return jsonify({
-            'models': RAM_MODELS_LIST
+            'models': []
         })
 
     def post(self):
-        get_ram_model(request.form['model_name'])
+        load_model(request.form['model_name'])
         return jsonify({
             'success': "ok"
         })

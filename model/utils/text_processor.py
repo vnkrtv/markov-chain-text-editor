@@ -34,15 +34,13 @@ class TextProcessor:
                 remove_brackets=remove_brackets)
 
     @classmethod
-    def get_text_gen(cls, text_gens_gen: Iterable) -> Generator:
-        for text_gen in text_gens_gen:
-            for sentences_gen in cls.get_sentences_gens(text_gen):
-                for sentence in sentences_gen:
-                    yield sentence.split()
+    def get_text_gen(cls, text_gen: Iterable) -> Generator:
+        for sentences_gen in cls.get_sentences_gens(text_gen):
+            for sentence in sentences_gen:
+                yield sentence.split()
 
     @classmethod
-    def get_ngram_gen(cls, text_gens_gen: Iterable, ngram_size: int = 3) -> Generator:
-        for text_gen in text_gens_gen:
-            for sentences_gen in cls.get_sentences_gens(text_gen):
-                for sentence in sentences_gen:
-                    yield [''.join(item) for item in nltk.ngrams(sentence, ngram_size)]
+    def get_ngram_gen(cls, text_gen: Iterable, ngram_size: int = 3) -> Generator:
+        for sentences_gen in cls.get_sentences_gens(text_gen):
+            for sentence in sentences_gen:
+                yield [''.join(item) for item in nltk.ngrams(sentence, ngram_size)]
