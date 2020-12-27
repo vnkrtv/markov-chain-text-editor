@@ -27,7 +27,7 @@ conn = psycopg2.connect(
             port=int(os.environ.get("PG_PORT", 5432)),
             user=os.environ.get("PG_USER", "postgres"),
             password=os.environ.get("PG_PASS", "password"),
-            dbname=os.environ.get("PG_DBNAME", "markov"))
+            dbname=os.environ.get("PG_DBNAME", "markov")
         );
 
 cur = conn.cursor();
