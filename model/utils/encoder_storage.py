@@ -19,7 +19,6 @@ class EncoderStorage(PostgresStorage):
                       VALUES (%s, %s)'''
             cursor.execute(sql, [code, word])
         self.conn.commit()
-        self.__create_indexes(model_name)
 
     def delete_encoder(self, model_name: str):
         cursor = self.conn.cursor()
@@ -41,13 +40,3 @@ class EncoderStorage(PostgresStorage):
         return WordsEncoder(counter=counter,
                             int2word=int2word,
                             word2int=word2int)
-
-    def __create_indexes(self, model_name: str):
-        cursor = self.conn.cursor()
-        cursor.execute('CALL create_encoder_indexes(%s)', [model_name]);
-        self.conn.commit()
-
-    def __drop_indexes(self, model_name: str):
-        cursor = self.conn.cursor()
-        cursor.execute('CALL drop_encoder_indexes(%s)', [model_name]);
-        self.conn.commit()
