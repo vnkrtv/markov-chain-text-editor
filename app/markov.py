@@ -66,7 +66,7 @@ def get_text_corpus_from_postgres(request_dict: dict) -> Generator:
     pg_storage = get_postgres_storage(request_dict)
     query, params = parse_query(request_dict.get('sql_query'))
     print(query, query.find("'"))
-    return (gen for gen in (pg_storage.exec_query(query, params),))
+    return pg_storage.exec_query(query, params)
 
 
 def get_text_corpus_from_file(request) -> Generator:
