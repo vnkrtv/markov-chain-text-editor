@@ -9,4 +9,35 @@ flask db init
 flask db migrate
 flask db upgrade
 
+python -c '
+import psycopg2;
+import os;
+
+DB_SCRIPTS_ROOT = "/usr/share/python3/model/db";
+
+with open(DB_SCRIPTS_ROOT + "chain.sql", "r") as f:
+  chain_sql = f.read();
+with open(DB_SCRIPTS_ROOT + "encoder.sql", "r") as f:
+  encoder_sql = f.read();
+with open(DB_SCRIPTS_ROOT + "functions.sql", "r") as f:
+  func_sql = f.read();
+
+conn = psycopg2.connect(
+            host=os.environ.get("PG_HOST", "172.17.0.2"),
+            port=int(os.environ.get("PG_PORT", 5432)),
+            user=os.environ.get("PG_USER", "postgres"),
+            password=os.environ.get("PG_PASS", "password"),
+            dbname=os.environ.get("PG_DBNAME", "markov"))
+        );
+
+cur = conn.cursor();
+
+cur.execute(chain_sql);
+cur.execute(encoder_sql);
+cur.execute(func_sql);
+
+conn.commit();
+conn.close()
+'
+
 gunicorn wsgi:app -b 0.0.0.0:5000
