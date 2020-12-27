@@ -1,37 +1,47 @@
 import re
-from typing import Generator, Iterable
+from typing import Generator
 
+from config import Config
 from model import (
-    PostgresStorage, HabrStorage, EncoderStorage, ChainStorage)
-from model import TextGenerator, get_model
+    TextGenerator, PostgresStorage, EncoderStorage, ChainStorage)
 
-__habr_storage: HabrStorage = None
+
 __encoder_storage: EncoderStorage = None
 __chain_storage: ChainStorage = None
-__model = None
+__model: TextGenerator = None
 
 
-def __get_habr_storage(pg_habs_host: str) -> HabrStorage:
-    global __habr_storage
-    if not __habr_storage:
-        __habr_storage = HabrStorage.connect(
-            host=pg_habs_host, dbname='habr')
-    return __habr_storage
+def get_model() -> TextGenerator:
+    global __model
+    return __model
 
 
-def __get_encoder_storage(pg_encoder_host: str) -> EncoderStorage:
+def set_model(model: TextGenerator) -> None:
+    global __model
+    __model = model
+
+
+def get_encoder_storage() -> EncoderStorage:
     global __encoder_storage
     if not __encoder_storage:
         __encoder_storage = EncoderStorage.connect(
-            host=pg_encoder_host, dbname='markov')
+            host=Config.PG_HOST,
+            port=Config.PG_PORT,
+            user=Config.PG_USER,
+            password=Config.PG_PASS,
+            dbname=Config.PG_DBNAME)
     return __encoder_storage
 
 
-def __get_chain_storage(pg_chain_host: str) -> ChainStorage:
+def get_chain_storage() -> ChainStorage:
     global __chain_storage
     if not __chain_storage:
         __chain_storage = ChainStorage.connect(
-            host=pg_chain_host, dbname='markov')
+            host=Config.PG_HOST,
+            port=Config.PG_PORT,
+            user=Config.PG_USER,
+            password=Config.PG_PASS,
+            dbname=Config.PG_DBNAME)
     return __chain_storage
 
 
@@ -63,41 +73,3 @@ def get_text_corpus_from_file(request) -> Generator:
     file = request.files['train_file']
     separator = request.form.get('text_separator')
     return (text for text in file.read().decode('utf-8').split(separator))
-
-
-def load_model(model_name: str = DB_MODEL_NAME,
-               train: bool = False,
-               train_corpus: Iterable = None,
-               pg_chain_host: str = '172.17.0.2',
-               pg_encoder_host: str = '172.17.0.2',
-               pg_habs_host: str = '172.17.0.3',
-               use_ngrams: bool = False,
-               ngram_size: int = 3) -> TextGenerator:
-    global __model
-    if not __model:
-        if not train:
-            __model = TextGenerator(pg_chain=__get_chain_storage(pg_chain_host),
-                                    pg_encoder=__get_encoder_storage(pg_encoder_host),
-                                    model_name=model_name,
-                                    state_size=3,
-                                    use_ngrams=use_ngrams,
-                                    ngram_size=ngram_size)
-        elif train_corpus and train:
-            __model = TextGenerator(pg_chain=__get_chain_storage(pg_chain_host),
-                                    pg_encoder=__get_encoder_storage(pg_encoder_host),
-                                    input_text=train_corpus,
-                                    model_name=model_name,
-                                    state_size=3,
-                                    use_ngrams=use_ngrams,
-                                    ngram_size=ngram_size)
-        else:
-            __model = get_model(
-                model_name=model_name,
-                pg_chain=__get_chain_storage(pg_chain_host),
-                pg_encoder=__get_encoder_storage(pg_encoder_host),
-                pg_habr=__get_habr_storage(pg_habs_host),
-                habr_posts_count=1000,
-                use_ngrams=use_ngrams,
-                ngram_size=ngram_size,
-            )
-    return __model

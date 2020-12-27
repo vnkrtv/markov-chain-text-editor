@@ -105,7 +105,7 @@
  <script>
     const modelSelect = document.getElementById('model-select');
     let modelsArr = [];
-    $.get('/api/models').done(function(response) {
+    $.get("{{ url_for('models_api') }}").done(function(response) {
         modelsArr = response['models'];
         for (let model of modelsArr) {
           const modelOption = document.createElement('option');
@@ -117,10 +117,9 @@
     $('#model-select').on('change', function (e) {
         let optionSelected = $("option:selected", this);
         let valueSelected = this.value;
-        $.post('/api/models', {
+        loadingContainer.style.display = "";
+        $.post("{{ url_for('models_api') }}", {
           model_name: valueSelected,
-        }).then(function () {
-          loadingContainer.style.display = "";
         }).done(function(response) {
           loadingContainer.style.display = "none";
       });

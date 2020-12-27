@@ -5,11 +5,9 @@ from flask import render_template, jsonify, request, redirect, url_for, flash
 from flask.views import MethodView
 from flask_login import login_user, logout_user, login_required, current_user
 
-from app import app, db, csrf
+from app import app, db, csrf, markov
 from .models import (
     User, Document, MarkovModel)
-from .markov import (
-    load_model, DB_MODEL_NAME)
 from .markov import (
     get_text_corpus_from_file, get_text_corpus_from_postgres)
 from .forms import (
@@ -51,8 +49,13 @@ def document(document_id):
             db.session.commit()
             flash("Document '%s' has been successfully updated." % doc.title)
             return redirect(url_for('index'))
-        load_model(model_name=DB_MODEL_NAME)
-        return render_template('editor.html', title=doc.title, doc=doc, form=form)
+        models = MarkovModel.query.all()
+        if len(models):
+            model = models[0]
+            model.load()
+            return render_template('editor.html', title=doc.title, doc=doc, form=form)
+        else:
+            flash("No available models found. Add new model to start working with documents.")
     return redirect(url_for('index'))
 
 
@@ -89,15 +92,12 @@ class IndexView(MethodView):
             else:
                 flash('Data source must be specified for added model.')
                 return self.get()
-            model = MarkovModel(name=model_form.name.data,
-                                state_size=model_form.state_size.data,
-                                use_ngrams=model_form.use_ngrams.data,
-                                ngram_size=model_form.ngram_size.data)
-            load_model(model_name=model.name,
-                       train=True,
-                       train_corpus=train_corpus,
-                       use_ngrams=model.use_ngrams,
-                       ngram_size=model.ngram_size)
+            model = MarkovModel.train(train_corpus=train_corpus,
+                                      model_name=model_form.name.data,
+                                      state_size=model_form.state_size.data,
+                                      use_ngrams=model_form.use_ngrams.data,
+                                      ngram_size=model_form.ngram_size.data)
+            model.load()
             db.session.add(model)
             db.session.commit()
             flash("New model '%s' was successfully added." % model.name)
@@ -138,13 +138,13 @@ class T9API(MethodView):
         return redirect(url_for('index'))
 
     def post(self):
-        markov_model = load_model(model_name=DB_MODEL_NAME)
+        model = markov.get_model()
         beginning = self.remove_punctuation.sub('', request.form['beginning']).strip()
 
         first_words_count = int(request.form['first_words_count'])
         phrase_len = int(request.form['phrase_length'])
         return jsonify({
-            'words': markov_model.make_sentences_for_t9(
+            'words': model.make_sentences_for_t9(
                 beginning, first_words_count, phrase_len)
         })
 
@@ -153,13 +153,14 @@ class ModelsAPI(MethodView):
     decorators = [csrf.exempt]
 
     def get(self):
-        # models = MarkovModel.query.all()
+        models = MarkovModel.query.all()
         return jsonify({
-            'models': []
+            'models': [model.name for model in models]
         })
 
     def post(self):
-        load_model(request.form['model_name'])
+        model = MarkovModel.query.filter_by(name=request.form['model_name']).first()
+        model.load()
         return jsonify({
             'success': "ok"
         })

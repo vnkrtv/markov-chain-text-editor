@@ -12,7 +12,7 @@ As docker container:
 - ```git clone https://github.com/vnkrtv/markov-chain-text-editor.git```
 - ```cd markov-chain-text-editor```
 - ```docker build -t markov-chain-text-editor .``` - build application docker image
--
+- Run application on 80 host port:  
 ```
 docker run --name text-editor\
      -p 0.0.0.0:80:5000 \
@@ -24,7 +24,6 @@ docker run --name text-editor\
      -e PG_DBNAME=<PG_DBNAME> \
      -d markov-chain-text-editor
 ```
- - run application on 80 host port  
 
 On windows:
 - ```git clone https://github.com/vnkrtv/markov-chain-text-editor.git```

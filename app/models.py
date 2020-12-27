@@ -1,8 +1,11 @@
 from datetime import datetime, timedelta
+from typing import Iterable
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
 from app import db, login
+from model import TextGenerator
+from .markov import set_model, get_encoder_storage, get_chain_storage
 
 
 @login.user_loader
@@ -47,8 +50,35 @@ class MarkovModel(db.Model):
     use_ngrams = db.Column(db.Boolean)
     ngram_size = db.Column(db.Integer)
 
+    @classmethod
+    def train(cls,
+              train_corpus: Iterable,
+              model_name: str,
+              state_size: int,
+              use_ngrams: bool,
+              ngram_size: int):
+        model = TextGenerator(pg_chain=get_chain_storage(),
+                              pg_encoder=get_encoder_storage(),
+                              input_text=train_corpus,
+                              model_name=model_name,
+                              state_size=3,
+                              use_ngrams=use_ngrams,
+                              ngram_size=ngram_size)
+        set_model(model)
+        return cls(name=model_name,
+                   state_size=state_size,
+                   use_ngrams=use_ngrams,
+                   ngram_size=ngram_size)
+
+    def load(self):
+        model = TextGenerator(pg_chain=get_chain_storage(),
+                              pg_encoder=get_encoder_storage(),
+                              model_name=self.name,
+                              state_size=self.state_size)
+        set_model(model)
+
     def __repr__(self):
         return '<Markov model: %s, state size=%s, ngrams=%s>' % (
             self.name,
             self.state_size,
-            self.use_ngrams + ', ngram_size=' + self.ngram_size if self.use_ngrams else self.use_ngrams)
+            str(self.use_ngrams) + ', ngram_size=' + str(self.ngram_size) if self.use_ngrams else self.use_ngrams)

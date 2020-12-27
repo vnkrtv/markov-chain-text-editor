@@ -3,4 +3,3 @@ from .utils import (
 
 from .chain_storage import ChainStorage
 from .text_generator import TextGenerator
-from .train import get_model
