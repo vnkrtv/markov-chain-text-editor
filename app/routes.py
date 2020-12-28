@@ -84,23 +84,27 @@ class IndexView(MethodView):
             flash(''.join(doc_form.title.errors))
 
         if model_form.validate_on_submit():
-            data_source = request.form.get('data_source')
-            if data_source == 'file':
-                train_corpus = get_text_corpus_from_file(request)
-            elif data_source == 'postgres':
-                train_corpus = get_text_corpus_from_postgres(request.form)
-            else:
-                flash('Data source must be specified for added model.')
-                return self.get()
-            model = MarkovModel.train(train_corpus=train_corpus,
-                                      model_name=model_form.name.data,
-                                      state_size=model_form.state_size.data,
-                                      use_ngrams=model_form.use_ngrams.data,
-                                      ngram_size=model_form.ngram_size.data)
-            model.load()
-            db.session.add(model)
-            db.session.commit()
-            flash("New model '%s' was successfully added." % model.name)
+            try:
+                data_source = request.form.get('data_source')
+                if data_source == 'file':
+                    train_corpus = get_text_corpus_from_file(request)
+                elif data_source == 'postgres':
+                    train_corpus = get_text_corpus_from_postgres(request.form)
+                else:
+                    flash('Data source must be specified for added model.')
+                    return self.get()
+
+                model = MarkovModel.train(train_corpus=train_corpus,
+                                          model_name=model_form.name.data,
+                                          state_size=model_form.state_size.data,
+                                          use_ngrams=model_form.use_ngrams.data,
+                                          ngram_size=model_form.ngram_size.data)
+                model.load()
+                db.session.add(model)
+                db.session.commit()
+                flash("New model '%s' was successfully added." % model.name)
+            except Exception as e:
+                flash("Error: %s" % str(e))
         elif model_form.is_submitted():
             flash(''.join(model_form.name.errors))
 
