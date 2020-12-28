@@ -161,6 +161,8 @@
 
  <script src="{{ url_for('static', filename='js/jquery-3.5.1.js') }}"></script>
  <script type="text/javascript">
+  $(':input[value="Add"]')[0].setAttribute("data-dismiss", "modal");
+  
   const ngramElementsIds = ['ngram_size', 'ngram_size_label', 'ngram_size_br_1', 'ngram_size_br_2'];
   const ngramsCheckbox = document.getElementById('use_ngrams');
   const dataSource = document.getElementById("dataSourceOptionSelect");

@@ -35,7 +35,7 @@ class TextGenerator:
             self.train_model(input_text)
         else:
             self.encoder = self.pg_encoder.load_encoder(model_name)
-        logging.error(f'Load model: {self}')
+        logging.info(f'Load model: {self}')
 
     def train_model(self, input_text: Iterable):
         if self.use_ngrams:
@@ -48,12 +48,12 @@ class TextGenerator:
 
         self.pg_encoder.add_encoder(self.model_name, self.encoder)
         self.pg_chain.add_model(self.model_name, encoded_train_corpus, self.state_size)
-        logging.error(f'Add new model: {self}')
+        logging.info(f'Add new model: {self}')
 
     def delete_model(self):
         self.pg_chain.delete_model(self.model_name)
         self.pg_encoder.delete_encoder(self.model_name)
-        logging.error(f'Delete model: {self}')
+        logging.info(f'Delete model: {self}')
 
     def ngrams_split(self, sentence: str) -> list:
         processed_sentence = self.re_process.sub('', sentence.lower())
@@ -120,7 +120,7 @@ class TextGenerator:
                               phrase_len: int = 5,
                               **kwargs) -> list:
         phrases = set()
-        logging.error("Model '%s' - beginning: %s", self.model_name, beginning)
+        logging.info("Model '%s' - beginning: %s", self.model_name, beginning)
         for i in range(count):
             phrase = self.make_sentence_with_start(beginning, min_words=phrase_len, **kwargs)
             print(phrase)
@@ -128,11 +128,11 @@ class TextGenerator:
                 words_list = phrase.split()
                 if 1 < len(words_list) >= phrase_len:
                     phrases.add(" ".join(words_list[first_words_count:]))
-        logging.error("Model '%s' - executed: %s", self.model_name, '\n'.join(phrases))
+        logging.info("Model '%s' - executed: %s", self.model_name, '\n'.join(phrases))
         return list(phrases)
 
     def __repr__(self):
-        return '<TextGenerator: model_name: %s, state size=%s, ngrams=%s>' % (
+        return '<TextGenerator: model_name=%s, state_size=%s, ngrams=%s>' % (
             self.model_name,
             self.state_size,
             str(self.use_ngrams) + ', ngram_size=' + str(self.ngram_size) if self.use_ngrams else self.use_ngrams)
