@@ -102,7 +102,7 @@ class IndexView(MethodView):
             db.session.commit()
             flash("New model '%s' was successfully added." % model.name)
         elif model_form.is_submitted():
-            flash(''.join(model_form.title.errors))
+            flash(''.join(model_form.name.errors))
 
         return self.get()
 

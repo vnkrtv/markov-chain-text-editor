@@ -144,7 +144,7 @@
             <label for="pgUser">User</label>
             <input type="text" aria-label="User" id="pgUser" name="pg_user" class="form-control" value="postgres"><br>
             <label for="pgPassword">Password</label>
-            <input type="text" aria-label="Password" id="pgPassword" name="pg_password" class="form-control" value="postgres"><br>
+            <input type="password" aria-label="Password" id="pgPassword" name="pg_password" class="form-control" value="postgres"><br>
             <label for="queryTextarea" id="queryTextarea">SQL query</label>
             <textarea class="form-control" rows='2' id="queryTextarea" name='sql_query' placeholder="SELECT text statement">SELECT text &#13;&#10;  FROM tabel_name</textarea>
           </div>
@@ -152,7 +152,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        {{ model_form.submit(class="btn btn-light", onclick="document.getElementById('loading-container').style.display = ''") }}
+        {{ model_form.submit(class="btn btn-light") }}
       </div>
     </form>
     </div>
@@ -161,8 +161,11 @@
 
  <script src="{{ url_for('static', filename='js/jquery-3.5.1.js') }}"></script>
  <script type="text/javascript">
-  $(':input[value="Add"]')[0].setAttribute("data-dismiss", "modal");
-  
+  $(':input[value="Add"]')[0].onclick = () => {
+    document.getElementById('loading-container').style.display = '';
+    $('#addModelModal').hide();
+  };
+
   const ngramElementsIds = ['ngram_size', 'ngram_size_label', 'ngram_size_br_1', 'ngram_size_br_2'];
   const ngramsCheckbox = document.getElementById('use_ngrams');
   const dataSource = document.getElementById("dataSourceOptionSelect");

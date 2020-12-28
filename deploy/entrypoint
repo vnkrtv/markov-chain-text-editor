@@ -40,4 +40,7 @@ conn.commit();
 conn.close()
 '
 
-gunicorn wsgi:app -b 0.0.0.0:5000
+# 4 minutes timeout
+TIMEOUT=240
+
+gunicorn wsgi:app --bind 0.0.0.0:5000 --timeout $TIMEOUT
