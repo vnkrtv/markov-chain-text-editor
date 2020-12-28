@@ -8,6 +8,7 @@
   box-sizing: border-box;
   display: block;
   position: absolute;
+  z-index: 254;
   width: 64px;
   height: 64px;
   margin: 8px;

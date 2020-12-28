@@ -21,16 +21,12 @@ class EncoderStorage(PostgresStorage):
         self.conn.commit()
 
     def delete_encoder(self, model_name: str):
-        cursor = self.conn.cursor()
-        cursor.execute('CALL delete_encoder(%s)', [model_name])
-        self.conn.commit()
+        self.exec('CALL delete_encoder(%s)', [model_name])
 
     def load_encoder(self, model_name: str) -> WordsEncoder:
-        cursor = self.conn.cursor()
-        cursor.execute(f'SELECT code, word FROM {model_name}_encoder')
         int2word = {}
         word2int = {}
-        for row in cursor.fetchall():
+        for row in self.exec_query(f'SELECT code, word FROM {model_name}_encoder', []):
             code, word = row[0], row[1]
             int2word[code] = word
             word2int[word] = code

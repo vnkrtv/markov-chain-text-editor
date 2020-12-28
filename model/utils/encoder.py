@@ -89,3 +89,7 @@ class WordsEncoder:
     @classmethod
     def from_json(cls, json_str):
         return cls.from_dict(json.loads(json_str))
+
+    def __repr__(self):
+        return '<WordsEncoder: words_count=%s, begin_word=%s, end_word=%s>' % (
+            str(self.counter), str(self.begin_word), str(self.end_word))

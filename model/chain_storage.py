@@ -12,21 +12,17 @@ class ChainStorage(PostgresStorage):
 
         hash_index = True
         for encoded_sentence in train_corpus:
-            cursor.execute('CALL update_chain(%s, %s, %s, %s)',
-                           [encoded_sentence, state_size, self.begin_word, self.end_word])
+            if encoded_sentence:
+                cursor.execute('CALL update_chain(%s, %s, %s, %s)',
+                               [encoded_sentence, state_size, self.begin_word, self.end_word])
 
         cursor.execute('CALL add_model(%s, %s, %s)', [model_name, self.end_word, hash_index])
         self.conn.commit()
 
-        self.conn.commit()
-
     def delete_model(self, model_name: str):
-        cursor = self.conn.cursor()
-        cursor.execute('CALL delete_model(%s)', [model_name])
-        self.conn.commit()
+        self.exec('CALL delete_model(%s)', [model_name])
 
     def walk(self, model_name: str, init_state: list, phrase_len: int = 10):
         cursor = self.conn.cursor()
         cursor.execute(f'SELECT chain_walk_{model_name}(%s, %s)', [init_state, phrase_len])
         return cursor.fetchone()[0] or []
-

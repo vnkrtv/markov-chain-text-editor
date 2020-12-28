@@ -140,6 +140,22 @@ BEGIN
             END
             $walk$
             ', model_name, end_word, model_name, model_name);
+
+    -- Temp procedure for inserting states in new model table
+    EXECUTE format('
+            CREATE PROCEDURE insert_state(new_state   int8[],
+                                          new_choices int8[],
+                                          new_cumdist int8[])
+                LANGUAGE plpgsql
+            AS
+            $insert_state$
+            BEGIN
+                INSERT INTO %s(state, choices, cumdist)
+                VALUES (new_state, new_choices, new_cumdist);
+            END
+            $insert_state$
+            ', model_name);
+
     FOR table_row IN (SELECT state,
                              array_agg(follows) AS choices,
                              accumulate(array_agg(counter)) AS cumdist
@@ -147,12 +163,13 @@ BEGIN
                       GROUP BY state)
         LOOP
             IF table_row.cumdist IS NOT NULL THEN
-                EXECUTE '
-                    INSERT INTO chain_table(state, choices, cumdist)
-                    VALUES ($1, $2, $3)'
+                EXECUTE 'CALL insert_state($1, $2, $3)'
                     USING table_row.state, table_row.choices, table_row.cumdist;
             END IF;
         END LOOP;
+
+    -- Drop temp procedure
+    DROP PROCEDURE insert_state(new_state int8[], new_choices int8[], new_cumdist int8[]);
 
     -- Create model index
     cmd := 'CREATE %s INDEX IF NOT EXISTS pk_%s ON %s USING %s (state)';
