@@ -1,35 +1,35 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <main class="login-form">
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-md-8">
-                        <div class="card">
-                            <div class="card-header"><h3>Authorize</h3></div>
-                            <div class="card-body">
-                            {% for message in get_flashed_messages() %}
-                                <div class="alert alert-danger" role="alert">
-                                    {{ message }}
-                                </div>                    
-                            {% endfor %}
-                                <form action="" method="post">
-                                    {{ form.hidden_tag() }}
-                                    {{ form.username.label }}<br>
-                                    {{ form.username(size=20, class="form-control") }}<br>
-                                    {{ form.password.label }}<br>
-                                    {{ form.password(size=20, class="form-control") }}<br>
-                                    <div class="custom-control custom-checkbox my-1 mr-sm-2">
-                                        {{ form.remember_me(class="custom-control-input") }}
-                                        {{ form.remember_me.label(class="custom-control-label") }}
-                                    </div>
-                                    <p>New User? <a href="{{ url_for('register') }}">Click to Register!</a></p>
-                                    <p>{{ form.submit(class="btn btn-light") }}</p>
-                                </form>
-                            </div>
+<main class="login-form">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header"><h3>Authorize</h3></div>
+                    <div class="card-body">
+                        {% for message in get_flashed_messages() %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ message }}
                         </div>
+                        {% endfor %}
+                        <form action="" method="post">
+                            {{ form.hidden_tag() }}
+                            {{ form.username.label }}<br>
+                            {{ form.username(size=20, class="form-control") }}<br>
+                            {{ form.password.label }}<br>
+                            {{ form.password(size=20, class="form-control") }}<br>
+                            <div class="custom-control custom-checkbox my-1 mr-sm-2">
+                                {{ form.remember_me(class="custom-control-input") }}
+                                {{ form.remember_me.label(class="custom-control-label") }}
+                            </div>
+                            <p>New User? <a href="{{ url_for('register') }}">Click to Register!</a></p>
+                            <p>{{ form.submit(class="btn btn-light") }}</p>
+                        </form>
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
+    </div>
+</main>
 {% endblock content %}

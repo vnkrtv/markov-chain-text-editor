@@ -134,6 +134,21 @@ class LoginView(MethodView):
         return render_template(self.template, title=self.title, form=form)
 
 
+class GeneratorView(MethodView):
+    title = 'Phrases generator'
+    template = 'generate.html'
+
+    def get(self):
+        if not current_user.is_authenticated:
+            return redirect(url_for('index'))
+        return render_template(self.template, title=self.title)
+
+    def post(self):
+        if not current_user.is_authenticated:
+            return redirect(url_for('index'))
+        return render_template(self.template, title=self.title)
+
+
 class T9API(MethodView):
     decorators = [csrf.exempt]
     remove_punctuation = re.compile(r'[^a-zA-Zа-яА-Я ]')
@@ -176,10 +191,12 @@ app.add_url_rule('/documents',
 app.add_url_rule('/',
                  view_func=LoginView.as_view('login'),
                  methods=['POST', 'GET'])
+app.add_url_rule('/generator',
+                 view_func=GeneratorView.as_view('generator'),
+                 methods=['POST', 'GET'])
 app.add_url_rule('/t9',
                  view_func=T9API.as_view('t9'),
                  methods=['POST', 'GET'])
-
 app.add_url_rule('/api/models',
                  view_func=ModelsAPI.as_view('models_api'),
                  methods=['POST', 'GET'])

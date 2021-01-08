@@ -23,3 +23,27 @@ def update_icon_path():
     def update_icon():
         return flask.url_for('static', filename='images/icons/update.svg')
     return dict(update_icon=update_icon)
+
+
+def user_icon_path():
+    def user_icon():
+        return flask.url_for('static', filename='images/icons/user.svg')
+    return dict(user_icon=user_icon)
+
+
+def add_doc_icon_path():
+    def add_doc_icon():
+        return flask.url_for('static', filename='images/icons/add_doc.svg')
+    return dict(add_doc_icon=add_doc_icon)
+
+
+def add_icon_path():
+    def add_icon():
+        return flask.url_for('static', filename='images/icons/add.svg')
+    return dict(add_icon=add_icon)
+
+
+def gears_icon_path():
+    def gears_icon():
+        return flask.url_for('static', filename='images/icons/gears.svg')
+    return dict(gears_icon=gears_icon)

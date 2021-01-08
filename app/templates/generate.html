@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block navbar %}
+
+<div class="d-flex justify-content-between">
+    <a href="" class="navbar-brand d-flex align-items-center" data-toggle="modal" data-target="#model-modal">
+        Model
+    </a>
+    <div class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle navbar-brand d-flex align-items-center" href="" id="navbarDropdownMenuLink"
+           role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <img src='{{ user_icon() }}'>&nbsp;<strong>{{ current_user.username }}</strong>
+        </a>
+        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+            <a class="dropdown-item" href="{{ url_for('index') }}">My docs</a>
+            <a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </div>
+</div>
+{% endblock navbar %}
+
+
+{% block content %}
+
+<header class="header">
+  <div class="jumbotron">
+    <form>
+        <div class="form-group">
+            <label for="phrase">Phrase</label>
+            <input type="text" class="form-control" id="phrase" placeholder="Enter phrase">
+        </div>
+        <div class="form-group">
+            <label for="samplesNum">Samples number</label>
+            <input type="number" class="form-control" id="samplesNum" placeholder="1" min=1>
+        </div>
+        <button type="submit" class="btn btn-light">Generate</button>
+    </form>
+  </div>
+</header>
+{% if samples %}
+<h3 class="output">Output</h3>
+{% endif %}
+{% for sample in samples %}
+<div class="jumbotron">
+    <h3>Пример {{ loop.index }}</h3>
+    <p>{{ sample }}</p>
+    {% endfor %}
+
+
+    <div id="model-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="model-modal"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="model-modal">Model parameters</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid bd-example-row">
+                        <div class="col">
+                            <div class="row">
+                                <h5>Select model</h5>
+                                <!--div class="form-control">
+                                  <select id="model-select" class="form-control" multiple size="3">
+                                    {% for model in models %}
+                                      <option value="{{ model }}">{{ model }}</option>
+                                    {% endfor %}
+                                  </select>
+                                </div-->
+                                <label for="model-select"></label>
+                                <select class="form-control custom-select" id="model-select"></select>
+                            </div>
+                            <br>
+                            <div class="row">
+                                <h5>First words count</h5> <input class="form-control" value="1" type="number" min="1"
+                                                                  max="6" id="first-words">
+                            </div>
+                            <br>
+                            <div class="row">
+                                <h5>Phrase length</h5> <input class="form-control" value="4" type="number" min="2"
+                                                              max="10" id="phrase-len">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modelSelect = document.getElementById('model-select');
+        let modelsArr = [];
+        $.get("{{ url_for('models_api') }}").done(function (response) {
+            modelsArr = response['models'];
+            for (let model of modelsArr) {
+                const modelOption = document.createElement('option');
+                modelOption.value = model;
+                modelOption.innerText = model;
+                modelSelect.appendChild(modelOption);
+            }
+        });
+        $('#model-select').on('change', function (e) {
+            let optionSelected = $("option:selected", this);
+            let valueSelected = this.value;
+            loadingContainer.style.display = "";
+            $.post("{{ url_for('models_api') }}", {
+                model_name: valueSelected,
+            }).done(function (response) {
+                loadingContainer.style.display = "none";
+            });
+        });
+    </script>
+    {% endblock %}
