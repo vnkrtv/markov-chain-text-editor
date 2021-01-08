@@ -141,12 +141,32 @@ class GeneratorView(MethodView):
     def get(self):
         if not current_user.is_authenticated:
             return redirect(url_for('index'))
-        return render_template(self.template, title=self.title)
+        models = MarkovModel.query.all()
+        return render_template(self.template, title=self.title, models=models)
 
     def post(self):
-        if not current_user.is_authenticated:
-            return redirect(url_for('index'))
-        return render_template(self.template, title=self.title)
+        return self.get()
+
+
+class GeneratorAPI(MethodView):
+    decorators = [csrf.exempt]
+    remove_punctuation = re.compile(r'[^a-zA-Zа-яА-Я ]')
+
+    def get(self):
+        return redirect(url_for('index'))
+
+    def post(self):
+        model_id = int(request.form['modelID'])
+        phrase = request.form['phrase']
+        samples_num = int(request.form['samplesNum'])
+
+        model = MarkovModel.query.get(model_id)
+        model.load()
+        processed_phrase = self.remove_punctuation.sub('', phrase).strip()
+
+        return jsonify({
+            'samples': model.generate_samples(processed_phrase, samples_num)
+        })
 
 
 class T9API(MethodView):
@@ -196,6 +216,9 @@ app.add_url_rule('/generator',
                  methods=['POST', 'GET'])
 app.add_url_rule('/t9',
                  view_func=T9API.as_view('t9'),
+                 methods=['POST', 'GET'])
+app.add_url_rule('/gen_api',
+                 view_func=GeneratorAPI.as_view('gen_api'),
                  methods=['POST', 'GET'])
 app.add_url_rule('/api/models',
                  view_func=ModelsAPI.as_view('models_api'),

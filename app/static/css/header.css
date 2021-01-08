@@ -19,6 +19,12 @@ body {
     height: 100vh;
 }
 
+.generator-container {
+    margin-top: 3vh;
+    margin-left: 3vh;
+    margin-right: 3vh;
+}
+
 .header > div {
     margin-top: 3vh;
     margin-left: 3vh;

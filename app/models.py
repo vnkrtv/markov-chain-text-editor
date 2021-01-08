@@ -5,7 +5,7 @@ from flask_login import UserMixin
 
 from app import db, login
 from model import TextGenerator
-from .markov import set_model, get_encoder_storage, get_chain_storage
+from .markov import set_model, get_model, get_encoder_storage, get_chain_storage
 
 
 @login.user_loader
@@ -76,6 +76,27 @@ class MarkovModel(db.Model):
                               model_name=self.name,
                               state_size=self.state_size)
         set_model(model)
+
+    def generate_samples(self, beginning: str, samples_num: int) -> list:
+        tries_count = samples_num * 2
+        counter = 0
+
+        model = get_model()
+        phrases = set()
+        for i in range(samples_num):
+            try:
+                phrase = model.make_sentence_with_start(beginning)
+                print(phrase)
+                if phrase:
+                    words_list = phrase.split()
+                    if 1 < len(words_list):
+                        phrases.add(" ".join(words_list))
+                counter += 1
+                if counter > tries_count:
+                    break
+            except Exception as e:
+                print(e)
+        return list(phrases)
 
     def __repr__(self):
         return '<Markov model: %s, state size=%s, ngrams=%s>' % (
