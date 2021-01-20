@@ -1,3 +1,5 @@
+import psycopg2
+
 from .postgres import PostgresStorage
 from .encoder import WordsEncoder
 
@@ -10,10 +12,9 @@ class EncoderStorage(PostgresStorage):
     def add_encoder(self, model_name: str, encoder: WordsEncoder):
         self.model_name = model_name
 
-        cursor = self.conn.cursor()
-        cursor.execute('CALL add_encoder(%s)', [model_name])
-        self.conn.commit()
+        self.exec('CALL add_encoder(%s)', [model_name])
 
+        cursor = self.conn.cursor()
         for code, word in encoder.int2word.items():
             sql = f'''INSERT INTO {model_name}_encoder(code, word)
                       VALUES (%s, %s)'''

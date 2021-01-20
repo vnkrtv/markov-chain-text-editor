@@ -68,8 +68,11 @@ class TextGenerator:
                 words_list.append(processed_word)
         return words_list
 
-    def res_join(self, words_list: list) -> str:
+    def words_join(self, words_list: list) -> str:
         return ' '.join(words_list)
+
+    def ngrams_join(self, ngrams_list: list) -> str:
+        return ngrams_list[0][:-1] + ''.join([ngram[-1] for ngram in ngrams_list])
 
     def make_sentence(self, init_state: list, **kwargs):
         tries = kwargs.get('tries', 10)
@@ -93,7 +96,9 @@ class TextGenerator:
             if (max_words is not None and len(words_list) > max_words) or (
                     min_words is not None and len(words_list) < min_words):
                 continue
-            return self.res_join(words_list)
+            if self.use_ngrams:
+                return self.ngrams_join(words_list)
+            return self.words_join(words_list)
         return None
 
     def make_sentence_with_start(self, input_phrase: str, **kwargs):
