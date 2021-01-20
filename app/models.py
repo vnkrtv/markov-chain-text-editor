@@ -74,7 +74,9 @@ class MarkovModel(db.Model):
         model = TextGenerator(pg_chain=get_chain_storage(),
                               pg_encoder=get_encoder_storage(),
                               model_name=self.name,
-                              state_size=self.state_size)
+                              state_size=self.state_size,
+                              use_ngrams=self.use_ngrams,
+                              ngram_size=self.ngram_size)
         set_model(model)
 
     def generate_samples(self, beginning: str, samples_num: int) -> list:
