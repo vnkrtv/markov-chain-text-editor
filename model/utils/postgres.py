@@ -31,5 +31,9 @@ class PostgresStorage:
 
     def exec(self, sql: str, params: list):
         cursor = self.conn.cursor()
-        cursor.execute(sql, params)
+        try:
+            cursor.execute(sql, params)
+        except psycopg2.Error as e:
+            self.conn.rollback()
+            raise e
         self.conn.commit()
