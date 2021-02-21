@@ -26,7 +26,11 @@ class PostgresStorage:
 
     def exec_query(self, query: str, params: list) -> Generator:
         cursor = self.conn.cursor()
-        cursor.execute(query, params)
+        try:
+            cursor.execute(query, params)
+        except psycopg2.Error as e:
+            self.conn.rollback()
+            raise e
         return cursor.fetchall()
 
     def exec(self, sql: str, params: list):

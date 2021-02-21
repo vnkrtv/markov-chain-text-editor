@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta
-from typing import Iterable
+from typing import Iterable, List
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
 from app import db, login
 from model import TextGenerator
-from .markov import set_model, get_model, get_encoder_storage, get_chain_storage
+from .utils import set_model, get_model, get_encoder_storage, get_chain_storage
 
 
 @login.user_loader
@@ -16,7 +16,7 @@ def load_user(_id):
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64), index=True, unique=True)
+    username = db.Column(db.String(64), unique=True)
     password_hash = db.Column(db.String(128))
 
     def __repr__(self):
@@ -32,13 +32,13 @@ class User(UserMixin, db.Model):
 class Document(db.Model):
     __tablename__ = 'documents'
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(256))
+    title = db.Column(db.String(256), index=True)
     body = db.Column(db.Text(), default='')
     created = db.Column(db.DateTime, default=lambda: datetime.utcnow() + timedelta(hours=3))
     last_update = db.Column(db.DateTime, default=lambda: datetime.utcnow() + timedelta(hours=3))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<Document: {}>'.format(self.title)
 
 
@@ -57,13 +57,13 @@ class MarkovModel(db.Model):
               state_size: int,
               use_ngrams: bool,
               ngram_size: int):
-        model = TextGenerator(pg_chain=get_chain_storage(),
-                              pg_encoder=get_encoder_storage(),
-                              input_text=train_corpus,
-                              model_name=model_name,
-                              state_size=3,
-                              use_ngrams=use_ngrams,
-                              ngram_size=ngram_size)
+        model = TextGenerator.train(pg_chain=get_chain_storage(),
+                                    pg_encoder=get_encoder_storage(),
+                                    train_text=train_corpus,
+                                    model_name=model_name,
+                                    state_size=3,
+                                    use_ngrams=use_ngrams,
+                                    ngram_size=ngram_size)
         set_model(model)
         return cls(name=model_name,
                    state_size=state_size,
@@ -71,15 +71,15 @@ class MarkovModel(db.Model):
                    ngram_size=ngram_size)
 
     def load(self):
-        model = TextGenerator(pg_chain=get_chain_storage(),
-                              pg_encoder=get_encoder_storage(),
-                              model_name=self.name,
-                              state_size=self.state_size,
-                              use_ngrams=self.use_ngrams,
-                              ngram_size=self.ngram_size)
+        model = TextGenerator.load(pg_chain=get_chain_storage(),
+                                   pg_encoder=get_encoder_storage(),
+                                   model_name=self.name,
+                                   state_size=self.state_size,
+                                   use_ngrams=self.use_ngrams,
+                                   ngram_size=self.ngram_size)
         set_model(model)
 
-    def generate_samples(self, beginning: str, samples_num: int) -> list:
+    def generate_samples(self, beginning: str, samples_num: int) -> List[str]:
         tries_count = samples_num * 2
         counter = 0
 
@@ -100,7 +100,7 @@ class MarkovModel(db.Model):
                 print(e)
         return list(phrases)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<Markov model: %s, state size=%s, ngrams=%s>' % (
             self.name,
             self.state_size,

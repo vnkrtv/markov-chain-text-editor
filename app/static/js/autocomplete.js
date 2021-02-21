@@ -1,4 +1,5 @@
-function autocomplete(inp, arr) {
+function autocomplete(inp, arr, t9ApiURL) {
+    const apiURL = t9ApiURL;
     const textInput = document.getElementById("text");
     const wordsDiv = document.getElementById("t9-words");
     const phrasesDiv = document.getElementById("t9-phrases");
@@ -8,20 +9,23 @@ function autocomplete(inp, arr) {
     let currentFocus;
     let bufferPhrase = "";
     let activeItems;
+    // let requestsStack = [];
 
-    function updateLists() {
+    function updateLists(t9RenderResponse = false) {
         let wordsContainer, phrasesContainer, wordInput, phraseInput
         let val = textInput.value;
         closeAllLists();
-        if (!val) { return false;}
+        if (!val) {
+            return false;
+        }
         currentFocus = -1;
 
-        wordsContainer = document.createElement("DIV");
+        wordsContainer = document.createElement("div");
         wordsContainer.setAttribute("id", "autocomplete-list-words");
         wordsContainer.setAttribute("class", "autocomplete-items");
         wordsDiv.appendChild(wordsContainer);
 
-        phrasesContainer = document.createElement("DIV");
+        phrasesContainer = document.createElement("div");
         phrasesContainer.setAttribute("id", "autocomplete-list-phrases");
         phrasesContainer.setAttribute("class", "autocomplete-items");
         phrasesDiv.appendChild(phrasesContainer);
@@ -34,20 +38,23 @@ function autocomplete(inp, arr) {
             let phraseWords = arr[i].split(" ");
             let firstWord = phraseWords[0];
             let phrase = '';
-            for (let i = 0; i < (phraseWords.length - 1 < phraseLen ? phraseWords.length - 1: phraseLen); i++) {
+            for (let i = 0; i < (phraseWords.length - 1 < phraseLen ? phraseWords.length - 1 : phraseLen); i++) {
                 phrase += (phraseWords[i] + " ");
             }
-            if (((phrase.substr(0, value.length).toUpperCase() === value.toUpperCase()) || (value.length = 0))) {
-                wordInput = document.createElement("DIV");
+            if ((phrase.substr(0, value.length).toUpperCase() === value.toUpperCase()) || (value.length = 0) || t9RenderResponse) {
+
+                let valueLength = t9RenderResponse ? 0 : value.length;
+
+                wordInput = document.createElement("div");
                 wordInput.className = 'form-control';
                 wordInput.style.cursor = "pointer";
 
-                wordInput.innerHTML = "<strong>" + firstWord.substr(0, value.length) + "</strong>";
-                wordInput.innerHTML += firstWord.substr(value.length);
+                wordInput.innerHTML = "<strong>" + firstWord.substr(0, valueLength) + "</strong>";
+                wordInput.innerHTML += firstWord.substr(valueLength);
 
                 wordInput.innerHTML += "<input type='hidden' value='" + firstWord + "'>";
 
-                wordInput.addEventListener("click", function(e) {
+                wordInput.addEventListener("click", function (e) {
                     inp.value = "";
                     for (let i = 0; i < phraseList.length - 1; i++) {
                         inp.value += (phraseList[i] + " ");
@@ -58,16 +65,16 @@ function autocomplete(inp, arr) {
                 });
                 wordsContainer.appendChild(wordInput);
 
-                phraseInput = document.createElement("DIV");
+                phraseInput = document.createElement("div");
                 phraseInput.className = 'form-control';
                 phraseInput.style.cursor = "pointer";
 
-                phraseInput.innerHTML = "<strong>" + phrase.substr(0, value.length) + "</strong>";
-                phraseInput.innerHTML += phrase.substr(value.length);
+                phraseInput.innerHTML = "<strong>" + phrase.substr(0, valueLength) + "</strong>";
+                phraseInput.innerHTML += phrase.substr(valueLength);
 
                 phraseInput.innerHTML += "<input type='hidden' value='" + phrase + "'>";
 
-                phraseInput.addEventListener("click", function(e) {
+                phraseInput.addEventListener("click", function (e) {
                     inp.value = "";
                     for (let i = 0; i < phraseList.length - 1; i++) {
                         inp.value += (phraseList[i] + " ");
@@ -82,7 +89,7 @@ function autocomplete(inp, arr) {
         changeActiveItems();
     }
 
-    inp.addEventListener("input", function(e) {
+    inp.addEventListener("input", function (e) {
         updateLists();
     });
 
@@ -92,9 +99,7 @@ function autocomplete(inp, arr) {
 
     function updateT9Phrases() {
         let val = textInput.value.toString();
-        // console.log(arr)
         if (val[val.length - 1] === " ") {
-            console.log('Updating T9...');
             let phraseList = val.split(" ");
             if (phraseList.length > 1) {
                 if (phraseList[phraseList.length - 2] !== bufferPhrase) {
@@ -107,21 +112,25 @@ function autocomplete(inp, arr) {
                     for (let i = bufArray.length - 1; i >= 0; i--) {
                         bufferPhrase += (bufArray[i] + ' ');
                     }
-                    console.log('T9 phrase: ', bufferPhrase.substr(0, bufferPhrase.length - 1).toLowerCase());
-                    console.log('T9 words count: ', wordsCount);
-                    $.post('/t9', {
+
+                    console.log('Make T9 request...');
+                    $.post(apiURL, {
                         beginning: bufferPhrase.substr(0, bufferPhrase.length - 1).toLowerCase(),
-                        first_words_count: wordsCount,
-                        phrase_length: phraseLenInput.value,
-                    }).done(function(response) {
-                        arr = response['words']
+                        firstWordsCount: wordsCount,
+                        phraseLength: phraseLenInput.value,
+                    }).done(function (response) {
+                        if (response.sentences !== undefined) {
+                            arr = response.sentences;
+                            console.log('arr: ', arr);
+                            updateLists(true);
+                        }
                     });
                 }
             }
         }
     }
 
-    inp.addEventListener("input", function(e) {
+    inp.addEventListener("input", function (e) {
         updateT9Phrases();
     });
 
@@ -132,21 +141,21 @@ function autocomplete(inp, arr) {
     function changeActiveItems() {
         wordsDiv.classList.toggle("hide-element");
         phrasesDiv.classList.toggle("hide-element");
-        console.log();
+        // console.log();
         if (wordsDiv.classList.contains("hide-element")) {
-            console.log('phrases');
+            // console.log('phrases');
             activeItems = phrasesDiv.children[0];
         } else {
-            console.log('words');
+            // console.log('words');
             activeItems = wordsDiv.children[0];
         }
         if (activeItems) activeItems = activeItems.getElementsByTagName("div");
-        console.log('changeActiveItems: ', activeItems);
-        console.log(phrasesDiv.children[0]);
-        console.log(wordsDiv.children[0]);
+        // console.log('changeActiveItems: ', activeItems);
+        // console.log(phrasesDiv.children[0]);
+        // console.log(wordsDiv.children[0]);
     }
 
-    inp.addEventListener("keydown", function(e) {
+    inp.addEventListener("keydown", function (e) {
         if (activeItems === undefined) {
             changeActiveItems();
             currentFocus = activeItems.length - 1;
@@ -156,18 +165,17 @@ function autocomplete(inp, arr) {
             changeActiveItems();
             currentFocus = activeItems.length - 1;
             removeActive(activeItems);
-        }
-        else if (e.keyCode === 40) {
+        } else if (e.keyCode === 40) {
             currentFocus++;
-            console.log('40: ', activeItems);
-            console.log(phrasesDiv.children[0]);
-            console.log(wordsDiv.children[0]);
+            // console.log('40: ', activeItems);
+            // console.log(phrasesDiv.children[0]);
+            // console.log(wordsDiv.children[0]);
             addActive(activeItems);
         } else if (e.keyCode === 38) { //up
             currentFocus--;
-            console.log('38: ', activeItems);
-            console.log(phrasesDiv.children[0]);
-            console.log(wordsDiv.children[0]);
+            // console.log('38: ', activeItems);
+            // console.log(phrasesDiv.children[0]);
+            // console.log(wordsDiv.children[0]);
             addActive(activeItems);
         } else if (e.keyCode === 13) {
             e.preventDefault();
@@ -184,11 +192,11 @@ function autocomplete(inp, arr) {
         removeActive(x);
         if (currentFocus >= x.length) currentFocus = 0;
         if (currentFocus < 0) currentFocus = (x.length - 1);
-        console.log('Before adding active style: ', x[currentFocus].innerHTML);
+        // console.log('Before adding active style: ', x[currentFocus].innerHTML);
         x[currentFocus].classList.add("autocomplete-active");
         x[currentFocus].style.backgroundColor = "DodgerBlue";
-        console.log('After adding active style: ', x[currentFocus].innerHTML);
-        console.log('currentFocus: ', currentFocus);
+        // console.log('After adding active style: ', x[currentFocus].innerHTML);
+        // console.log('currentFocus: ', currentFocus);
     }
 
     function removeActive(x) {
@@ -210,11 +218,11 @@ function autocomplete(inp, arr) {
         }
     }
 
-    inp.addEventListener('keyup', function(){
-        if(this.scrollTop > 0){
-          this.style.height = this.scrollHeight + "px";
+    inp.addEventListener('keyup', function () {
+        if (this.scrollTop > 0) {
+            this.style.height = this.scrollHeight + "px";
         }
-      });
+    });
 
     document.addEventListener("click", function (e) {
         closeAllLists(e.target);

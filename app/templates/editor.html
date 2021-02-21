@@ -103,9 +103,12 @@
 </form>
  <script src="{{ url_for('static', filename='js/autocomplete.js') }}"></script>
  <script>
+    const t9ApiUrl = "{{ url_for('t9') }}";
+    const modelsApiUrl = "{{ url_for('models_api') }}";
     const modelSelect = document.getElementById('model-select');
+
     let modelsArr = [];
-    $.get("{{ url_for('models_api') }}").done(function(response) {
+    $.get(modelsApiUrl).done(function(response) {
         modelsArr = response['models'];
         for (let model of modelsArr) {
           const modelOption = document.createElement('option');
@@ -118,14 +121,15 @@
         let optionSelected = $("option:selected", this);
         let valueSelected = this.value;
         loadingContainer.style.display = "";
-        $.post("{{ url_for('models_api') }}", {
-          model_name: valueSelected,
+        $.post(modelsApiUrl, {
+          modelName: valueSelected,
         }).done(function(response) {
           loadingContainer.style.display = "none";
       });
     });
+
     let textarea = document.getElementById("text");
-    let words = ['Чтобы Т9 заработал', 'начните вбивать какой-либо текст', 'модель возьмет последние слова', 'и на их основании предложит', 'продолжение фразы'];
-    autocomplete(textarea, words);
+    let words = [];
+    autocomplete(textarea, words, t9ApiUrl);
   </script>
 {% endblock %}

@@ -1,15 +1,16 @@
 import re
+import logging
 from datetime import datetime, timedelta
 
 from flask import render_template, jsonify, request, redirect, url_for, flash
 from flask.views import MethodView
 from flask_login import login_user, logout_user, login_required, current_user
 
-from app import app, db, csrf, markov
+from app import app, db, csrf, utils
 from .models import (
     User, Document, MarkovModel)
-from .markov import (
-    get_text_corpus_from_file, get_text_corpus_from_postgres)
+from .utils import (
+    get_text_corpus_from_file, get_text_corpus_from_postgres, get_msg_stack)
 from .forms import (
     LoginForm, RegistrationForm, DocumentForm, ModelForm)
 
@@ -177,15 +178,26 @@ class T9API(MethodView):
         return redirect(url_for('index'))
 
     def post(self):
-        model = markov.get_model()
-        beginning = self.remove_punctuation.sub('', request.form['beginning']).strip()
-
-        first_words_count = int(request.form['first_words_count'])
-        phrase_len = int(request.form['phrase_length'])
-        return jsonify({
-            'words': model.make_sentences_for_t9(
-                beginning, first_words_count, phrase_len)
+        msg_stack = get_msg_stack()
+        msg_stack.push({
+            'beginning': self.remove_punctuation.sub('', request.form['beginning']).strip(),
+            'first_words_count': int(request.form['firstWordsCount']),
+            'phrase_len': int(request.form['phraseLength'])
         })
+        if not msg_stack.locked:
+            msg_stack.lock()
+            model = utils.get_model()
+            obj = msg_stack.pop()
+            msg_stack.clear()
+            sentences = model.make_sentences_for_t9(obj['beginning'], obj['first_words_count'], obj['phrase_len'])
+            msg_stack.unlock()
+            logging.info(str(datetime.now()) + ' msg_stack size: ' + str(len(msg_stack.stack)))
+            logging.info(str(datetime.now()) + ' Send!')
+            return jsonify({
+                'sentences': sentences
+            })
+        else:
+            return jsonify({})
 
 
 class ModelsAPI(MethodView):
@@ -198,7 +210,7 @@ class ModelsAPI(MethodView):
         })
 
     def post(self):
-        model = MarkovModel.query.filter_by(name=request.form['model_name']).first()
+        model = MarkovModel.query.filter_by(name=request.form['modelName']).first()
         model.load()
         return jsonify({
             'success': "ok"

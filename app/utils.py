@@ -1,14 +1,14 @@
 import re
-from typing import Generator
+from typing import Generator, Optional, List
 
 from config import Config
 from model import (
     TextGenerator, PostgresStorage, EncoderStorage, ChainStorage)
 
 
-__encoder_storage: EncoderStorage = None
-__chain_storage: ChainStorage = None
-__model: TextGenerator = None
+__encoder_storage: Optional[EncoderStorage] = None
+__chain_storage: Optional[ChainStorage] = None
+__model: Optional[TextGenerator] = None
 
 
 def get_model() -> TextGenerator:
@@ -56,16 +56,15 @@ def get_postgres_storage(request_dict: dict) -> PostgresStorage:
 
 
 def parse_query(query: str) -> tuple:
-    query = re.sub(r'[^\w,.=><\'" ]', '', query)
-    params = [param[1:-1] for param in re.findall(r'"(.*?)"', query)]
-    query = re.sub(r'"(.*?)"', '%s', query)
+    query = re.sub(r'[^\w,.=><\'()" ]', '', query)
+    params = [param[1:-1] for param in re.findall(r"'(.*?)'", query)]
+    query = re.sub(r"'(.*?)'", '%s', query)
     return query, params
 
 
 def get_text_corpus_from_postgres(request_dict: dict) -> Generator:
     pg_storage = get_postgres_storage(request_dict)
     query, params = parse_query(request_dict.get('sql_query'))
-    print(query, query.find("'"))
     return (row[0] for row in pg_storage.exec_query(query, params))
 
 
@@ -73,3 +72,35 @@ def get_text_corpus_from_file(request) -> Generator:
     file = request.files['train_file']
     separator = request.form.get('text_separator')
     return (text for text in file.read().decode('utf-8').split(separator))
+
+
+class RequestStack:
+    stack: List[dict]
+    locked: bool
+
+    def __init__(self):
+        self.stack = []
+        self.locked = False
+
+    def push(self, msg: dict):
+        self.stack.append(msg)
+
+    def pop(self) -> dict:
+        return self.stack.pop()
+
+    def clear(self):
+        self.stack = []
+
+    def lock(self):
+        self.locked = True
+
+    def unlock(self):
+        self.locked = False
+
+
+__msg_stack: Optional[RequestStack] = RequestStack()
+
+
+def get_msg_stack() -> RequestStack:
+    global __msg_stack
+    return __msg_stack
