@@ -117,6 +117,70 @@
           modelSelect.appendChild(modelOption);
         }
     });
+
+    let textarea = document.getElementById("text");
+    let t9Dict = {};
+    $.get(t9ApiUrl).done((response) => {
+        if (response.words) {
+            for (let word of response.words) {
+                let firstLetter = word[0];
+                if (t9Dict[firstLetter]) {
+                    t9Dict[firstLetter].push(word);
+                } else {
+                    t9Dict[firstLetter] = [word];
+                }
+            }
+            for (let key in t9Dict) {
+                t9Dict[key].sort();
+            }
+            autocomplete(textarea, t9Dict);
+        }
+    });
+
+    $('#model-select').on('change', function (e) {
+        let optionSelected = $("option:selected", this);
+        let valueSelected = this.value;
+        loadingContainer.style.display = "";
+        $.post(modelsApiUrl, {
+          modelName: valueSelected,
+        }).done(function(response) {
+          loadingContainer.style.display = "none";
+          $.get(t9ApiUrl).done((response) => {
+              if (response.words) {
+                  for (let word of response.words) {
+                      let firstLetter = word[0];
+                      if (t9Dict[firstLetter]) {
+                          t9Dict[firstLetter].push(word);
+                      } else {
+                          t9Dict[firstLetter] = [word];
+                      }
+                  }
+                  for (let key in t9Dict) {
+                      t9Dict[key].sort();
+                  }
+                  autocomplete(textarea, t9Dict);
+              }
+          });
+      });
+    });
+  </script>
+{% endblock %}
+
+<!--script>
+    const t9ApiUrl = "{{ url_for('t9') }}";
+    const modelsApiUrl = "{{ url_for('models_api') }}";
+    const modelSelect = document.getElementById('model-select');
+
+    let modelsArr = [];
+    $.get(modelsApiUrl).done(function(response) {
+        modelsArr = response['models'];
+        for (let model of modelsArr) {
+          const modelOption = document.createElement('option');
+          modelOption.value = model;
+          modelOption.innerText = model;
+          modelSelect.appendChild(modelOption);
+        }
+    });
     $('#model-select').on('change', function (e) {
         let optionSelected = $("option:selected", this);
         let valueSelected = this.value;
@@ -131,5 +195,4 @@
     let textarea = document.getElementById("text");
     let words = [];
     autocomplete(textarea, words, t9ApiUrl);
-  </script>
-{% endblock %}
+  </script-->

@@ -1,23 +1,42 @@
-function autocomplete(inp, arr, t9ApiURL) {
-    const apiURL = t9ApiURL;
+function getT9Hashtable(apiURL) {
+    let t9Dict = {};
+    $.get(apiURL).done((response) => {
+        if (response.words) {
+            for (let word of response.words) {
+                let firstLetter = word[0];
+                if (t9Dict[firstLetter]) {
+                    t9Dict[firstLetter].push(word);
+                } else {
+                    t9Dict[firstLetter] = [word];
+                }
+            }
+            for (let key in t9Dict) {
+                t9Dict[key].sort();
+            }
+            return t9Dict;
+        }
+    });
+}
+
+function autocomplete(inp, t9Hashtable) {
     const textInput = document.getElementById("text");
     const wordsDiv = document.getElementById("t9-words");
-    const phrasesDiv = document.getElementById("t9-phrases");
-    const phraseLenInput = document.getElementById("phrase-len");
-    const firstWordsInput = document.getElementById("first-words");
 
     let currentFocus;
-    let bufferPhrase = "";
     let activeItems;
-    // let requestsStack = [];
 
-    function updateLists(t9RenderResponse = false) {
-        let wordsContainer, phrasesContainer, wordInput, phraseInput
+    function updateLists() {
+        let wordsContainer, wordInput;
         let val = textInput.value;
+        let inputWords = val.split(" ");
+        let inputWord = inputWords[inputWords.length - 1];
+        console.log('inputWord: ', inputWord);
+
         closeAllLists();
-        if (!val) {
+        if (!inputWord.length) {
             return false;
         }
+        let arr = t9Hashtable[inputWord[0]];
         currentFocus = -1;
 
         wordsContainer = document.createElement("div");
@@ -25,65 +44,29 @@ function autocomplete(inp, arr, t9ApiURL) {
         wordsContainer.setAttribute("class", "autocomplete-items");
         wordsDiv.appendChild(wordsContainer);
 
-        phrasesContainer = document.createElement("div");
-        phrasesContainer.setAttribute("id", "autocomplete-list-phrases");
-        phrasesContainer.setAttribute("class", "autocomplete-items");
-        phrasesDiv.appendChild(phrasesContainer);
-
-        let phraseLen = parseInt(phraseLenInput.value);
-
         for (let i = 0; i < arr.length; i++) {
-            let phraseList = val.split(" ");
-            let value = phraseList[phraseList.length - 1];
-            let phraseWords = arr[i].split(" ");
-            let firstWord = phraseWords[0];
-            let phrase = '';
-            for (let i = 0; i < (phraseWords.length - 1 < phraseLen ? phraseWords.length - 1 : phraseLen); i++) {
-                phrase += (phraseWords[i] + " ");
-            }
-            if ((phrase.substr(0, value.length).toUpperCase() === value.toUpperCase()) || (value.length = 0) || t9RenderResponse) {
-
-                let valueLength = t9RenderResponse ? 0 : value.length;
+            let word = arr[i];
+            if (word.substr(0, inputWord.length).toUpperCase() === inputWord.toUpperCase()) {
 
                 wordInput = document.createElement("div");
                 wordInput.className = 'form-control';
                 wordInput.style.cursor = "pointer";
 
-                wordInput.innerHTML = "<strong>" + firstWord.substr(0, valueLength) + "</strong>";
-                wordInput.innerHTML += firstWord.substr(valueLength);
+                wordInput.innerHTML = "<strong>" + word.substr(0, inputWord.length) + "</strong>";
+                wordInput.innerHTML += word.substr(inputWord.length);
 
-                wordInput.innerHTML += "<input type='hidden' value='" + firstWord + "'>";
+                wordInput.innerHTML += "<input type='hidden' value='" + word + "'>";
 
                 wordInput.addEventListener("click", function (e) {
                     inp.value = "";
-                    for (let i = 0; i < phraseList.length - 1; i++) {
-                        inp.value += (phraseList[i] + " ");
+                    for (let i = 0; i < inputWords.length - 1; i++) {
+                        inp.value += (inputWords[i] + " ");
                     }
                     let clickedValue = this.getElementsByTagName("input")[0].value;
-                    inp.value += clickedValue.substr(0, clickedValue.length - 1);
+                    inp.value += clickedValue.substr(0, clickedValue.length);
                     closeAllLists();
                 });
                 wordsContainer.appendChild(wordInput);
-
-                phraseInput = document.createElement("div");
-                phraseInput.className = 'form-control';
-                phraseInput.style.cursor = "pointer";
-
-                phraseInput.innerHTML = "<strong>" + phrase.substr(0, valueLength) + "</strong>";
-                phraseInput.innerHTML += phrase.substr(valueLength);
-
-                phraseInput.innerHTML += "<input type='hidden' value='" + phrase + "'>";
-
-                phraseInput.addEventListener("click", function (e) {
-                    inp.value = "";
-                    for (let i = 0; i < phraseList.length - 1; i++) {
-                        inp.value += (phraseList[i] + " ");
-                    }
-                    let clickedValue = this.getElementsByTagName("input")[0].value;
-                    inp.value += clickedValue.substr(0, clickedValue.length - 1);
-                    closeAllLists();
-                });
-                phrasesContainer.appendChild(phraseInput);
             }
         }
         changeActiveItems();
@@ -93,62 +76,9 @@ function autocomplete(inp, arr, t9ApiURL) {
         updateLists();
     });
 
-    phraseLenInput.onkeyup = phraseLenInput.onchange = () => {
-        updateLists();
-    }
-
-    function updateT9Phrases() {
-        let val = textInput.value.toString();
-        if (val[val.length - 1] === " ") {
-            let phraseList = val.split(" ");
-            if (phraseList.length > 1) {
-                if (phraseList[phraseList.length - 2] !== bufferPhrase) {
-                    let wordsCount = parseInt(firstWordsInput.value);
-                    let bufArray = [];
-                    for (let i = 0; i < (wordsCount < phraseList.length ? wordsCount : phraseList.length); i++) {
-                        bufArray.push(phraseList[phraseList.length - (i + 2)]);
-                    }
-                    bufferPhrase = '';
-                    for (let i = bufArray.length - 1; i >= 0; i--) {
-                        bufferPhrase += (bufArray[i] + ' ');
-                    }
-
-                    console.log('Make T9 request...');
-                    $.post(apiURL, {
-                        beginning: bufferPhrase.substr(0, bufferPhrase.length - 1).toLowerCase(),
-                        firstWordsCount: wordsCount,
-                        phraseLength: phraseLenInput.value,
-                    }).done(function (response) {
-                        if (response.sentences !== undefined) {
-                            arr = response.sentences;
-                            console.log('arr: ', arr);
-                            updateLists(true);
-                        }
-                    });
-                }
-            }
-        }
-    }
-
-    inp.addEventListener("input", function (e) {
-        updateT9Phrases();
-    });
-
-    firstWordsInput.onkeyup = firstWordsInput.onchange = () => {
-        updateT9Phrases();
-    }
-
     function changeActiveItems() {
-        wordsDiv.classList.toggle("hide-element");
-        phrasesDiv.classList.toggle("hide-element");
-        // console.log();
-        if (wordsDiv.classList.contains("hide-element")) {
-            // console.log('phrases');
-            activeItems = phrasesDiv.children[0];
-        } else {
-            // console.log('words');
-            activeItems = wordsDiv.children[0];
-        }
+        wordsDiv.classList.remove("hide-element");
+        activeItems = wordsDiv.children[0];
         if (activeItems) activeItems = activeItems.getElementsByTagName("div");
         // console.log('changeActiveItems: ', activeItems);
         // console.log(phrasesDiv.children[0]);
@@ -157,11 +87,6 @@ function autocomplete(inp, arr, t9ApiURL) {
 
     inp.addEventListener("keydown", function (e) {
         if (activeItems === undefined) {
-            changeActiveItems();
-            currentFocus = activeItems.length - 1;
-            removeActive(activeItems);
-        }
-        if (e.keyCode === 39) {
             changeActiveItems();
             currentFocus = activeItems.length - 1;
             removeActive(activeItems);

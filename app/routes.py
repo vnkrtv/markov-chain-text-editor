@@ -175,7 +175,11 @@ class T9API(MethodView):
     remove_punctuation = re.compile(r'[^a-zA-Zа-яА-Я ]')
 
     def get(self):
-        return redirect(url_for('index'))
+        model = utils.get_model()
+        words = [word for word in model.encoder.word2int if isinstance(word, str)]
+        return jsonify({
+            'words': words
+        })
 
     def post(self):
         msg_stack = get_msg_stack()
