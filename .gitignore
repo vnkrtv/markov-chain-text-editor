@@ -1,8 +1,10 @@
 .idea
 .ipynb_checkpoints/
+./*.ipynb
 
 venv/
 vevn/
+model/models/*.json
 migrations/
 notebooks/.ipynb_checkpoints
 models/bin
