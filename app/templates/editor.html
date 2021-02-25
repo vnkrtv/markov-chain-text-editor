@@ -50,13 +50,6 @@
         	<div class="col">
             <div class="row">
               <h5>Select model</h5>
-              <!--div class="form-control">
-                <select id="model-select" class="form-control" multiple size="3">
-                  {% for model in models %}                    
-                    <option value="{{ model }}">{{ model }}</option>
-                  {% endfor %}
-                </select>
-              </div-->
               <label for="model-select"></label>
               <select class="form-control custom-select" id="model-select"></select>
             </div>
@@ -123,11 +116,16 @@
     $.get(t9ApiUrl).done((response) => {
         if (response.words) {
             for (let word of response.words) {
-                let firstLetter = word[0];
-                if (t9Dict[firstLetter]) {
-                    t9Dict[firstLetter].push(word);
+                let firstLetters = word.slice(0, 2);
+                if (t9Dict[firstLetters[0] + ' ']) {
+                    t9Dict[firstLetters[0] + ' '].push(word);
                 } else {
-                    t9Dict[firstLetter] = [word];
+                    t9Dict[firstLetters[0] + ' '] = [word];
+                }
+                if (t9Dict[firstLetters]) {
+                    t9Dict[firstLetters].push(word);
+                } else {
+                    t9Dict[firstLetters] = [word];
                 }
             }
             for (let key in t9Dict) {
@@ -146,27 +144,30 @@
         }).done(function(response) {
           loadingContainer.style.display = "none";
           $.get(t9ApiUrl).done((response) => {
-              if (response.words) {
-                  for (let word of response.words) {
-                      let firstLetter = word[0];
-                      if (t9Dict[firstLetter]) {
-                          t9Dict[firstLetter].push(word);
-                      } else {
-                          t9Dict[firstLetter] = [word];
-                      }
-                  }
-                  for (let key in t9Dict) {
-                      t9Dict[key].sort();
-                  }
-                  autocomplete(textarea, t9Dict);
-              }
-          });
+            if (response.words) {
+                for (let word of response.words) {
+                    let firstLetters = word.slice(0, 2);
+                    if (t9Dict[firstLetters[0] + ' ']) {
+                        t9Dict[firstLetters[0] + ' '].push(word);
+                    } else {
+                        t9Dict[firstLetters[0] + ' '] = [word];
+                    }
+                    if (t9Dict[firstLetters]) {
+                        t9Dict[firstLetters].push(word);
+                    } else {
+                        t9Dict[firstLetters] = [word];
+                    }
+                }
+                for (let key in t9Dict) {
+                    t9Dict[key].sort();
+                }
+                autocomplete(textarea, t9Dict);
+            }
+        });
       });
     });
   </script>
-{% endblock %}
-
-<!--script>
+  <!--script>
     const t9ApiUrl = "{{ url_for('t9') }}";
     const modelsApiUrl = "{{ url_for('models_api') }}";
     const modelSelect = document.getElementById('model-select');
@@ -196,3 +197,5 @@
     let words = [];
     autocomplete(textarea, words, t9ApiUrl);
   </script-->
+
+{% endblock %}

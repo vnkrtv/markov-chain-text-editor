@@ -3,11 +3,16 @@ function getT9Hashtable(apiURL) {
     $.get(apiURL).done((response) => {
         if (response.words) {
             for (let word of response.words) {
-                let firstLetter = word[0];
-                if (t9Dict[firstLetter]) {
-                    t9Dict[firstLetter].push(word);
+                let firstLetters = word.slice(0, 2);
+                if (t9Dict[firstLetters[0] + ' ']) {
+                    t9Dict[firstLetters[0] + ' '].push(word);
                 } else {
-                    t9Dict[firstLetter] = [word];
+                    t9Dict[firstLetters[0] + ' '] = [word];
+                }
+                if (t9Dict[firstLetters]) {
+                    t9Dict[firstLetters].push(word);
+                } else {
+                    t9Dict[firstLetters] = [word];
                 }
             }
             for (let key in t9Dict) {
@@ -36,8 +41,9 @@ function autocomplete(inp, t9Hashtable) {
         if (!inputWord.length) {
             return false;
         }
-        let arr = t9Hashtable[inputWord[0]];
+        let arr = inputWord.length > 1 ? t9Hashtable[inputWord.slice(0, 2)] : t9Hashtable[inputWord[0] + ' '].slice(0, 500);
         currentFocus = -1;
+        console.log(arr);
 
         wordsContainer = document.createElement("div");
         wordsContainer.setAttribute("id", "autocomplete-list-words");
