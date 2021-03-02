@@ -5,7 +5,7 @@ from typing import Iterable, List
 import nltk
 
 from .chain_storage import ChainStorage
-from .utils import EncoderStorage, WordsEncoder, TextProcessor
+from markov.utils import EncoderStorage, WordsEncoder, TextProcessor
 
 
 class TextGenerator:

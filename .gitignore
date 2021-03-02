@@ -4,10 +4,11 @@
 
 venv/
 vevn/
-model/models/*.json
+markov/models/*.json
 migrations/
 notebooks/.ipynb_checkpoints
-models/bin
+notebooks/NGrammMarkov2.0.ipynb
+notebooks/mnogogramm.ipynb
 __pycache__
 
 users.db

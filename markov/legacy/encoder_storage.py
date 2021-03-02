@@ -1,7 +1,5 @@
-import psycopg2
-
-from .postgres import PostgresStorage
-from .encoder import WordsEncoder
+from markov.utils.postgres import PostgresStorage
+from markov.utils.encoder import WordsEncoder
 
 
 class EncoderStorage(PostgresStorage):

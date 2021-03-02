@@ -1,5 +1,5 @@
 from typing import Generator
-from .postgres import PostgresStorage
+from markov.utils.postgres import PostgresStorage
 
 
 class HabrStorage(PostgresStorage):

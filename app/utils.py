@@ -1,48 +1,26 @@
 import re
 from typing import Generator, Optional, List
 
-from config import Config
-from model import (
-    TextGenerator, PostgresStorage, EncoderStorage, ChainStorage)
+from markov import NgrammTextGenerator
+from markov.utils import PostgresStorage
+
+__model: Optional[NgrammTextGenerator] = None
 
 
-__encoder_storage: Optional[EncoderStorage] = None
-__chain_storage: Optional[ChainStorage] = None
-__model: Optional[TextGenerator] = None
-
-
-def get_model() -> TextGenerator:
+def get_model() -> NgrammTextGenerator:
     global __model
     return __model
 
 
-def set_model(model: TextGenerator) -> None:
+def set_model(model: NgrammTextGenerator) -> None:
     global __model
     __model = model
 
 
-def get_encoder_storage() -> EncoderStorage:
-    global __encoder_storage
-    if not __encoder_storage:
-        __encoder_storage = EncoderStorage.connect(
-            host=Config.PG_HOST,
-            port=Config.PG_PORT,
-            user=Config.PG_USER,
-            password=Config.PG_PASS,
-            dbname=Config.PG_DBNAME)
-    return __encoder_storage
-
-
-def get_chain_storage() -> ChainStorage:
-    global __chain_storage
-    if not __chain_storage:
-        __chain_storage = ChainStorage.connect(
-            host=Config.PG_HOST,
-            port=Config.PG_PORT,
-            user=Config.PG_USER,
-            password=Config.PG_PASS,
-            dbname=Config.PG_DBNAME)
-    return __chain_storage
+def parse_query(query: str) -> tuple:
+    params = list(re.findall(r"'(.*?)'", query))
+    query = re.sub(r"'(.*?)'", '%s', query)
+    return query, params
 
 
 def get_postgres_storage(request_dict: dict) -> PostgresStorage:
@@ -53,13 +31,6 @@ def get_postgres_storage(request_dict: dict) -> PostgresStorage:
     pg_password = request_dict.get('pg_password')
     return PostgresStorage.connect(
         host=pg_host, port=pg_port, dbname=pg_dbname, user=pg_user, password=pg_password)
-
-
-def parse_query(query: str) -> tuple:
-    query = re.sub(r'[^\w,.=><\'()" ]', '', query)
-    params = [param[1:-1] for param in re.findall(r"'(.*?)'", query)]
-    query = re.sub(r"'(.*?)'", '%s', query)
-    return query, params
 
 
 def get_text_corpus_from_postgres(request_dict: dict) -> Generator:

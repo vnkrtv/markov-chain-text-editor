@@ -4,8 +4,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
 from app import db, login
-from model import TextGenerator
-from .utils import set_model, get_model, get_encoder_storage, get_chain_storage
+from markov import NgrammTextGenerator
+from .utils import set_model, get_model
 
 
 @login.user_loader
@@ -43,11 +43,10 @@ class Document(db.Model):
 
 
 class MarkovModel(db.Model):
-    __tablename__ = 'markov_models'
+    __tablename__ = 'models'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), unique=True)
     state_size = db.Column(db.Integer)
-    use_ngrams = db.Column(db.Boolean)
     ngram_size = db.Column(db.Integer)
 
     @classmethod
@@ -55,28 +54,18 @@ class MarkovModel(db.Model):
               train_corpus: Iterable,
               model_name: str,
               state_size: int,
-              use_ngrams: bool,
               ngram_size: int):
-        model = TextGenerator.train(pg_chain=get_chain_storage(),
-                                    pg_encoder=get_encoder_storage(),
-                                    train_text=train_corpus,
-                                    model_name=model_name,
-                                    state_size=3,
-                                    use_ngrams=use_ngrams,
-                                    ngram_size=ngram_size)
+        model = NgrammTextGenerator.train(model_name=model_name,
+                                          train_text=train_corpus,
+                                          state_size=state_size,
+                                          ngram_size=ngram_size)
         set_model(model)
         return cls(name=model_name,
                    state_size=state_size,
-                   use_ngrams=use_ngrams,
                    ngram_size=ngram_size)
 
     def load(self):
-        model = TextGenerator.load(pg_chain=get_chain_storage(),
-                                   pg_encoder=get_encoder_storage(),
-                                   model_name=self.name,
-                                   state_size=self.state_size,
-                                   use_ngrams=self.use_ngrams,
-                                   ngram_size=self.ngram_size)
+        model = NgrammTextGenerator.load(model_name=self.name)
         set_model(model)
 
     def generate_samples(self, beginning: str, samples_num: int) -> List[str]:
@@ -101,7 +90,7 @@ class MarkovModel(db.Model):
         return list(phrases)
 
     def __repr__(self) -> str:
-        return '<Markov model: %s, state size=%s, ngrams=%s>' % (
+        return '<Markov model: %s, state_size=%s, ngram_size=%s>' % (
             self.name,
             self.state_size,
-            str(self.use_ngrams) + ', ngram_size=' + str(self.ngram_size) if self.use_ngrams else self.use_ngrams)
+            self.ngram_size)

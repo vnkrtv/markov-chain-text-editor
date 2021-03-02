@@ -1,11 +1,9 @@
-import os
 import json
 from typing import Iterable, List, Dict, Any
 
+from config import Config
 from .encoded_chain import EncodedChain
 from .utils import TextProcessor
-
-MODELS_PATH = os.path.abspath(__file__).join('models')
 
 
 class NgrammTextGenerator:
@@ -27,7 +25,7 @@ class NgrammTextGenerator:
 
     @classmethod
     def load(cls, model_name: str):
-        with open(MODELS_PATH.join(model_name + '.json'), 'r') as f:
+        with open(Config.MODELS_ROOT / (model_name + '.json'), 'r') as f:
             obj = json.load(f)
         chain = EncodedChain.from_json(obj['chain'])
         return cls(model_name=obj['model_name'],
@@ -47,8 +45,7 @@ class NgrammTextGenerator:
                     chain=chain,
                     state_size=state_size,
                     ngram_size=ngram_size)
-        with open(MODELS_PATH.join(model_name + '.json'), 'w') as f:
-            json.dump(model.to_json(), f)
+        model.dump()
         return model
 
     def ngrams_split(self, sentence: str) -> List[str]:
@@ -93,6 +90,7 @@ class NgrammTextGenerator:
                               phrase_len: int = 5,
                               **kwargs) -> List[str]:
         phrases = set()
+        print("Model '%s' - beginning: %s" % (self.model_name, beginning))
         for i in range(count):
             phrase = self.make_sentence_with_start(beginning, min_words=phrase_len, **kwargs)
             print(phrase)
@@ -111,6 +109,10 @@ class NgrammTextGenerator:
 
     def to_json(self) -> str:
         return json.dumps(self.to_dict())
+
+    def dump(self):
+        with open(Config.MODELS_ROOT / (self.model_name + '.json'), 'w') as f:
+            json.dump(self.to_json(), f, indent=4)
 
     def __repr__(self) -> str:
         return '<TextGenerator: state_size=%s, ngrams_size=%s>' % (

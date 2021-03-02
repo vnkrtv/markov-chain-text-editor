@@ -1,4 +1,4 @@
-from typing import Generator
+from typing import Generator, List
 
 import psycopg2
 
@@ -24,7 +24,7 @@ class PostgresStorage:
             host=host, port=port, user=user, password=password, dbname=dbname)
         )
 
-    def exec_query(self, query: str, params: list) -> Generator:
+    def exec_query(self, query: str, params: List[str]) -> Generator:
         cursor = self.conn.cursor()
         try:
             cursor.execute(query, params)
@@ -33,7 +33,7 @@ class PostgresStorage:
             raise e
         return cursor.fetchall()
 
-    def exec(self, sql: str, params: list):
+    def exec(self, sql: str, params: List[str]):
         cursor = self.conn.cursor()
         try:
             cursor.execute(sql, params)

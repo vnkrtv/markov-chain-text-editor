@@ -109,18 +109,8 @@
                             {{ model_form.name(size=20, class="form-control") }}<br>
                             {{ model_form.state_size.label }}<br>
                             {{ model_form.state_size(type="number", min=1, size=20, class="form-control") }}<br>
-                        </div>
-                        <h5>Ngrams</h5><br>
-                        <div class="col">
-                            <div class="custom-control custom-checkbox mr-sm-2">
-                                {{ model_form.use_ngrams(id="use_ngrams", class="custom-control-input") }}
-                                {{ model_form.use_ngrams.label(class="custom-control-label",
-                                onclick="ngramsCheckboxChange()") }}
-                            </div>
-                            <br>
-                            {{ model_form.ngram_size.label(id="ngram_size_label") }}<br id="ngram_size_br_1">
-                            {{ model_form.ngram_size(type="number", min=1, size=20, class="form-control") }}<br
-                                id="ngram_size_br_2">
+                            {{ model_form.ngram_size.label(id="ngram_size_label") }}<br>
+                            {{ model_form.ngram_size(type="number", min=1, size=20, class="form-control") }}<br>
                         </div>
                         <h5>Train data</h5><br>
                         <div class="col">
@@ -189,17 +179,12 @@
         $('#addModelModal').hide();
     };
 
-    const ngramElementsIds = ['ngram_size', 'ngram_size_label', 'ngram_size_br_1', 'ngram_size_br_2'];
-    const ngramsCheckbox = document.getElementById('use_ngrams');
     const dataSource = document.getElementById("dataSourceOptionSelect");
     const fileOptionDiv = document.getElementById("fileOption");
     const pgOptionDiv = document.getElementById("pgOption");
     const fileLabel = document.getElementById('fileLabel');
     const fileInput = document.getElementById('trainTextFile');
 
-    for (const elemID of ngramElementsIds) {
-        document.getElementById(elemID).style.display = 'none';
-    }
     fileOptionDiv.style.display = 'none';
     pgOptionDiv.style.display = 'none';
 
@@ -213,18 +198,6 @@
         } else {
             pgOptionDiv.style.display = 'none';
             fileOptionDiv.style.display = 'none';
-        }
-    };
-
-    const ngramsCheckboxChange = () => {
-        if (ngramsCheckbox.checked) {
-            for (const elemID of ngramElementsIds) {
-                document.getElementById(elemID).style.display = 'none';
-            }
-        } else {
-            for (const elemID of ngramElementsIds) {
-                document.getElementById(elemID).style.display = '';
-            }
         }
     };
 

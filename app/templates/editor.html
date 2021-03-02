@@ -94,7 +94,7 @@
   </div>
 </div>
 </form>
- <script src="{{ url_for('static', filename='js/autocomplete.js') }}"></script>
+ <!--script src="{{ url_for('static', filename='js/autocomplete.js') }}"></script>
  <script>
     const t9ApiUrl = "{{ url_for('t9') }}";
     const modelsApiUrl = "{{ url_for('models_api') }}";
@@ -166,8 +166,9 @@
         });
       });
     });
-  </script>
-  <!--script>
+  </script-->
+  <script src="{{ url_for('static', filename='js/autocomplete1.0.js') }}"></script>
+  <script>
     const t9ApiUrl = "{{ url_for('t9') }}";
     const modelsApiUrl = "{{ url_for('models_api') }}";
     const modelSelect = document.getElementById('model-select');
@@ -196,6 +197,6 @@
     let textarea = document.getElementById("text");
     let words = [];
     autocomplete(textarea, words, t9ApiUrl);
-  </script-->
+  </script>
 
 {% endblock %}

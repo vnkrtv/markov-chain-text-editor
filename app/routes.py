@@ -98,7 +98,6 @@ class IndexView(MethodView):
                 model = MarkovModel.train(train_corpus=train_corpus,
                                           model_name=model_form.name.data,
                                           state_size=model_form.state_size.data,
-                                          use_ngrams=model_form.use_ngrams.data,
                                           ngram_size=model_form.ngram_size.data)
                 model.load()
                 db.session.add(model)

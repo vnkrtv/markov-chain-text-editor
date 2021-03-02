@@ -4,7 +4,7 @@ Write-Host "Created virtual environment..."
 
 Write-Host "Start loading requirements..."
 pip install --no-cache-dir -r requirements.txt
-Write-Host "Successfully loaded requeirments..."
+Write-Host "Successfully loaded requirements..."
 
 $env:FLASK_APP=wsgi.py
 flask db init
