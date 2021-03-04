@@ -28,7 +28,7 @@ class NgrammTextGenerator:
         with open(Config.MODELS_ROOT / (model_name + '.json'), 'r') as f:
             obj = json.load(f)
         chain = EncodedChain.from_json(obj['chain'])
-        return cls(model_name=obj['model_name'],
+        return cls(model_name=model_name,
                    chain=chain,
                    state_size=chain.state_size,
                    ngram_size=obj['ngram_size'])
@@ -47,6 +47,10 @@ class NgrammTextGenerator:
                     ngram_size=ngram_size)
         model.dump()
         return model
+
+    @property
+    def name(self):
+        return self.model_name
 
     def ngrams_split(self, sentence: str) -> List[str]:
         ngrams_list = next(TextProcessor.get_ngram_gen([sentence], self.ngram_size))
@@ -104,15 +108,12 @@ class NgrammTextGenerator:
         return {
             'state_size': self.state_size,
             'ngram_size': self.ngram_size,
-            'chain': self.chain.model
+            'chain': self.chain.to_json()
         }
-
-    def to_json(self) -> str:
-        return json.dumps(self.to_dict())
 
     def dump(self):
         with open(Config.MODELS_ROOT / (self.model_name + '.json'), 'w') as f:
-            json.dump(self.to_json(), f, indent=4)
+            json.dump(self.to_dict(), f, indent=4)
 
     def __repr__(self) -> str:
         return '<TextGenerator: state_size=%s, ngrams_size=%s>' % (

@@ -13,4 +13,4 @@ class Config:
     # SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
     #                           'sqlite:///' + os.path.join(BASE_DIR, 'users.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    MODELS_ROOT = pathlib.Path(__file__) / 'markov' / 'models'
+    MODELS_ROOT = pathlib.Path(__file__).parent / 'markov' / 'models'

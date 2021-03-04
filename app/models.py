@@ -65,8 +65,10 @@ class MarkovModel(db.Model):
                    ngram_size=ngram_size)
 
     def load(self):
-        model = NgrammTextGenerator.load(model_name=self.name)
-        set_model(model)
+        model = get_model()
+        if not model or model.name != self.name:
+            model = NgrammTextGenerator.load(model_name=self.name)
+            set_model(model)
 
     def generate_samples(self, beginning: str, samples_num: int) -> List[str]:
         tries_count = samples_num * 2

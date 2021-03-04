@@ -10,7 +10,7 @@ from app import app, db, csrf, utils
 from .models import (
     User, Document, MarkovModel)
 from .utils import (
-    get_text_corpus_from_file, get_text_corpus_from_postgres, get_msg_stack)
+    get_model, get_text_corpus_from_file, get_text_corpus_from_postgres, get_msg_stack)
 from .forms import (
     LoginForm, RegistrationForm, DocumentForm, ModelForm)
 
@@ -52,8 +52,9 @@ def document(document_id):
             return redirect(url_for('index'))
         models = MarkovModel.query.all()
         if len(models):
-            model = models[0]
-            model.load()
+            if not get_model():
+                model = models[0]
+                model.load()
             return render_template('editor.html', title=doc.title, doc=doc, form=form)
         else:
             flash("No available models found. Add new model to start working with documents.")
