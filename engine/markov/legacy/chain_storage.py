@@ -1,7 +1,7 @@
 import operator
 from typing import Iterable, Generator
 
-from markov.utils import PostgresStorage
+from engine.markov import PostgresStorage
 
 
 def accumulate(iterable: Iterable, func=operator.add) -> Generator:

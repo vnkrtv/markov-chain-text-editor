@@ -1,10 +1,18 @@
 import re
 from typing import Generator, Optional, List
 
-from markov import NgrammTextGenerator
-from markov.utils import PostgresStorage
+from config import Config
+from engine.markov import NgrammTextGenerator
+from engine.markov import PostgresStorage
+from engine.elastic import ElasticEngine
 
 __model: Optional[NgrammTextGenerator] = None
+__es: ElasticEngine = ElasticEngine(host=Config.ELASTIC_HOST)
+
+
+def get_elastic_engine() -> ElasticEngine:
+    global __es
+    return __es
 
 
 def get_model() -> NgrammTextGenerator:

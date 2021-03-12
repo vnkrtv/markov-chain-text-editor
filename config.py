@@ -14,3 +14,4 @@ class Config:
     #                           'sqlite:///' + os.path.join(BASE_DIR, 'users.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MODELS_ROOT = pathlib.Path(__file__).parent / 'markov' / 'models'
+    ELASTIC_HOST = os.environ.get('ELASTIC_HOST', '0.0.0.0:9200')

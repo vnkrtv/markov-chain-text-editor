@@ -4,7 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
 from app import db, login
-from markov import NgrammTextGenerator
+from engine.markov import NgrammTextGenerator
 from .utils import set_model, get_model
 
 

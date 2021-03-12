@@ -10,7 +10,7 @@ from app import app, db, csrf, utils
 from .models import (
     User, Document, MarkovModel)
 from .utils import (
-    get_model, get_text_corpus_from_file, get_text_corpus_from_postgres, get_msg_stack)
+    get_model, get_text_corpus_from_file, get_text_corpus_from_postgres, get_msg_stack, get_elastic_engine)
 from .forms import (
     LoginForm, RegistrationForm, DocumentForm, ModelForm)
 

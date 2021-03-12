@@ -1,5 +1,5 @@
-from markov.utils.postgres import PostgresStorage
-from markov.utils.encoder import WordsEncoder
+from engine.markov import PostgresStorage
+from engine.markov import WordsEncoder
 
 
 class EncoderStorage(PostgresStorage):
