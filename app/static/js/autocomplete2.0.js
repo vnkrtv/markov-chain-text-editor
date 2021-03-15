@@ -23,7 +23,7 @@ function getT9Hashtable(apiURL) {
     });
 }
 
-function autocomplete(inp, t9Hashtable) {
+function autocomplete20(inp, t9Hashtable) {
     const textInput = document.getElementById("text");
     const wordsDiv = document.getElementById("t9-words");
 

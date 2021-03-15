@@ -31,8 +31,9 @@
 	<div class='jumbotron'>
 		<div class="form-group shadow-textarea autocomplete">
 		  <textarea id="text" name="doc-body" class="form-control z-depth-1" style="overflow:hidden;" placeholder="Print here...">{{ doc.body }}</textarea>
-		  <div id="t9-words"></div>
-		  <div id="t9-phrases" class="hide-element"></div>
+		  <!--div id="t9-words"></div>
+		  <div id="t9-phrases" class="hide-element"></div-->
+      <div id="t9-phrases"></div>
 		</div>
 	</div>
 </header>
@@ -94,7 +95,7 @@
   </div>
 </div>
 </form>
- <!--script src="{{ url_for('static', filename='js/autocomplete.js') }}"></script>
+ <!--script src="{{ url_for('static', filename='js/autocomplete2.0.js') }}"></script>
  <script>
     const t9ApiUrl = "{{ url_for('t9') }}";
     const modelsApiUrl = "{{ url_for('models_api') }}";
@@ -167,7 +168,7 @@
       });
     });
   </script-->
-  <script src="{{ url_for('static', filename='js/autocomplete1.0.js') }}"></script>
+  <!--script src="{{ url_for('static', filename='js/autocomplete1.0.js') }}"></script>
   <script>
     const t9ApiUrl = "{{ url_for('t9') }}";
     const modelsApiUrl = "{{ url_for('models_api') }}";
@@ -192,6 +193,37 @@
         }).done(function(response) {
           loadingContainer.style.display = "none";
       });
+    });
+
+    let textarea = document.getElementById("text");
+    let words = [];
+    autocomplete(textarea, words, t9ApiUrl);
+  </script-->
+  <script src="{{ url_for('static', filename='js/autocomplete3.0.js') }}"></script>
+  <script>
+    const t9ApiUrl = "{{ url_for('t9') }}";
+    const modelsApiUrl = "{{ url_for('models_api') }}";
+    const modelSelect = document.getElementById('model-select');
+
+    let modelsArr = [];
+    $.get(modelsApiUrl).done(function(response) {
+        modelsArr = response['models'];
+        for (let model of modelsArr) {
+          const modelOption = document.createElement('option');
+          modelOption.value = model;
+          modelOption.innerText = model;
+          modelSelect.appendChild(modelOption);
+        }
+    });
+    $('#model-select').on('change', function (e) {
+      //   let optionSelected = $("option:selected", this);
+      //   let valueSelected = this.value;
+      //   loadingContainer.style.display = "";
+      //   $.post(modelsApiUrl, {
+      //     modelName: valueSelected,
+      //   }).done(function(response) {
+      //     loadingContainer.style.display = "none";
+      // });
     });
 
     let textarea = document.getElementById("text");

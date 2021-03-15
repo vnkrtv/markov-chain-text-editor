@@ -56,7 +56,7 @@ class ElasticEngine:
         })
 
     def get(self, index_name: str, phrase: str, count: int = 10) -> List[str]:
-        return [
+        sentences = [
             doc['_source']['text']
             for doc in self.es.search(
                 index=index_name,
@@ -69,4 +69,8 @@ class ElasticEngine:
                     },
                     "size": count
                 })['hits']['hits']
+        ]
+        return [
+            sentence[sentence.find(phrase):]
+            for sentence in sentences
         ]
