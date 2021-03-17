@@ -4,7 +4,7 @@ import pathlib
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'you-will-never-guess')
-    PG_USER = os.environ.get('PG_USER', 'postgres')
+    PG_USER = os.environ.get('PG_USER', 'vnkrtv')
     PG_PASS = os.environ.get('PG_PASS', 'password')
     PG_HOST = os.environ.get('PG_HOST', '172.17.0.2')
     PG_PORT = os.environ.get('PG_PORT', 5432)

@@ -51,10 +51,11 @@ def document(document_id):
             flash("Document '%s' has been successfully updated." % doc.title)
             return redirect(url_for('index'))
         models = MarkovModel.query.all()
+        # return render_template('editor.html', title=doc.title, doc=doc, form=form)
         if len(models):
-            # if not get_model():
-            #     model = models[0]
-            #     model.load()
+            if not get_model():
+                model = models[0]
+                model.load()
             return render_template('editor.html', title=doc.title, doc=doc, form=form)
         else:
             flash("No available models found. Add new model to start working with documents.")
@@ -182,33 +183,33 @@ class T9API(MethodView):
         })
 
     def post(self):
-        es = get_elastic_engine()
-        phrase = self.remove_punctuation.sub('', request.form['beginning'])
-        sentences = es.get(index_name='t9_app_3', phrase=phrase)
-        print('phrase: ', phrase, '\nsentences: ', sentences)
-        return jsonify({
-                'sentences': sentences
-            })
-        # msg_stack = get_msg_stack()
-        # msg_stack.push({
-        #     'beginning': self.remove_punctuation.sub('', request.form['beginning']).strip(),
-        #     'first_words_count': int(request.form['firstWordsCount']),
-        #     'phrase_len': int(request.form['phraseLength'])
-        # })
-        # if not msg_stack.locked:
-        #     msg_stack.lock()
-        #     model = utils.get_model()
-        #     obj = msg_stack.pop()
-        #     msg_stack.clear()
-        #     sentences = model.make_sentences_for_t9(obj['beginning'], obj['first_words_count'], obj['phrase_len'])
-        #     msg_stack.unlock()
-        #     logging.info(str(datetime.now()) + ' msg_stack size: ' + str(len(msg_stack.stack)))
-        #     logging.info(str(datetime.now()) + ' Send!')
-        #     return jsonify({
+        # es = get_elastic_engine()
+        # phrase = self.remove_punctuation.sub('', request.form['beginning'])
+        # sentences = es.get(index_name='t9_app_3', phrase=phrase)
+        # print('phrase: ', phrase, '\nsentences: ', sentences)
+        # return jsonify({
         #         'sentences': sentences
         #     })
-        # else:
-        #     return jsonify({})
+        msg_stack = get_msg_stack()
+        msg_stack.push({
+            'beginning': self.remove_punctuation.sub('', request.form['beginning']).strip(),
+            'first_words_count': int(request.form['firstWordsCount']),
+            'phrase_len': int(request.form['phraseLength'])
+        })
+        if not msg_stack.locked:
+            msg_stack.lock()
+            model = utils.get_model()
+            obj = msg_stack.pop()
+            msg_stack.clear()
+            sentences = model.make_sentences_for_t9(obj['beginning'], obj['first_words_count'], obj['phrase_len'])
+            msg_stack.unlock()
+            logging.info(str(datetime.now()) + ' msg_stack size: ' + str(len(msg_stack.stack)))
+            logging.info(str(datetime.now()) + ' Send!')
+            return jsonify({
+                'sentences': sentences
+            })
+        else:
+            return jsonify({})
 
 
 class ModelsAPI(MethodView):

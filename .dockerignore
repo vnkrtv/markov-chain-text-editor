@@ -4,9 +4,7 @@
 venv/
 notebooks/
 __pycache__/
-models/markov/bin/
+engine/markov/models
 
 *.db
 *.pyc
-
-!models/markov/bin/math_habs.json

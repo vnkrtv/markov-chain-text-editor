@@ -57,7 +57,7 @@ function autocomplete(inp, arr, t9ApiURL) {
                         inp.value += (phraseList[i] + ' ');
                     }
                     let clickedValue = this.getElementsByTagName("input")[0].value;
-                    inp.value +=  clickedValue.substr(0, clickedValue.length - 1);
+                    inp.value += clickedValue.substr(0, clickedValue.length - 1);
                     closeAllLists();
                 });
                 phrasesContainer.appendChild(phraseInput);
@@ -66,7 +66,7 @@ function autocomplete(inp, arr, t9ApiURL) {
         activeItems = phrasesDiv.children[0].getElementsByTagName("div");
     }
 
-    inp.addEventListener("input", function (e) {
+    inp.addEventListener("input", (e) => {
         updateLists();
     });
 
@@ -84,10 +84,7 @@ function autocomplete(inp, arr, t9ApiURL) {
             bufArray.push(phraseList[phraseList.length - count + i]);
         }
         let beginning = bufArray.join(' ');
-        console.log('count: ', count);
-        console.log('phraseList: ', phraseList);
-        console.log('bufArray: ', bufArray);
-        console.log('beginning: ', beginning);
+
         $.post(apiURL, {
             beginning: beginning.toLowerCase(),
             firstWordsCount: wordsCount,
@@ -101,7 +98,7 @@ function autocomplete(inp, arr, t9ApiURL) {
         });
     }
 
-    inp.addEventListener("input", function (e) {
+    inp.addEventListener("input", (e) => {
         updateT9Phrases();
     });
 
@@ -109,12 +106,11 @@ function autocomplete(inp, arr, t9ApiURL) {
         updateT9Phrases();
     }
 
-    inp.addEventListener("keydown", function (e) {
-        console.log(e.keyCode);
+    inp.addEventListener("keydown", (e) => {
         if (e.keyCode === 40) {
             currentFocus++;
             addActive(activeItems);
-        } else if (e.keyCode === 38) { //up
+        } else if (e.keyCode === 38) {
             currentFocus--;
             addActive(activeItems);
         } else if (e.keyCode === 13) {
@@ -122,8 +118,6 @@ function autocomplete(inp, arr, t9ApiURL) {
             if (currentFocus > -1) {
                 if (activeItems) activeItems[currentFocus].click();
             }
-        } else if (e.keyCode === 220) {
-            console.log(arr);
         }
     });
 
@@ -143,7 +137,7 @@ function autocomplete(inp, arr, t9ApiURL) {
         }
     }
 
-    function closeAllLists(elmnt) {
+    function closeAllLists(elem) {
         const x = document.getElementsByClassName("autocomplete-items");
         for (let item of x) {
             item.remove();
@@ -155,13 +149,14 @@ function autocomplete(inp, arr, t9ApiURL) {
         }
     }
 
-    inp.addEventListener('keyup', function () {
+    inp.addEventListener('keyup', () => {
         if (this.scrollTop > 0) {
             this.style.height = this.scrollHeight + "px";
         }
     });
 
-    document.addEventListener("click", function (e) {
+    document.addEventListener("click", (e) => {
         closeAllLists(e.target);
     });
+
 }
