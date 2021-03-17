@@ -1,6 +1,7 @@
 # smart-text-editor
 
 [![Build Status](https://travis-ci.com/vnkrtv/smart-text-editor.svg?branch=master)](https://travis-ci.com/vnkrtv/smart-text-editor)
+![Docker](https://github.com/vnkrtv/smart-text-editor/workflows/Docker/badge.svg)
 
 ## Description  
 

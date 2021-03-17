@@ -6,7 +6,7 @@
     <a href="" class="navbar-brand d-flex align-items-center" data-toggle="modal" data-target="#newDocModal">
         <img src='{{ add_doc_icon() }}'>&nbsp;New doc
     </a>
-    <!--a href="{{ url_for('generator') }}" class="navbar-brand d-flex align-items-center">
+    <!--a href="{ url_for('generator') }" class="navbar-brand d-flex align-items-center">
         <img src='{{ gears_icon() }}'>&nbsp;Generate phrases
     </a-->
     <a href="" class="navbar-brand d-flex align-items-center" data-toggle="modal" data-target="#addModelModal">
@@ -103,13 +103,13 @@
                 {{ model_form.hidden_tag() }}
                 <div class="modal-body">
                     <div class="container-fluid bd-example-row">
-                        <h5>Model parameters</h5><br>
                         <div class="col">
                             {{ model_form.name.label }}<br>
                             {{ model_form.name(size=20, class="form-control") }}
                         </div>
-                        <h5>Train data</h5><br>
+                        <br>
                         <div class="col">
+                            <label>Train data</label>
                             <div class="input-group mb-3">
                                 <div class="input-group-prepend">
                                     <label class="input-group-text" for="dataSourceOptionSelect">Data source</label>
