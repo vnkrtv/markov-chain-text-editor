@@ -75,6 +75,7 @@ function autocomplete(inp, arr, t9ApiURL) {
     }
 
     function updateT9Phrases() {
+        let indexName = $('#model-select').selected().value;
         let val = textInput.value.toString();
         let phraseList = val.split(" ");
         let wordsCount = parseInt(firstWordsInput.value);
@@ -89,6 +90,7 @@ function autocomplete(inp, arr, t9ApiURL) {
         console.log('bufArray: ', bufArray);
         console.log('beginning: ', beginning);
         $.post(apiURL, {
+            indexName: indexName,
             beginning: beginning.toLowerCase(),
             firstWordsCount: wordsCount,
             phraseLength: phraseLenInput.value,

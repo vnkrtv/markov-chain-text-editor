@@ -76,7 +76,7 @@ class TextGenerator:
         if self.use_ngrams:
             train_corpus = list(TextProcessor.get_ngram_gen(input_text, self.ngram_size))
         else:
-            train_corpus = list(TextProcessor.get_text_gen(input_text))
+            train_corpus = list(TextProcessor.get_words_gen(input_text))
 
         self.encoder = WordsEncoder()
         encoded_train_corpus = self.encoder.fit_encode(train_corpus)

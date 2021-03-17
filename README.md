@@ -1,10 +1,10 @@
-# markov-chain-text-editor
+# smart-text-editor
 
-[![Build Status](https://travis-ci.com/vnkrtv/markov-chain-text-editor.svg?branch=master)](https://travis-ci.com/vnkrtv/markov-chain-text-editor)
+[![Build Status](https://travis-ci.com/vnkrtv/smart-text-editor.svg?branch=master)](https://travis-ci.com/vnkrtv/markov-chain-text-editor)
 
 ## Description  
 
-Web application for editing text documents with support for intelligent typing based on Markov chains.
+Web application for editing text documents with support for intelligent typing based on relevant search in Elasticsearch.
 
 ## Installation  
 

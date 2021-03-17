@@ -6,11 +6,12 @@ from flask import render_template, jsonify, request, redirect, url_for, flash
 from flask.views import MethodView
 from flask_login import login_user, logout_user, login_required, current_user
 
+from engine.markov.utils import TextProcessor
 from app import app, db, csrf, utils
 from .models import (
-    User, Document, MarkovModel)
+    User, Document, ModelIndex)
 from .utils import (
-    get_model, get_text_corpus_from_file, get_text_corpus_from_postgres, get_msg_stack, get_elastic_engine)
+    get_text_corpus_from_file, get_text_corpus_from_postgres, get_elastic_engine)
 from .forms import (
     LoginForm, RegistrationForm, DocumentForm, ModelForm)
 
@@ -50,11 +51,8 @@ def document(document_id):
             db.session.commit()
             flash("Document '%s' has been successfully updated." % doc.title)
             return redirect(url_for('index'))
-        models = MarkovModel.query.all()
+        models = ModelIndex.query.all()
         if len(models):
-            # if not get_model():
-            #     model = models[0]
-            #     model.load()
             return render_template('editor.html', title=doc.title, doc=doc, form=form)
         else:
             flash("No available models found. Add new model to start working with documents.")
@@ -96,11 +94,9 @@ class IndexView(MethodView):
                     flash('Data source must be specified for added model.')
                     return self.get()
 
-                model = MarkovModel.train(train_corpus=train_corpus,
-                                          model_name=model_form.name.data,
-                                          state_size=model_form.state_size.data,
-                                          ngram_size=model_form.ngram_size.data)
-                model.load()
+                model = ModelIndex.add(
+                    train_sentences=(' '.join(words) for words in TextProcessor.get_words_gen(train_corpus)),
+                    model_name=model_form.name.data)
                 db.session.add(model)
                 db.session.commit()
                 flash("New model '%s' was successfully added." % model.name)
@@ -135,97 +131,77 @@ class LoginView(MethodView):
         return render_template(self.template, title=self.title, form=form)
 
 
-class GeneratorView(MethodView):
-    title = 'Phrases generator'
-    template = 'generate.html'
-
-    def get(self):
-        if not current_user.is_authenticated:
-            return redirect(url_for('index'))
-        models = MarkovModel.query.all()
-        return render_template(self.template, title=self.title, models=models)
-
-    def post(self):
-        return self.get()
-
-
-class GeneratorAPI(MethodView):
-    decorators = [csrf.exempt]
-    remove_punctuation = re.compile(r'[^a-zA-Zа-яА-Я ]')
-
-    def get(self):
-        return redirect(url_for('index'))
-
-    def post(self):
-        model_id = int(request.form['modelID'])
-        phrase = request.form['phrase']
-        samples_num = int(request.form['samplesNum'])
-
-        model = MarkovModel.query.get(model_id)
-        model.load()
-        processed_phrase = self.remove_punctuation.sub('', phrase).strip()
-
-        return jsonify({
-            'samples': model.generate_samples(processed_phrase, samples_num)
-        })
+# class GeneratorView(MethodView):
+#     title = 'Phrases generator'
+#     template = 'generate.html'
+#
+#     def get(self):
+#         if not current_user.is_authenticated:
+#             return redirect(url_for('index'))
+#         models = ModelIndex.query.all()
+#         return render_template(self.template, title=self.title, models=models)
+#
+#     def post(self):
+#         return self.get()
+#
+#
+# class GeneratorAPI(MethodView):
+#     decorators = [csrf.exempt]
+#     remove_punctuation = re.compile(r'[^a-zA-Zа-яА-Я ]')
+#
+#     def get(self):
+#         return redirect(url_for('index'))
+#
+#     def post(self):
+#         model_id = int(request.form['modelID'])
+#         phrase = request.form['phrase']
+#         samples_num = int(request.form['samplesNum'])
+#
+#         model = ModelIndex.query.get(model_id)
+#         model.load()
+#         processed_phrase = self.remove_punctuation.sub('', phrase).strip()
+#
+#         return jsonify({
+#             'samples': model.generate_samples(processed_phrase, samples_num)
+#         })
 
 
 class T9API(MethodView):
     decorators = [csrf.exempt]
     remove_punctuation = re.compile(r'[^a-zA-Zа-яА-Я ]')
 
-    def get(self):
-        model = utils.get_model()
-        words = [word for word in model.encoder.word2int if isinstance(word, str)]
-        return jsonify({
-            'words': words
-        })
+    # def get(self):
+    #     model = utils.get_model()
+    #     words = [word for word in model.encoder.word2int if isinstance(word, str)]
+    #     return jsonify({
+    #         'words': words
+    #     })
 
     def post(self):
-        es = get_elastic_engine()
         phrase = self.remove_punctuation.sub('', request.form['beginning'])
-        sentences = es.get(index_name='t9_app_3', phrase=phrase)
+        es = get_elastic_engine()
+        sentences = es.get(index_name=request.form['indexName'], phrase=phrase)
         print('phrase: ', phrase, '\nsentences: ', sentences)
         return jsonify({
-                'sentences': sentences
-            })
-        # msg_stack = get_msg_stack()
-        # msg_stack.push({
-        #     'beginning': self.remove_punctuation.sub('', request.form['beginning']).strip(),
-        #     'first_words_count': int(request.form['firstWordsCount']),
-        #     'phrase_len': int(request.form['phraseLength'])
-        # })
-        # if not msg_stack.locked:
-        #     msg_stack.lock()
-        #     model = utils.get_model()
-        #     obj = msg_stack.pop()
-        #     msg_stack.clear()
-        #     sentences = model.make_sentences_for_t9(obj['beginning'], obj['first_words_count'], obj['phrase_len'])
-        #     msg_stack.unlock()
-        #     logging.info(str(datetime.now()) + ' msg_stack size: ' + str(len(msg_stack.stack)))
-        #     logging.info(str(datetime.now()) + ' Send!')
-        #     return jsonify({
-        #         'sentences': sentences
-        #     })
-        # else:
-        #     return jsonify({})
+            'sentences': sentences
+        })
 
 
 class ModelsAPI(MethodView):
     decorators = [csrf.exempt]
 
     def get(self):
-        models = MarkovModel.query.all()
+        models = ModelIndex.query.all()
         return jsonify({
             'models': [model.name for model in models]
         })
 
-    def post(self):
-        model = MarkovModel.query.filter_by(name=request.form['modelName']).first()
-        model.load()
-        return jsonify({
-            'success': "ok"
-        })
+    # def post(self):
+    #     model = ModelIndex.query.filter_by(name=request.form['modelName']).first()
+    #     model.load()
+    #     return jsonify({
+    #         'success': "ok"
+    #     })
 
 
 app.add_url_rule('/documents',
@@ -234,15 +210,15 @@ app.add_url_rule('/documents',
 app.add_url_rule('/',
                  view_func=LoginView.as_view('login'),
                  methods=['POST', 'GET'])
-app.add_url_rule('/generator',
-                 view_func=GeneratorView.as_view('generator'),
-                 methods=['POST', 'GET'])
+# app.add_url_rule('/generator',
+#                  view_func=GeneratorView.as_view('generator'),
+#                  methods=['POST', 'GET'])
 app.add_url_rule('/t9',
                  view_func=T9API.as_view('t9'),
                  methods=['POST', 'GET'])
-app.add_url_rule('/gen_api',
-                 view_func=GeneratorAPI.as_view('gen_api'),
-                 methods=['POST', 'GET'])
+# app.add_url_rule('/gen_api',
+#                  view_func=GeneratorAPI.as_view('gen_api'),
+#                  methods=['POST', 'GET'])
 app.add_url_rule('/api/models',
                  view_func=ModelsAPI.as_view('models_api'),
                  methods=['POST', 'GET'])

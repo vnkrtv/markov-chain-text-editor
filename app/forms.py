@@ -4,7 +4,7 @@ from wtforms import (
 from wtforms.validators import (
     ValidationError, DataRequired, EqualTo, NumberRange)
 
-from app.models import User, Document, MarkovModel
+from app.models import User, Document, ModelIndex
 
 
 class LoginForm(FlaskForm):
@@ -39,12 +39,9 @@ class RegistrationForm(FlaskForm):
 
 class ModelForm(FlaskForm):
     name = StringField('Model name', validators=[DataRequired()])
-    state_size = IntegerField('State size', validators=[NumberRange(min=1)], default=3)
-    use_ngrams = BooleanField('Use ngrams', default=False)
-    ngram_size = IntegerField('Ngrams size', validators=[NumberRange(min=1)], default=3)
     submit = SubmitField('Add')
 
     def validate_name(self, name):
-        model = MarkovModel.query.filter_by(name=name.data).first()
+        model = ModelIndex.query.filter_by(name=name.data).first()
         if model is not None:
             raise ValidationError('Please use a different model name.')

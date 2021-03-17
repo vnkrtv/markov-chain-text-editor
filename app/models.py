@@ -3,9 +3,9 @@ from typing import Iterable, List
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
-from app import db, login
-from engine.markov import NgrammTextGenerator
-from .utils import set_model, get_model
+from app import db, login, utils
+from config import Config
+from engine.elastic import ElasticEngine
 
 
 @login.user_loader
@@ -42,57 +42,24 @@ class Document(db.Model):
         return '<Document: {}>'.format(self.title)
 
 
-class MarkovModel(db.Model):
+class ModelIndex(db.Model):
     __tablename__ = 'models'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), unique=True)
-    state_size = db.Column(db.Integer)
-    ngram_size = db.Column(db.Integer)
 
     @classmethod
-    def train(cls,
-              train_corpus: Iterable,
-              model_name: str,
-              state_size: int,
-              ngram_size: int):
-        model = NgrammTextGenerator.train(model_name=model_name,
-                                          train_text=train_corpus,
-                                          state_size=state_size,
-                                          ngram_size=ngram_size)
-        set_model(model)
-        return cls(name=model_name,
-                   state_size=state_size,
-                   ngram_size=ngram_size)
-
-    def load(self):
-        model = get_model()
-        if not model or model.name != self.name:
-            model = NgrammTextGenerator.load(model_name=self.name)
-            set_model(model)
+    def add(cls, train_sentences: Iterable[str], model_name: str):
+        es = ElasticEngine(host=Config.ELASTIC_HOST)
+        es.add_index(name=model_name,
+                     number_of_shards=Config.ELASTIC_SHARDS_NUMBER,
+                     number_of_replicas=Config.ELASTIC_REPLICAS_NUMBER)
+        for sentence in train_sentences:
+            es.add_doc(index_name=model_name, text=sentence)
+        return cls(name=model_name)
 
     def generate_samples(self, beginning: str, samples_num: int) -> List[str]:
-        tries_count = samples_num * 2
-        counter = 0
-
-        model = get_model()
-        phrases = set()
-        for i in range(samples_num):
-            try:
-                phrase = model.make_sentence_with_start(beginning)
-                print(phrase)
-                if phrase:
-                    words_list = phrase.split()
-                    if 1 < len(words_list):
-                        phrases.add(" ".join(words_list))
-                counter += 1
-                if counter > tries_count:
-                    break
-            except Exception as e:
-                print(e)
-        return list(phrases)
+        es = utils.get_elastic_engine()
+        return es.get(index_name=self.name, phrase=beginning, count=samples_num)
 
     def __repr__(self) -> str:
-        return '<Markov model: %s, state_size=%s, ngram_size=%s>' % (
-            self.name,
-            self.state_size,
-            self.ngram_size)
+        return '<ModelIndex: %s>' % self.name

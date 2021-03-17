@@ -24,7 +24,7 @@ class TextProcessor:
                 yield sentence
 
     @classmethod
-    def get_text_gen(cls, text_gen: Iterable) -> Generator:
+    def get_words_gen(cls, text_gen: Iterable) -> Generator:
         for sentence in cls.get_sentences_gens(text_gen):
             yield [_.text for _ in razdel.tokenize(sentence)]
 

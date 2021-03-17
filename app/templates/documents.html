@@ -6,9 +6,9 @@
     <a href="" class="navbar-brand d-flex align-items-center" data-toggle="modal" data-target="#newDocModal">
         <img src='{{ add_doc_icon() }}'>&nbsp;New doc
     </a>
-    <a href="{{ url_for('generator') }}" class="navbar-brand d-flex align-items-center">
+    <!--a href="{{ url_for('generator') }}" class="navbar-brand d-flex align-items-center">
         <img src='{{ gears_icon() }}'>&nbsp;Generate phrases
-    </a>
+    </a-->
     <a href="" class="navbar-brand d-flex align-items-center" data-toggle="modal" data-target="#addModelModal">
         <img src='{{ add_icon() }}'>&nbsp;Add model
     </a>
@@ -106,11 +106,7 @@
                         <h5>Model parameters</h5><br>
                         <div class="col">
                             {{ model_form.name.label }}<br>
-                            {{ model_form.name(size=20, class="form-control") }}<br>
-                            {{ model_form.state_size.label }}<br>
-                            {{ model_form.state_size(type="number", min=1, size=20, class="form-control") }}<br>
-                            {{ model_form.ngram_size.label(id="ngram_size_label") }}<br>
-                            {{ model_form.ngram_size(type="number", min=1, size=20, class="form-control") }}<br>
+                            {{ model_form.name(size=20, class="form-control") }}
                         </div>
                         <h5>Train data</h5><br>
                         <div class="col">
