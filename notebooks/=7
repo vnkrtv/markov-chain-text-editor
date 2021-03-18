@@ -1,0 +1,2 @@
+Requirement already satisfied: elasticsearch in /home/vnkrtv/anaconda3/lib/python3.7/site-packages (6.8.2)
+Requirement already satisfied: urllib3>=1.21.1 in /home/vnkrtv/anaconda3/lib/python3.7/site-packages (from elasticsearch) (1.25.8)

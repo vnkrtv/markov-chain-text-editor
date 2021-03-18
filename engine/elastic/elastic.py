@@ -5,7 +5,6 @@ from elasticsearch import Elasticsearch
 
 class ElasticEngine:
     es: Elasticsearch
-    doc_type: str = "sentence"
 
     def __init__(self, host: str, **kwargs):
         self.es = Elasticsearch(host=host, **kwargs)
@@ -38,20 +37,18 @@ class ElasticEngine:
                 }
             },
             "mappings": {
-                self.doc_type: {
-                    "properties": {
-                        "text": {
-                            "type": "text",
-                            "analyzer": "t9_analyzer",
-                            "search_analyzer": "standard"
-                        }
+                "properties": {
+                    "text": {
+                        "type": "text",
+                        "analyzer": "t9_analyzer",
+                        "search_analyzer": "standard"
                     }
                 }
             }
         })
 
     def add_doc(self, index_name: str, text: str):
-        self.es.index(index=index_name, doc_type=self.doc_type, body={
+        self.es.index(index=index_name, body={
             'text': text
         })
 
@@ -60,7 +57,6 @@ class ElasticEngine:
             doc['_source']['text']
             for doc in self.es.search(
                 index=index_name,
-                doc_type=self.doc_type,
                 body={
                     "query": {
                         "match_phrase": {

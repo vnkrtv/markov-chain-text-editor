@@ -5,7 +5,7 @@
 
 ## Description  
 
-Web application for editing text documents with support for intelligent typing based on relevant search in Elasticsearch.
+Web application for editing text documents with support for intelligent typing based on relevant search in Elasticsearch(>7).
 
 ## Installation  
 
