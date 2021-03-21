@@ -25,6 +25,9 @@ function autocomplete(inp, arr, t9ApiURL) {
         let phraseLen = parseInt(phraseLenInput.value);
 
         let phraseList = val.split(" ");
+        if (phraseList[phraseList.length - 1] === '') {
+            phraseList = phraseList.slice(0, phraseList.length - 1);
+        }
         let wordsCount = parseInt(firstWordsInput.value);
         let bufArray = [];
         let count = (wordsCount < phraseList.length ? wordsCount : phraseList.length);
@@ -78,6 +81,9 @@ function autocomplete(inp, arr, t9ApiURL) {
         let indexName = document.getElementById('model-select').value;
         let val = textInput.value.toString();
         let phraseList = val.split(" ");
+        if (phraseList[phraseList.length - 1] === '') {
+            phraseList = phraseList.slice(0, phraseList.length - 1);
+        }
         let wordsCount = parseInt(firstWordsInput.value);
         let bufArray = [];
         let count = (wordsCount < phraseList.length ? wordsCount : phraseList.length);
