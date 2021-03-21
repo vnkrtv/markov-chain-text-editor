@@ -177,7 +177,7 @@ class T9API(MethodView):
 
     def post(self):
         phrase = self.remove_punctuation.sub('', request.form['beginning'])
-        es = get_elastic_engine()
+        es = utils.get_elastic_engine()
         sentences = es.get(index_name=request.form['indexName'], phrase=phrase)
         print('phrase: ', phrase, '\nsentences: ', sentences)
         return jsonify({
