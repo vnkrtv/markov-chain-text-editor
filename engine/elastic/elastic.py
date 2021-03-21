@@ -1,13 +1,21 @@
 from typing import List, Dict, Any
 
 from elasticsearch import Elasticsearch
+from elasticsearch.exceptions import ElasticsearchException
 
 
 class ElasticEngine:
     es: Elasticsearch
 
-    def __init__(self, host: str, **kwargs):
-        self.es = Elasticsearch(host=host, **kwargs)
+    def __init__(self, es: Elasticsearch):
+        self.es = es
+
+    @classmethod
+    def connect(cls, host: str, port: Any, user: str, password: str):
+        es = Elasticsearch(f'http://{user}:{password}@{host}:{port}/')
+        if not es.ping():
+            raise ElasticsearchException
+        return cls(es)
 
     def add_index(self, name: str, number_of_shards: int = 1, number_of_replicas: int = 2):
         self.es.indices.create(index=name, body={

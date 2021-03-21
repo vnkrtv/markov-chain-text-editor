@@ -75,7 +75,7 @@ function autocomplete(inp, arr, t9ApiURL) {
     }
 
     function updateT9Phrases() {
-        let indexName = $('#model-select').selected().value;
+        let indexName = document.getElementById('model-select').value;
         let val = textInput.value.toString();
         let phraseList = val.split(" ");
         let wordsCount = parseInt(firstWordsInput.value);

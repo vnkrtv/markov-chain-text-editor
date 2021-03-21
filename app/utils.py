@@ -5,7 +5,11 @@ from config import Config
 from engine.markov import PostgresStorage
 from engine.elastic import ElasticEngine
 
-__es: ElasticEngine = ElasticEngine(host=Config.ELASTIC_HOST)
+__es: ElasticEngine = ElasticEngine.connect(
+    host=Config.ELASTIC_HOST,
+    port=Config.ELASTIC_PORT,
+    user=Config.ELASTIC_USER,
+    password=Config.ELASTIC_PASS)
 
 
 def get_elastic_engine() -> ElasticEngine:

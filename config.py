@@ -5,6 +5,9 @@ import pathlib
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'you-will-never-guess')
     ELASTIC_HOST = os.environ.get('ELASTIC_HOST', 'localhost')
+    ELASTIC_PORT = os.environ.get('ELASTIC_PORT', 9200)
+    ELASTIC_USER = os.environ.get('ELASTIC_USER', 'elastic')
+    ELASTIC_PASS = os.environ.get('ELASTIC_PASS', 'elastic')
     ELASTIC_SHARDS_NUMBER = os.environ.get('ELASTIC_SHARDS_NUMBER', 1)
     ELASTIC_REPLICAS_NUMBER = os.environ.get('ELASTIC_REPLICAS_NUMBER', 2)
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///' + str(pathlib.Path(__file__).parent / 'app.db')
