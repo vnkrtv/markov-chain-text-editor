@@ -9,7 +9,7 @@ flask db init
 flask db migrate
 flask db upgrade
 
-# 15 minutes timeout - for extra large models
-TIMEOUT=900
+# 30 minutes timeout - for extra large models
+TIMEOUT=1800
 
 gunicorn wsgi:app --bind 0.0.0.0:5000 --timeout $TIMEOUT
