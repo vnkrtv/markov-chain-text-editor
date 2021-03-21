@@ -1,7 +1,7 @@
 from typing import List, Dict, Any
 
 from elasticsearch import Elasticsearch
-from elasticsearch.exceptions import ElasticsearchException
+from elasticsearch.exceptions import ConnectionError
 
 
 class ElasticEngine:
@@ -14,7 +14,7 @@ class ElasticEngine:
     def connect(cls, host: str, port: Any, user: str, password: str):
         es = Elasticsearch(f'http://{user}:{password}@{host}:{port}/')
         if not es.ping():
-            raise ElasticsearchException
+            raise ConnectionError('ping failed')
         return cls(es)
 
     def add_index(self, name: str, number_of_shards: int = 1, number_of_replicas: int = 2):

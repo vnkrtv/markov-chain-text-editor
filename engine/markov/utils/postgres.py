@@ -10,7 +10,7 @@ class PostgresStorage:
 
     conn: psycopg2.extensions.connection
 
-    def __init__(self, conn):
+    def __init__(self, conn: psycopg2.extensions.connection):
         self.conn = conn
 
     @classmethod

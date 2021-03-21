@@ -10,8 +10,6 @@ from engine.markov.utils import TextProcessor
 from app import app, db, csrf, utils
 from .models import (
     User, Document, ModelIndex)
-from .utils import (
-    get_text_corpus_from_file, get_text_corpus_from_postgres, get_elastic_engine)
 from .forms import (
     LoginForm, RegistrationForm, DocumentForm, ModelForm)
 
@@ -87,9 +85,9 @@ class IndexView(MethodView):
             try:
                 data_source = request.form.get('data_source')
                 if data_source == 'file':
-                    train_corpus = get_text_corpus_from_file(request)
+                    train_corpus = utils.get_text_corpus_from_file(request)
                 elif data_source == 'postgres':
-                    train_corpus = get_text_corpus_from_postgres(request.form)
+                    train_corpus = utils.get_text_corpus_from_postgres(request.form)
                 else:
                     flash('Data source must be specified for added model.')
                     return self.get()

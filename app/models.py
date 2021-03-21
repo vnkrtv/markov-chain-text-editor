@@ -5,7 +5,6 @@ from flask_login import UserMixin
 
 from app import db, login, utils
 from config import Config
-from engine.elastic import ElasticEngine
 
 
 @login.user_loader
@@ -49,7 +48,7 @@ class ModelIndex(db.Model):
 
     @classmethod
     def add(cls, train_sentences: Iterable[str], model_name: str):
-        es = ElasticEngine(host=Config.ELASTIC_HOST)
+        es = utils.get_elastic_engine()
         es.add_index(name=model_name,
                      number_of_shards=Config.ELASTIC_SHARDS_NUMBER,
                      number_of_replicas=Config.ELASTIC_REPLICAS_NUMBER)
