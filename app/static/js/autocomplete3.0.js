@@ -130,8 +130,9 @@ function autocomplete(inp, arr, t9ApiURL) {
             if (currentFocus > -1) {
                 if (activeItems) activeItems[currentFocus].click();
             }
-        } else if (e.keyCode === 220) {
-            console.log(arr);
+        } else if (e.keyCode === 17) {
+            currentFocus = 0;
+            addActive(activeItems);
         }
     });
 
