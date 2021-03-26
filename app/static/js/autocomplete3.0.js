@@ -9,8 +9,10 @@ function autocomplete(inp, arr, t9ApiURL) {
     let activeItems;
 
     function updateLists() {
-        let phrasesContainer, phraseInput
-        let val = textInput.value;
+        let phrasesContainer, phraseInput;
+        let cursorPosition = textInput['selectionStart'];
+        let val = textInput.value.substr(0, cursorPosition);
+        let ending = textInput.value.substr(cursorPosition);
         closeAllLists();
         if (!val) {
             return false;
@@ -60,8 +62,11 @@ function autocomplete(inp, arr, t9ApiURL) {
                         inp.value += (phraseList[i] + ' ');
                     }
                     let clickedValue = this.getElementsByTagName("input")[0].value;
-                    inp.value +=  clickedValue.substr(0, clickedValue.length - 1);
+                    inp.value += clickedValue.substr(0, clickedValue.length - 1);
+                    let selectionStart = inp.value.length;
+                    inp.value += ending;
                     closeAllLists();
+                    textInput.setSelectionRange(selectionStart, selectionStart);
                 });
                 phrasesContainer.appendChild(phraseInput);
             }
@@ -79,7 +84,8 @@ function autocomplete(inp, arr, t9ApiURL) {
 
     function updateT9Phrases() {
         let indexName = document.getElementById('model-select').value;
-        let val = textInput.value.toString();
+        let cursorPosition = textInput['selectionStart'];
+        let val = textInput.value.substr(0, cursorPosition);
         let phraseList = val.split(" ");
         if (phraseList[phraseList.length - 1] === '') {
             phraseList = phraseList.slice(0, phraseList.length - 1);
@@ -131,7 +137,7 @@ function autocomplete(inp, arr, t9ApiURL) {
                 if (activeItems) activeItems[currentFocus].click();
             }
         } else if (e.keyCode === 17) {
-            currentFocus = 0;
+            currentFocus++;
             addActive(activeItems);
         }
     });
