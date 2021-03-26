@@ -27,7 +27,8 @@ function autocomplete(inp, arr, t9ApiURL) {
         let phraseLen = parseInt(phraseLenInput.value);
 
         let phraseList = val.split(" ");
-        if (phraseList[phraseList.length - 1] === '') {
+        let isNewWord = (phraseList[phraseList.length - 1] === '')
+        if (isNewWord) {
             phraseList = phraseList.slice(0, phraseList.length - 1);
         }
         let wordsCount = parseInt(firstWordsInput.value);
@@ -38,14 +39,21 @@ function autocomplete(inp, arr, t9ApiURL) {
         }
         let beginning = bufArray.join(' ');
 
+        let phraseSet = new Set();
         for (let i = 0; i < arr.length; i++) {
             let phraseWords = arr[i].split(" ");
             let phrase = '';
-            for (let i = 0; i < (phraseWords.length - 1 < phraseLen ? phraseWords.length - 1 : phraseLen); i++) {
+            let startIdx = (isNewWord ? 1 : 0);
+            let endIdx = (phraseWords.length - 1 < phraseLen ? phraseWords.length - 1 : phraseLen) + startIdx;
+            for (let i = startIdx; i < endIdx; i++) {
                 phrase += (phraseWords[i] + " ");
             }
-            if (phrase.substr(0, beginning.length).toLowerCase() === beginning.toLowerCase()) {
-                let valueLength = beginning.length;
+            if (phraseSet.has(phrase) || phrase.length === 0) {
+                continue
+            }
+            phraseSet.add(phrase);
+            if ((phrase.substr(0, beginning.length).toLowerCase() === beginning.toLowerCase()) || isNewWord) {
+                let valueLength = isNewWord ? 0 : beginning.length;
 
                 phraseInput = document.createElement("div");
                 phraseInput.className = 'form-control';
@@ -58,7 +66,7 @@ function autocomplete(inp, arr, t9ApiURL) {
 
                 phraseInput.addEventListener("click", function (e) {
                     inp.value = '';
-                    for (let i = 0; i < phraseList.length - count; i++) {
+                    for (let i = 0; i < phraseList.length - count + (isNewWord ? 1 : 0); i++) {
                         inp.value += (phraseList[i] + ' ');
                     }
                     let clickedValue = this.getElementsByTagName("input")[0].value;
@@ -97,18 +105,18 @@ function autocomplete(inp, arr, t9ApiURL) {
             bufArray.push(phraseList[phraseList.length - count + i]);
         }
         let beginning = bufArray.join(' ');
-        console.log('count: ', count);
-        console.log('phraseList: ', phraseList);
-        console.log('bufArray: ', bufArray);
-        console.log('beginning: ', beginning);
+        console.debug('count: ', count);
+        console.debug('phraseList: ', phraseList);
+        console.debug('bufArray: ', bufArray);
+        console.debug('beginning: ', beginning);
         $.post(apiURL, {
             indexName: indexName,
             beginning: beginning.toLowerCase(),
             firstWordsCount: wordsCount,
             phraseLength: phraseLenInput.value,
         }).done(function (response) {
-            if (response.sentences !== undefined) {
-                arr = response.sentences;
+            if (response["sentences"] !== undefined) {
+                arr = response["sentences"];
                 console.log('arr: ', arr);
                 updateLists();
             }
@@ -124,11 +132,10 @@ function autocomplete(inp, arr, t9ApiURL) {
     }
 
     inp.addEventListener("keydown", function (e) {
-        console.log(e.keyCode);
         if (e.keyCode === 40) {
             currentFocus++;
             addActive(activeItems);
-        } else if (e.keyCode === 38) { //up
+        } else if (e.keyCode === 38) {
             currentFocus--;
             addActive(activeItems);
         } else if (e.keyCode === 13) {
