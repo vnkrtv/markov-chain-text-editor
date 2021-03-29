@@ -8,6 +8,7 @@ markov/models/*.json
 migrations/
 instance
 notebooks/.ipynb_checkpoints
+notebooks/training_data
 notebooks/NGrammMarkov2.0.ipynb
 notebooks/mnogogramm.ipynb
 __pycache__

@@ -3,6 +3,7 @@ import re
 from typing import Generator, Iterable, Optional, List, Tuple, Dict, Any
 
 import textract
+import pdftotext
 from textract.exceptions import ExtensionNotSupported
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
@@ -48,10 +49,13 @@ def get_text_corpus_from_postgres(request_dict: Dict[str, Any]) -> Iterable[str]
 
 def get_text_corpus_from_file(request, filename: str) -> Iterable[str]:
     file = request.files[filename]
+    if file.filename.endswith('.pdf'):
+        pdf = pdftotext.PDF(file)
+        return (page.replace('\n', ' ') for page in pdf)
     filepath = os.path.join(app.instance_path, Config.TMP_DATA_FOLDER, file.filename)
     file.save(filepath)
     content = textract.process(filepath)
     os.remove(filepath)
-    return (text.replace('\n', '') for text in content.decode().split('\n\n'))
+    return (text.replace('\n', ' ') for text in content.decode().split('\n\n'))
 
 # def get_text_corpus_from_folder()
