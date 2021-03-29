@@ -63,6 +63,12 @@
 </div>
 
 <script type="text/javascript">
+    function clearForms() {
+        const elements = document.getElementsByClassName('form-control');
+        for (const element of elements) {
+            element.value = '';
+        }
+    }
     document.getElementById("loadingContainer").style.display = "none";
 </script>
 </body>

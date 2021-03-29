@@ -1,6 +1,13 @@
+import os
 import re
 from typing import Generator, Iterable, Optional, List, Tuple, Dict, Any
 
+import textract
+from textract.exceptions import ExtensionNotSupported
+from werkzeug.datastructures import FileStorage
+from werkzeug.utils import secure_filename
+
+from app import app
 from config import Config
 from engine.markov import PostgresStorage
 from engine.elastic import ElasticEngine
@@ -39,7 +46,12 @@ def get_text_corpus_from_postgres(request_dict: Dict[str, Any]) -> Iterable[str]
     return (row[0] for row in pg_storage.exec_query(query, params))
 
 
-def get_text_corpus_from_file(request) -> Iterable[str]:
-    file = request.files['train_file']
-    separator = request.form.get('text_separator')
-    return (text for text in file.read().decode('utf-8').split(separator))
+def get_text_corpus_from_file(request, filename: str) -> Iterable[str]:
+    file = request.files[filename]
+    filepath = os.path.join(app.instance_path, Config.TMP_DATA_FOLDER, file.filename)
+    file.save(filepath)
+    content = textract.process(filepath)
+    os.remove(filepath)
+    return (text.replace('\n', '') for text in content.decode().split('\n\n'))
+
+# def get_text_corpus_from_folder()

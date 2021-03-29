@@ -1,10 +1,172 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-</body>
-</html>
+{% block navbar %}
+
+<div class="d-flex justify-content-between">
+    <a href="" class="navbar-brand d-flex align-items-center" data-toggle="modal" data-target="#addModelModal">
+        <img src='{{ add_icon() }}'>&nbsp;Add model
+    </a>
+    <div class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle navbar-brand d-flex align-items-center" href="" id="navbarDropdownMenuLink"
+           role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <img src='{{ user_icon() }}'>&nbsp;<strong>{{ current_user.username }}</strong>
+        </a>
+        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+            <a class="dropdown-item" href="{{ url_for('index') }}">My docs</a>
+            <a class="dropdown-item" href="{{ url_for('models') }}">Models</a>
+            <a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </div>
+</div>
+{% endblock navbar %}
+
+{% block content %}
+
+<header class="header">
+    <div class='jumbotron'>
+        {% for message in get_flashed_messages() %}
+        <div class="alert alert-light" role="alert" title="Click to close alert" onclick='this.style.display = "none"'>
+            {{ message }}
+        </div>
+        {% endfor %}
+        <table class="table table-dark table-hover">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Name</th>
+                <th scope="col">Index name</th>
+                <th scope="col">Sentences in index</th>
+                <th scope="col">Size</th>
+                <th scope="col">Update</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for model in models %}
+            <tr>
+                <th scope="row">{{ loop.index }}</th>
+                <td>{{ model.name }}</td>
+                <td>{{ model.index_name }}</td>
+                <td>{{ models_stats[model.index_name].doc_count }}</td>
+                <td>{{ models_stats[model.index_name].size }}</td>
+                <td><a href="{{ url_for('document', document_id=1) }}" type="button" class="btn btn-light btn-sm"
+                       onclick="document.getElementById('loading-container').style.display = ''">Update »</a></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</header>
+
+<div id="addModelModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="gridModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="gridModalLabel">New model</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="" method="post" enctype="multipart/form-data">
+                {{ model_form.hidden_tag() }}
+                <div class="modal-body">
+                    <div class="container-fluid bd-example-row">
+                        <div class="col">
+                            {{ model_form.name.label }}<br>
+                            {{ model_form.name(size=20, class="form-control") }}
+                        </div>
+                        <br>
+                        <div class="col">
+                            <label>Train data</label>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <label class="input-group-text" for="dataSourceOptionSelect">Data source</label>
+                                </div>
+                                <select class="custom-select" id="dataSourceOptionSelect" name="data_source"
+                                        onchange="dataSourceChange()">
+                                    <option value="" selected>Choose...</option>
+                                    <option value="file">Text file</option>
+                                    <option value="postgres">PostgreSQL</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col" id='fileOption'>
+                            <label>Text corpus file</label>
+                            <div class="input-group">
+                                <div class="custom-file">
+                                    <input type="file" name='train_file' class="custom-file-input" id="trainTextFile"
+                                           aria-describedby="trainTextFile" onchange="setFileLabel()">
+                                    <label id="fileLabel" class="custom-file-label" for="trainTextFile">Choose
+                                        file</label>
+                                </div>
+                            </div>
+                            <br>
+                            <label for="textsSeparator">Texts separator</label>
+                            <input type="text" name='text_separator' class="form-control" id="textsSeparator"
+                                   placeholder="<|endoftext|>" value="<|endoftext|>"><br>
+                        </div>
+                        <div class="col" id='pgOption'>
+                            <label for="pgHost">Host</label>
+                            <input type="text" aria-label="Host" name="pg_host" id="pgHost" class="form-control"
+                                   value="localhost"><br>
+                            <label for="pgPort">Port</label>
+                            <input type="number" aria-label="Port" name="pg_port" id="pgPort" class="form-control"
+                                   value="5432" min="1" , max="65535"><br>
+                            <label for="pgDBName">DN name</label>
+                            <input type="text" aria-label="DB" id="pgDBName" name="pg_dbname" class="form-control"
+                                   value="postgres"><br>
+                            <label for="pgUser">User</label>
+                            <input type="text" aria-label="User" id="pgUser" name="pg_user" class="form-control"
+                                   value="postgres"><br>
+                            <label for="pgPassword">Password</label>
+                            <input type="password" aria-label="Password" id="pgPassword" name="pg_password"
+                                   class="form-control" value="postgres"><br>
+                            <label for="queryTextarea" id="queryTextarea">SQL query</label>
+                            <textarea class="form-control" rows='2' id="queryTextarea" name='sql_query'
+                                      placeholder="SELECT text statement">SELECT text &#13;&#10;  FROM tabel_name</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    {{ model_form.submit(class="btn btn-light") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/jquery-3.5.1.js') }}"></script>
+<script type="text/javascript">
+    $(':input[value="Add"]')[0].onclick = () => {
+        document.getElementById('loading-container').style.display = '';
+        $('#addModelModal').hide();
+    };
+
+    const dataSource = document.getElementById("dataSourceOptionSelect");
+    const fileOptionDiv = document.getElementById("fileOption");
+    const pgOptionDiv = document.getElementById("pgOption");
+    const fileLabel = document.getElementById('fileLabel');
+    const fileInput = document.getElementById('trainTextFile');
+
+    fileOptionDiv.style.display = 'none';
+    pgOptionDiv.style.display = 'none';
+
+    const dataSourceChange = () => {
+        if (dataSource.selectedIndex === 1) {
+            fileOptionDiv.style.display = '';
+            pgOptionDiv.style.display = 'none';
+        } else if (dataSource.selectedIndex === 2) {
+            pgOptionDiv.style.display = '';
+            fileOptionDiv.style.display = 'none';
+        } else {
+            pgOptionDiv.style.display = 'none';
+            fileOptionDiv.style.display = 'none';
+        }
+    };
+
+    const setFileLabel = () => {
+        fileLabel.innerText = fileInput.files[0].name;
+    };
+</script>
+
+{% endblock content %}

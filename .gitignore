@@ -6,6 +6,7 @@ venv/
 vevn/
 markov/models/*.json
 migrations/
+instance
 notebooks/.ipynb_checkpoints
 notebooks/NGrammMarkov2.0.ipynb
 notebooks/mnogogramm.ipynb
@@ -16,3 +17,6 @@ users.db
 *.db
 *.json
 *.csv
+*.doc
+*.docx
+*.pdf

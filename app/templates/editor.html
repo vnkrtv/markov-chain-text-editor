@@ -15,6 +15,7 @@
         </a>
           <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
             <a class="dropdown-item" href="{{ url_for('index') }}">My docs</a>
+            <a class="dropdown-item" href="{{ url_for('models') }}">Models</a>
             <a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a>
           </div>
         </div>
@@ -210,8 +211,8 @@
         modelsArr = response['models'];
         for (let model of modelsArr) {
           const modelOption = document.createElement('option');
-          modelOption.value = model;
-          modelOption.innerText = model;
+          modelOption.value = model.index_name;
+          modelOption.innerText = model.name;
           modelSelect.appendChild(modelOption);
         }
     });

@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Iterable, List
+from typing import Iterable, List, Dict, Any
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
@@ -43,22 +43,42 @@ class Document(db.Model):
 
 class ModelIndex(db.Model):
     __tablename__ = 'models'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(128), unique=True)
 
     @classmethod
-    def add(cls, train_sentences: Iterable[str], model_name: str):
+    def get_indices_stats(cls) -> Dict[str, Any]:
         es = utils.get_elastic_engine()
-        es.add_index(name=model_name,
+        return {
+            index_name: {
+                'doc_count': stat['primaries']['docs']['count'],
+                'size': stat['primaries']['store']['size']
+            }
+            for index_name, stat in es.get_indices_stats(index_name='t9-index-*').items()
+        }
+
+    def create_index(self):
+        es = utils.get_elastic_engine()
+        es.add_index(name=self.index_name,
                      number_of_shards=Config.ELASTIC_SHARDS_NUMBER,
                      number_of_replicas=Config.ELASTIC_REPLICAS_NUMBER)
+
+    def update_index(self, train_sentences: Iterable[str]):
+        es = utils.get_elastic_engine()
         for sentence in train_sentences:
-            es.add_doc(index_name=model_name, text=sentence)
-        return cls(name=model_name)
+            es.add_doc(index_name=self.index_name, text=sentence)
 
     def generate_samples(self, beginning: str, samples_num: int) -> List[str]:
         es = utils.get_elastic_engine()
-        return es.get(index_name=self.name, phrase=beginning, count=samples_num)
+        return es.get(index_name=self.index_name, phrase=beginning, count=samples_num)
+
+    def delete_index(self):
+        es = utils.get_elastic_engine()
+        es.delete_index(index_name=self.index_name)
+
+    @property
+    def index_name(self) -> str:
+        return f't9-index-{self.id}'
 
     def __repr__(self) -> str:
         return '<ModelIndex: %s>' % self.name
