@@ -32,24 +32,23 @@
         <table class="table table-dark table-hover">
             <thead>
             <tr>
-                <th scope="col">#</th>
+                <th scope="col">ID</th>
+                <th scope="col">Action</th>
                 <th scope="col">Name</th>
                 <th scope="col">Index name</th>
                 <th scope="col">Sentences in index</th>
                 <th scope="col">Size</th>
-                <th scope="col">Update</th>
             </tr>
             </thead>
             <tbody>
             {% for model in models %}
-            <tr>
-                <th scope="row">{{ loop.index }}</th>
+            <tr onmouseover='showImages(`{{ loop.index }}`)' onmouseout='hideImages(`{{ loop.index }}`)'>
+                <th scope="row">{{ model.id }}</th>
+                <td id="row_{{ loop.index }}"><img id="delImg{{ loop.index }}" title="Delete" src="{{ delete_icon() }}" style="display: none; cursor: pointer;" data-toggle="modal" data-target="#deleteModelModal" onclick='fillDeleteModal("{{ model.id }}", "{{ model.name }}", modelsApiUrl)'>     <img id="updImg{{ loop.index }}" title="Update" src="{{ update_icon() }}" style="display: none; cursor: pointer;" data-toggle="modal" data-target="#updateModelModal" onclick='fillUpdateModal("{{ model.id }}")'></td>
                 <td>{{ model.name }}</td>
                 <td>{{ model.index_name }}</td>
                 <td>{{ models_stats[model.index_name].doc_count }}</td>
                 <td>{{ models_stats[model.index_name].size }}</td>
-                <td><a href="{{ url_for('document', document_id=1) }}" type="button" class="btn btn-light btn-sm"
-                       onclick="document.getElementById('loading-container').style.display = ''">Update »</a></td>
             </tr>
             {% endfor %}
             </tbody>
@@ -135,8 +134,49 @@
     </div>
 </div>
 
+<div id="deleteModelModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="gridModalLabel">Delete model</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id='pDelete'>Are you sure what you want to delele model? This action can't be canceled.</p>
+                <input type="hidden" id="idModelDelete" value="">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" id="deleteModelButton">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="updateModelModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="gridModalLabel">Update model</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                    
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="{{ url_for('static', filename='js/jquery-3.5.1.js') }}"></script>
+<script src="{{ url_for('static', filename='js/models.js') }}"></script>
 <script type="text/javascript">
+    const modelsApiUrl = "{{ url_for('models_api', model_id='model_id') }}";
+
     $(':input[value="Add"]')[0].onclick = () => {
         document.getElementById('loading-container').style.display = '';
         $('#addModelModal').hide();
@@ -167,6 +207,7 @@
     const setFileLabel = () => {
         fileLabel.innerText = fileInput.files[0].name;
     };
+
 </script>
 
 {% endblock content %}

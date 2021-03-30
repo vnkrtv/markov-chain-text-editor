@@ -47,14 +47,14 @@ class ModelIndex(db.Model):
     name = db.Column(db.String(128), unique=True)
 
     @classmethod
-    def get_indices_stats(cls) -> Dict[str, Any]:
+    def get_indices_stats(cls, index_name: str = 't9-index-*') -> Dict[str, Any]:
         es = utils.get_elastic_engine()
         return {
             index_name: {
                 'doc_count': stat['primaries']['docs']['count'],
                 'size': stat['primaries']['store']['size']
             }
-            for index_name, stat in es.get_indices_stats(index_name='t9-index-*').items()
+            for index_name, stat in es.get_indices_stats(index_name=index_name).items()
         }
 
     def create_index(self):

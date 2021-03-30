@@ -61,7 +61,7 @@
         		</div>
         		<br>
         		<div class="row">
-        			<h5>Phrase length</h5> <input class="form-control" value="4" type="number" min="1" max="10" id="phrase-len">
+        			<h5>Phrase length</h5> <input class="form-control" value="1" type="number" min="1" max="10" id="phrase-len">
         		</div>
         	</div>
         </div>
@@ -96,119 +96,15 @@
   </div>
 </div>
 </form>
- <!--script src="{{ url_for('static', filename='js/autocomplete2.0.js') }}"></script>
- <script>
-    const t9ApiUrl = "{{ url_for('t9') }}";
-    const modelsApiUrl = "{{ url_for('models_api') }}";
-    const modelSelect = document.getElementById('model-select');
-
-    let modelsArr = [];
-    $.get(modelsApiUrl).done(function(response) {
-        modelsArr = response['models'];
-        for (let model of modelsArr) {
-          const modelOption = document.createElement('option');
-          modelOption.value = model;
-          modelOption.innerText = model;
-          modelSelect.appendChild(modelOption);
-        }
-    });
-
-    let textarea = document.getElementById("text");
-    let t9Dict = {};
-    $.get(t9ApiUrl).done((response) => {
-        if (response.words) {
-            for (let word of response.words) {
-                let firstLetters = word.slice(0, 2);
-                if (t9Dict[firstLetters[0] + ' ']) {
-                    t9Dict[firstLetters[0] + ' '].push(word);
-                } else {
-                    t9Dict[firstLetters[0] + ' '] = [word];
-                }
-                if (t9Dict[firstLetters]) {
-                    t9Dict[firstLetters].push(word);
-                } else {
-                    t9Dict[firstLetters] = [word];
-                }
-            }
-            for (let key in t9Dict) {
-                t9Dict[key].sort();
-            }
-            autocomplete(textarea, t9Dict);
-        }
-    });
-
-    $('#model-select').on('change', function (e) {
-        let optionSelected = $("option:selected", this);
-        let valueSelected = this.value;
-        loadingContainer.style.display = "";
-        $.post(modelsApiUrl, {
-          modelName: valueSelected,
-        }).done(function(response) {
-          loadingContainer.style.display = "none";
-          $.get(t9ApiUrl).done((response) => {
-            if (response.words) {
-                for (let word of response.words) {
-                    let firstLetters = word.slice(0, 2);
-                    if (t9Dict[firstLetters[0] + ' ']) {
-                        t9Dict[firstLetters[0] + ' '].push(word);
-                    } else {
-                        t9Dict[firstLetters[0] + ' '] = [word];
-                    }
-                    if (t9Dict[firstLetters]) {
-                        t9Dict[firstLetters].push(word);
-                    } else {
-                        t9Dict[firstLetters] = [word];
-                    }
-                }
-                for (let key in t9Dict) {
-                    t9Dict[key].sort();
-                }
-                autocomplete(textarea, t9Dict);
-            }
-        });
-      });
-    });
-  </script-->
-  <!--script src="{{ url_for('static', filename='js/autocomplete1.0.js') }}"></script>
-  <script>
-    const t9ApiUrl = "{{ url_for('t9') }}";
-    const modelsApiUrl = "{{ url_for('models_api') }}";
-    const modelSelect = document.getElementById('model-select');
-
-    let modelsArr = [];
-    $.get(modelsApiUrl).done(function(response) {
-        modelsArr = response['models'];
-        for (let model of modelsArr) {
-          const modelOption = document.createElement('option');
-          modelOption.value = model;
-          modelOption.innerText = model;
-          modelSelect.appendChild(modelOption);
-        }
-    });
-    $('#model-select').on('change', function (e) {
-        let optionSelected = $("option:selected", this);
-        let valueSelected = this.value;
-        loadingContainer.style.display = "";
-        $.post(modelsApiUrl, {
-          modelName: valueSelected,
-        }).done(function(response) {
-          loadingContainer.style.display = "none";
-      });
-    });
-
-    let textarea = document.getElementById("text");
-    let words = [];
-    autocomplete(textarea, words, t9ApiUrl);
-  </script-->
   <script src="{{ url_for('static', filename='js/autocomplete3.0.js') }}"></script>
   <script>
-    const t9ApiUrl = "{{ url_for('t9') }}";
-    const modelsApiUrl = "{{ url_for('models_api') }}";
+    const t9ApiUrl = "{{ url_for('t9_api') }}";
+    const modelsApiUrl = "{{ url_for('models_api', model_id='all') }}";
     const modelSelect = document.getElementById('model-select');
 
     let modelsArr = [];
     $.get(modelsApiUrl).done(function(response) {
-        modelsArr = response['models'];
+        modelsArr = response;
         for (let model of modelsArr) {
           const modelOption = document.createElement('option');
           modelOption.value = model.index_name;

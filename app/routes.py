@@ -1,6 +1,7 @@
 import re
 import logging
 from datetime import datetime, timedelta
+from typing import Optional
 
 from flask import render_template, jsonify, request, redirect, url_for, flash
 from flask.views import MethodView
@@ -169,18 +170,120 @@ class ModelsView(MethodView):
 class ModelsAPI(MethodView):
     decorators = [csrf.exempt]
 
-    def get(self):
-        models = ModelIndex.query.all()
+    def get(self, model_id: str):
+        if model_id == 'all':
+            indices_stats = ModelIndex.get_indices_stats()
+            return jsonify([
+                {
+                    'id': model.id,
+                    'name': model.name,
+                    'index_name': model.index_name,
+                    'doc_count': indices_stats[model.index_name]['doc_count'],
+                    'size': indices_stats[model.index_name]['size']
+                } for model in ModelIndex.query.all()
+            ])
+        model = ModelIndex.query.filter_by(id=int(model_id)).first()
+        index_stats = ModelIndex.get_indices_stats(index_name=model.index_name)
         return jsonify({
-            'models': [{'name': model.name, 'index_name': model.index_name} for model in models]
+            'id': model.id,
+            'name': model.name,
+            'index_name': model.index_name,
+            'doc_count': index_stats[model.index_name]['doc_count'],
+            'size': index_stats[model.index_name]['size']
         })
 
-    # def post(self):
-    #     model = ModelIndex.query.filter_by(name=request.form['modelName']).first()
-    #     model.load()
-    #     return jsonify({
-    #         'success': "ok"
-    #     })
+    def delete(self, model_id: str):
+        model = ModelIndex.query.filter_by(id=int(model_id)).first()
+        if model:
+            db.session.delete(model)
+            db.session.commit()
+            return jsonify({
+                'success': "ok"
+            })
+        return jsonify({
+            'error': "Not found"
+        })
+
+    def put(self, model_id: str):
+        model = ModelIndex.query.filter_by(id=int(model_id)).first()
+        if model:
+            model.name = request.form['name']
+            db.session.commit()
+            try:
+                data_source = request.form.get('data_source')
+                if data_source == 'file':
+                    train_corpus = utils.get_text_corpus_from_file(request, filename='train_file')
+                elif data_source == 'postgres':
+                    train_corpus = utils.get_text_corpus_from_postgres(request.form)
+                elif data_source == 'folder':
+                    train_corpus = utils.get_text_corpus_from_postgres(request.form)
+                else:
+                    return jsonify({
+                        'error': 'Data source must be specified for added model.'
+                    })
+
+                model = ModelIndex(name=request.form['name'])
+                db.session.add(model)
+                db.session.commit()
+
+                model.create_index()
+                model.update_index(
+                    train_sentences=(' '.join(words) for words in TextProcessor.get_words_gen(train_corpus)))
+                return jsonify({
+                    'success': "New model '%s' was successfully added." % model.name
+                })
+            except ExtensionNotSupported as e:
+                return jsonify({
+                    'error': "Error: %s" % str(e)
+                })
+            except Exception as e:
+                db.session.delete(model)
+                db.session.commit()
+                return jsonify({
+                    'error': "Error: %s" % str(e)
+                })
+            return jsonify({
+                'success': f'Model name was successfully updated'
+            })
+        return jsonify({
+            'error': "Not found"
+        })
+
+    def post(self, model_id: str):
+        if model_id == 'new':
+            try:
+                data_source = request.form.get('data_source')
+                if data_source == 'file':
+                    train_corpus = utils.get_text_corpus_from_file(request, filename='train_file')
+                elif data_source == 'postgres':
+                    train_corpus = utils.get_text_corpus_from_postgres(request.form)
+                elif data_source == 'folder':
+                    train_corpus = utils.get_text_corpus_from_postgres(request.form)
+                else:
+                    return jsonify({
+                        'error': 'Data source must be specified for added model.'
+                    })
+
+                model = ModelIndex(name=request.form['name'])
+                db.session.add(model)
+                db.session.commit()
+
+                model.create_index()
+                model.update_index(
+                    train_sentences=(' '.join(words) for words in TextProcessor.get_words_gen(train_corpus)))
+                return jsonify({
+                    'success': "New model '%s' was successfully added." % model.name
+                })
+            except ExtensionNotSupported as e:
+                return jsonify({
+                    'error': "Error: %s" % str(e)
+                })
+            except Exception as e:
+                db.session.delete(model)
+                db.session.commit()
+                return jsonify({
+                    'error': "Error: %s" % str(e)
+                })
 
 
 # class GeneratorView(MethodView):
@@ -224,12 +327,12 @@ app.add_url_rule('/documents',
 app.add_url_rule('/',
                  view_func=LoginView.as_view('login'),
                  methods=['POST', 'GET'])
-app.add_url_rule('/t9',
-                 view_func=T9API.as_view('t9'),
+app.add_url_rule('/api/t9',
+                 view_func=T9API.as_view('t9_api'),
                  methods=['POST', 'GET'])
-app.add_url_rule('/api/models',
+app.add_url_rule('/api/models/<model_id>',
                  view_func=ModelsAPI.as_view('models_api'),
-                 methods=['POST', 'GET'])
+                 methods=['POST', 'GET', 'PUT', 'DELETE'])
 app.add_url_rule('/models',
                  view_func=ModelsView.as_view('models'),
                  methods=['POST', 'GET'])
