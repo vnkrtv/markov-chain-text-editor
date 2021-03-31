@@ -40,7 +40,7 @@
                 <th scope="col">Size</th>
             </tr>
             </thead>
-            <tbody>
+            <tbody id="modelsTBody">
             {% for model in models %}
             <tr onmouseover='showImages(`{{ loop.index }}`)' onmouseout='hideImages(`{{ loop.index }}`)'>
                 <th scope="row">{{ model.id }}</th>
@@ -143,12 +143,12 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p id='pDelete'>Are you sure what you want to delele model? This action can't be canceled.</p>
+                <p id='pDelete'></p>
                 <input type="hidden" id="idModelDelete" value="">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-danger" data-dismiss="modal" id="deleteModelButton">Delete</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" id="deleteModelButton" data-toggle="infoModal">Delete</button>
             </div>
         </div>
     </div>
@@ -172,10 +172,14 @@
     </div>
 </div>
 
-<script src="{{ url_for('static', filename='js/jquery-3.5.1.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/models.js') }}"></script>
 <script type="text/javascript">
     const modelsApiUrl = "{{ url_for('models_api', model_id='model_id') }}";
+    const iconUrls = {
+        delete: "{{ delete_icon() }}",
+        update: "{{ update_icon() }}"
+    }
 
     $(':input[value="Add"]')[0].onclick = () => {
         document.getElementById('loading-container').style.display = '';
@@ -207,7 +211,7 @@
     const setFileLabel = () => {
         fileLabel.innerText = fileInput.files[0].name;
     };
-
+    renderModels(modelsApiUrl, iconUrls);
 </script>
 
 {% endblock content %}

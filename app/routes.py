@@ -171,34 +171,41 @@ class ModelsAPI(MethodView):
     decorators = [csrf.exempt]
 
     def get(self, model_id: str):
-        if model_id == 'all':
-            indices_stats = ModelIndex.get_indices_stats()
-            return jsonify([
-                {
-                    'id': model.id,
-                    'name': model.name,
-                    'index_name': model.index_name,
-                    'doc_count': indices_stats[model.index_name]['doc_count'],
-                    'size': indices_stats[model.index_name]['size']
-                } for model in ModelIndex.query.all()
-            ])
-        model = ModelIndex.query.filter_by(id=int(model_id)).first()
-        index_stats = ModelIndex.get_indices_stats(index_name=model.index_name)
-        return jsonify({
-            'id': model.id,
-            'name': model.name,
-            'index_name': model.index_name,
-            'doc_count': index_stats[model.index_name]['doc_count'],
-            'size': index_stats[model.index_name]['size']
-        })
+        try:
+            if model_id == 'all':
+                indices_stats = ModelIndex.get_indices_stats()
+                return jsonify([
+                    {
+                        'id': model.id,
+                        'name': model.name,
+                        'index_name': model.index_name,
+                        'doc_count': indices_stats[model.index_name]['doc_count'],
+                        'size': indices_stats[model.index_name]['size']
+                    } for model in ModelIndex.query.all()
+                ])
+            model = ModelIndex.query.filter_by(id=int(model_id)).first()
+            index_stats = ModelIndex.get_indices_stats(index_name=model.index_name)
+            return jsonify({
+                'id': model.id,
+                'name': model.name,
+                'index_name': model.index_name,
+                'doc_count': index_stats[model.index_name]['doc_count'],
+                'size': index_stats[model.index_name]['size']
+            })
+        except Exception as e:
+            return jsonify({
+                'error': 'Error on getting models: %s' % e
+            })
 
     def delete(self, model_id: str):
         model = ModelIndex.query.filter_by(id=int(model_id)).first()
         if model:
+            msg = "Model '%s' was successfully deleted." % model.name
+            model.delete_index()
             db.session.delete(model)
             db.session.commit()
             return jsonify({
-                'success': "ok"
+                'success': msg
             })
         return jsonify({
             'error': "Not found"
@@ -221,36 +228,28 @@ class ModelsAPI(MethodView):
                     return jsonify({
                         'error': 'Data source must be specified for added model.'
                     })
-
-                model = ModelIndex(name=request.form['name'])
-                db.session.add(model)
-                db.session.commit()
-
-                model.create_index()
                 model.update_index(
                     train_sentences=(' '.join(words) for words in TextProcessor.get_words_gen(train_corpus)))
                 return jsonify({
-                    'success': "New model '%s' was successfully added." % model.name
+                    'success': f"Model '%s' was successfully updated" % model.name
                 })
             except ExtensionNotSupported as e:
                 return jsonify({
                     'error': "Error: %s" % str(e)
                 })
             except Exception as e:
-                db.session.delete(model)
-                db.session.commit()
                 return jsonify({
                     'error': "Error: %s" % str(e)
                 })
-            return jsonify({
-                'success': f'Model name was successfully updated'
-            })
         return jsonify({
             'error': "Not found"
         })
 
     def post(self, model_id: str):
         if model_id == 'new':
+            model = ModelIndex(name=request.form['name'])
+            db.session.add(model)
+            db.session.commit()
             try:
                 data_source = request.form.get('data_source')
                 if data_source == 'file':
@@ -263,11 +262,6 @@ class ModelsAPI(MethodView):
                     return jsonify({
                         'error': 'Data source must be specified for added model.'
                     })
-
-                model = ModelIndex(name=request.form['name'])
-                db.session.add(model)
-                db.session.commit()
-
                 model.create_index()
                 model.update_index(
                     train_sentences=(' '.join(words) for words in TextProcessor.get_words_gen(train_corpus)))
@@ -327,15 +321,15 @@ app.add_url_rule('/documents',
 app.add_url_rule('/',
                  view_func=LoginView.as_view('login'),
                  methods=['POST', 'GET'])
+app.add_url_rule('/models',
+                 view_func=ModelsView.as_view('models'),
+                 methods=['POST', 'GET'])
 app.add_url_rule('/api/t9',
                  view_func=T9API.as_view('t9_api'),
                  methods=['POST', 'GET'])
 app.add_url_rule('/api/models/<model_id>',
                  view_func=ModelsAPI.as_view('models_api'),
                  methods=['POST', 'GET', 'PUT', 'DELETE'])
-app.add_url_rule('/models',
-                 view_func=ModelsView.as_view('models'),
-                 methods=['POST', 'GET'])
 # app.add_url_rule('/generator',
 #                  view_func=GeneratorView.as_view('generator'),
 #                  methods=['POST', 'GET'])
