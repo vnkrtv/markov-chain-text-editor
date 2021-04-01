@@ -38,9 +38,21 @@
             <strong>DOC Editor</strong>
         </a>
     </div>
-    {% block navbar %}
+    <div class="d-flex justify-content-between">
+        {% block navbar %}
 
-    {% endblock navbar %}
+        {% endblock navbar %}
+        {% if current_user.is_authenticated %}
+        <a href="" class="navbar-brand d-flex align-items-center"><img src='{{ line_icon() }}'></a> 
+        <a href="{{ url_for('index') }}" class="navbar-brand d-flex align-items-center"><img src='{{ doc_icon() }}'>&nbsp;Docs</a>
+        <a href="{{ url_for('models') }}" class="navbar-brand d-flex align-items-center"><img src='{{ gears_icon() }}'>&nbsp;Models</a>
+        <a href="{{ url_for('logout') }}" class="navbar-brand d-flex align-items-center"><img src='{{ logout_icon() }}'>&nbsp;Logout</a>
+        <a href="" class="navbar-brand d-flex align-items-center"><img src='{{ line_icon() }}'></a> 
+        <a class="nav-link navbar-brand d-flex align-items-center" href="">
+            <img src='{{ user_icon() }}'>&nbsp;<strong>{{ current_user.username }}</strong>
+        </a>
+        {% endif %}
+    </div>
 </div>
 </div>
 

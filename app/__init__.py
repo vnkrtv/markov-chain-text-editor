@@ -9,8 +9,8 @@ from flask_cors import CORS
 
 from config import Config
 from app.context_procesor import (
-    user_icon_path, add_doc_icon_path, add_icon_path, gears_icon_path,
-    update_icon_path, delete_icon_path, sort_icon_path)
+    user_icon_path, add_doc_icon_path, add_icon_path, gears_icon_path, line_icon_path,
+    update_icon_path, delete_icon_path, sort_icon_path, doc_icon_path, logout_icon_path)
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -34,6 +34,9 @@ app.context_processor(gears_icon_path)
 app.context_processor(update_icon_path)
 app.context_processor(delete_icon_path)
 app.context_processor(sort_icon_path)
+app.context_processor(doc_icon_path)
+app.context_processor(logout_icon_path)
+app.context_processor(line_icon_path)
 app.jinja_env.globals.update(user_icon=user_icon_path)
 app.jinja_env.globals.update(add_doc_icon=add_doc_icon_path)
 app.jinja_env.globals.update(add_icon=add_icon_path)
@@ -41,6 +44,9 @@ app.jinja_env.globals.update(gears_icon=gears_icon_path)
 app.jinja_env.globals.update(update_icon=update_icon_path)
 app.jinja_env.globals.update(delete_icon=delete_icon_path)
 app.jinja_env.globals.update(sort_icon=sort_icon_path)
+app.jinja_env.globals.update(doc_icon=doc_icon_path)
+app.jinja_env.globals.update(logout_icon=logout_icon_path)
+app.jinja_env.globals.update(line_icon=line_icon_path)
 
 
 from app import routes

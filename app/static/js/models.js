@@ -71,6 +71,7 @@ function hideImages(rowIdx) {
 }
 
 function fillEditModal(modelID, modelName) {
+    clearForms();
     const addModelModalTitle = document.getElementById('addModelModalTitle');
     addModelModalTitle.innerHTML = 'Update model';
     const modelNameInput = document.getElementById('name');
@@ -149,6 +150,7 @@ function fillEditModal(modelID, modelName) {
 }
 
 function fillAddModal() {
+    clearForms();
     const addModelModalTitle = document.getElementById('addModelModalTitle');
     addModelModalTitle.innerHTML = 'Add model';
     const retrainDiv = document.getElementById('retrainDiv');

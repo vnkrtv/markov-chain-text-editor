@@ -47,3 +47,21 @@ def gears_icon_path():
     def gears_icon():
         return flask.url_for('static', filename='images/icons/gears.svg')
     return dict(gears_icon=gears_icon)
+
+
+def doc_icon_path():
+    def doc_icon():
+        return flask.url_for('static', filename='images/icons/doc.svg')
+    return dict(doc_icon=doc_icon)
+
+
+def logout_icon_path():
+    def logout_icon():
+        return flask.url_for('static', filename='images/icons/logout.svg')
+    return dict(logout_icon=logout_icon)
+
+
+def line_icon_path():
+    def line_icon():
+        return flask.url_for('static', filename='images/icons/line.svg')
+    return dict(line_icon=line_icon)

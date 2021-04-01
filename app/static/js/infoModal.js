@@ -7,3 +7,10 @@ function renderInfoModal(title, message) {
 
     $('#infoModal').modal('show');
 }
+
+function clearForms() {
+    const elements = document.getElementsByClassName('form-control');
+    for (const element of elements) {
+        element.value = '';
+    }
+}
