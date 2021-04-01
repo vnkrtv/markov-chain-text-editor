@@ -1,5 +1,6 @@
 import re
 import logging
+import json
 import traceback
 from bson import ObjectId
 from datetime import datetime, timedelta
@@ -187,32 +188,46 @@ class ModelsAPI(MethodView):
         model = ModelIndex.query.filter_by(id=model_id).first()
         if model:
             model.name = request.form['name']
-            db.session.commit()
-            try:
-                data_source = request.form.get('data_source')
-                if data_source == 'file':
-                    train_corpus = utils.get_text_corpus_from_file(request, filename='train_file')
-                elif data_source == 'postgres':
-                    train_corpus = utils.get_text_corpus_from_postgres(request.form)
-                elif data_source == 'folder':
-                    train_corpus = utils.get_text_corpus_from_folder(request)
-                else:
+            retrain = json.loads(request.form['retrain'])
+            msg = "Model '%s' was successfully updated." % model.name
+            if retrain:
+                try:
+                    data_source = request.form.get('data_source')
+                    if data_source == 'file':
+                        file = request.files['train_file']
+                        train_corpus = utils.get_text_corpus_from_file(file)
+                        model.update_index(train_sentences=TextProcessor.get_train_sentences(train_corpus))
+                        msg = "Model '%s' was successfully updated based by '%s' file data." % (model.name, file.filename)
+                    elif data_source == 'postgres':
+                        train_corpus = utils.get_text_corpus_from_postgres(request.form)
+                        model.update_index(train_sentences=TextProcessor.get_train_sentences(train_corpus))
+                        msg = "Model '%s' was successfully updated by PostgreSQL data." % model.name
+                    elif data_source == 'folder':
+                        msg = "Model '%s' was successfully updated based by train files:\n" % model.name
+                        is_empty = True
+                        for ok, filename, train_corpus in utils.get_text_corpus_gen_from_folder(request):
+                            if ok:
+                                model.update_index(train_sentences=TextProcessor.get_train_sentences(train_corpus))
+                                msg += f' + {filename}\n'
+                                is_empty = False
+                            else:
+                                msg += f' - {filename} - error on parsing\n'
+                        if is_empty:
+                            raise Exception('All specified train files were not parsed.')
+                    else:
+                        return jsonify({
+                            'error': 'Data source must be specified for retrained model.'
+                        })
+                except Exception as e:
+                    traceback.print_exc()
+                    model.delete_index()
                     return jsonify({
-                        'error': 'Data source must be specified for added model.'
+                        'error': "Error: %s" % str(e)
                     })
-                model.update_index(
-                    train_sentences=(' '.join(words) for words in TextProcessor.get_words_gen(train_corpus)))
-                return jsonify({
-                    'success': f"Model '%s' was successfully updated" % model.name
-                })
-            except ExtensionNotSupported as e:
-                return jsonify({
-                    'error': "Error: %s" % str(e)
-                })
-            except Exception as e:
-                return jsonify({
-                    'error': "Error: %s" % str(e)
-                })
+            db.session.commit()
+            return jsonify({
+                'success': msg
+            })
         return jsonify({
             'error': "Not found"
         })
@@ -231,7 +246,7 @@ class ModelsAPI(MethodView):
                 elif data_source == 'postgres':
                     train_corpus = utils.get_text_corpus_from_postgres(request.form)
                     model.update_index(train_sentences=TextProcessor.get_train_sentences(train_corpus))
-                    msg = "New model '%s' based on PostgreSQL request was successfully added." % model.name
+                    msg = "New model '%s' based on PostgreSQL data was successfully added." % model.name
                 elif data_source == 'folder':
                     msg = "New model '%s' was successfully added. Train files:\n" % model.name
                     is_empty = True

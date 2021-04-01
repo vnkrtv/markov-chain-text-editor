@@ -26,7 +26,7 @@ function renderModels() {
                                     title="Update" src="${iconUrls.update}" 
                                     style="display: none; cursor: pointer;" 
                                     data-toggle="modal" 
-                                    data-target="#updateModelModal" 
+                                    data-target="#addModelModal" 
                                     onclick='fillEditModal("${model.id}", "${model.name}")'
                                 >
                             </td>
@@ -71,21 +71,88 @@ function hideImages(rowIdx) {
 }
 
 function fillEditModal(modelID, modelName) {
-    // const idInput = document.getElementById('edit-subject-id');
-    // idInput.value = subjectID;
-    //
-    // const subjectNameH3 = document.getElementById(`subject-name-${subjectID}`)
-    // const nameInput = document.getElementById('edit-name');
-    // nameInput.value = subjectNameH3.innerHTML;
-    //
-    // const subjectDescriptionP = document.getElementById(`subject-description-${subjectID}`)
-    // const descriptionInput = document.getElementById('edit-description');
-    // descriptionInput.value = subjectDescriptionP.innerHTML;
+    const addModelModalTitle = document.getElementById('addModelModalTitle');
+    addModelModalTitle.innerHTML = 'Update model';
+    const modelNameInput = document.getElementById('name');
+    modelNameInput.value = modelName;
+    const retrainDiv = document.getElementById('retrainDiv');
+    retrainDiv.style.display = '';
+    const retrainOptionsDiv = document.getElementById('retrainOptionsDiv');
+    const retrainModel = document.getElementById('retrainModel');
+    retrainModel.onchange = () => {
+        if (retrainModel.checked) {
+            retrainOptionsDiv.style.display = '';
+        } else {
+            retrainOptionsDiv.style.display = 'none';
+        }
+    };
+    const addModelButton = document.getElementById('addModelButton');
+    addModelButton.innerHTML = 'Update';
+    addModelButton.onclick = () => {
+        const modelName = document.getElementById('name');
+        const dataSource = document.getElementById("dataSourceOptionSelect");
+
+        let formData = new FormData();
+        formData.append('name', modelName.value);
+        formData.append('retrain', retrainModel.checked);
+
+        if (dataSource.selectedIndex === 0) { // single file
+            formData.append('data_source', 'file');
+            const trainFile = document.getElementById('trainFile');
+            formData.append('train_file', trainFile.files[0]);
+
+        } else if (dataSource.selectedIndex === 1) { // folder with text files
+            formData.append('data_source', 'folder');
+            const trainFiles = document.getElementById('trainFiles');
+            for (let file of trainFiles.files) {
+                formData.append(file.name, file);
+            }
+
+        } else if (dataSource.selectedIndex === 2) { // postgresql
+            formData.append('data_source', 'postgres');
+            const pgHost = document.getElementById('pgHost');
+            const pgPort = document.getElementById('pgPort');
+            const pgUser = document.getElementById('pgUser');
+            const pgPassword = document.getElementById('pgPassword');
+            const pgDBName = document.getElementById('pgDBName');
+            const pgQuery = document.getElementById('pgQuery');
+
+            formData.append('pg_host', pgHost.value);
+            formData.append('pg_port', pgPort.value);
+            formData.append('pg_user', pgUser.value);
+            formData.append('pg_password', pgPassword.value);
+            formData.append('pg_dbname', pgDBName.value);
+            formData.append('sql_query', pgQuery.value);
+        }
+        for (let key of formData) {
+            console.log(key, formData[key]);
+        }
+
+        document.getElementById("loadingContainer").style.display = "";
+        $.ajax({
+            url: modelsApiUrl.replace('model_id', modelID),
+            type: 'put',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: (response) => {
+                document.getElementById("loadingContainer").style.display = "none";
+                if (response.success) {
+                    renderModels();
+                    renderInfoModal("Model was updated", response.success);
+                } else {
+                    renderInfoModal("Error", response.error);
+                }
+            }
+        });
+    };
 }
 
 function fillAddModal() {
     const addModelModalTitle = document.getElementById('addModelModalTitle');
     addModelModalTitle.innerHTML = 'Add model';
+    const retrainDiv = document.getElementById('retrainDiv');
+    retrainDiv.style.display = 'none';
     const addModelButton = document.getElementById('addModelButton');
     addModelButton.onclick = () => {
         const modelName = document.getElementById('name');
@@ -126,6 +193,7 @@ function fillAddModal() {
             console.log(key, formData[key]);
         }
 
+        document.getElementById("loadingContainer").style.display = "";
         $.ajax({
             url: modelsApiUrl.replace('model_id', 'new'),
             type: 'post',
@@ -133,6 +201,7 @@ function fillAddModal() {
             contentType: false,
             processData: false,
             success: (response) => {
+                document.getElementById("loadingContainer").style.display = "none";
                 if (response.success) {
                     renderModels();
                     renderInfoModal("New model", response.success);
@@ -141,9 +210,7 @@ function fillAddModal() {
                 }
             }
         });
-
     };
-
 }
 
 function fillDeleteModal(modelID, modelName) {

@@ -59,63 +59,72 @@
                             {{ model_form.name.label }}<br>
                             {{ model_form.name(size=20, class="form-control") }}
                         </div>
+                        <div id="retrainDiv" class="col">
+                            <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="" id="retrainModel">
+                              <label class="form-check-label" for="retrainModel" id="retrainModelLabel">
+                                Retrain
+                              </label>
+                            </div>
+                        </div>
                         <br>
-                        <div class="col">
-                            <label>Train data</label>
-                            <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <label class="input-group-text" for="dataSourceOptionSelect">Data source</label>
-                                </div>
-                                <select class="custom-select" id="dataSourceOptionSelect" name="data_source"
-                                        onchange="dataSourceChange()">
-                                    <option value="file" selected>Single text file</option>
-                                    <option value="folder">Folder with text files</option>
-                                    <option value="postgres">PostgreSQL</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col" id='fileOption'>
-                            <label>Text corpus file</label>
-                            <div class="input-group">
-                                <div class="custom-file">
-                                    <input id="trainFile" type="file" name='train_file' class="custom-file-input" id="trainTextFile"
-                                           aria-describedby="trainTextFile" onchange="setFileLabel()">
-                                    <label id="fileLabel" class="custom-file-label" for="trainTextFile">Choose
-                                        file</label>
+                        <div id="retrainOptionsDiv">
+                            <div class="col">
+                                <label>Train data</label>
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <label class="input-group-text" for="dataSourceOptionSelect">Data source</label>
+                                    </div>
+                                    <select class="custom-select" id="dataSourceOptionSelect" name="data_source"
+                                            onchange="dataSourceChange()">
+                                        <option value="file" selected>Single text file</option>
+                                        <option value="folder">Folder with text files</option>
+                                        <option value="postgres">PostgreSQL</option>
+                                    </select>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col" id='folderOption'>
-                            <label>Folder with text files</label>
-                            <div class="input-group">
-                                <div class="custom-file">
-                                    <input id="trainFiles" type="file" class="custom-file-input" name='train_files' onchange="selectFolder(event)" webkitdirectory mozdirectory msdirectory odirectory directory multiple />
-                                    <input type="hidden" name="files_names" id="filesNames" value="">
-                                    <label id="fileLabel" class="custom-file-label" for="trainTextFile">Choose folder</label>
+                            <div class="col" id='fileOption'>
+                                <label>Text corpus file</label>
+                                <div class="input-group">
+                                    <div class="custom-file">
+                                        <input id="trainFile" type="file" name='train_file' class="custom-file-input" id="trainTextFile"
+                                               aria-describedby="trainTextFile" onchange="setFileLabel()">
+                                        <label id="fileLabel" class="custom-file-label" for="trainTextFile">Choose
+                                            file</label>
+                                    </div>
                                 </div>
                             </div>
-                            <p id="selectedFiles"></p>
-                        </div>
-                        <div class="col" id='pgOption'>
-                            <label for="pgHost">Host</label>
-                            <input type="text" aria-label="Host" name="pg_host" id="pgHost" class="form-control"
-                                   value="localhost"><br>
-                            <label for="pgPort">Port</label>
-                            <input type="number" aria-label="Port" name="pg_port" id="pgPort" class="form-control"
-                                   value="5432" min="1" , max="65535"><br>
-                            <label for="pgDBName">DN name</label>
-                            <input type="text" aria-label="DB" id="pgDBName" name="pg_dbname" class="form-control"
-                                   value="postgres"><br>
-                            <label for="pgUser">User</label>
-                            <input type="text" aria-label="User" id="pgUser" name="pg_user" class="form-control"
-                                   value="postgres"><br>
-                            <label for="pgPassword">Password</label>
-                            <input type="password" aria-label="Password" id="pgPassword" name="pg_password"
-                                   class="form-control" value="postgres"><br>
-                            <label for="queryTextarea" id="queryTextarea">SQL query</label>
-                            <textarea class="form-control" rows='2' id="pgQuery" name='sql_query'
-                                      placeholder="SELECT text statement">SELECT text &#13;&#10;  FROM tabel_name</textarea>
-                        </div>
+                            <div class="col" id='folderOption'>
+                                <label>Folder with text files</label>
+                                <div class="input-group">
+                                    <div class="custom-file">
+                                        <input id="trainFiles" type="file" class="custom-file-input" name='train_files' onchange="selectFolder(event)" webkitdirectory mozdirectory msdirectory odirectory directory multiple />
+                                        <input type="hidden" name="files_names" id="filesNames" value="">
+                                        <label id="fileLabel" class="custom-file-label" for="trainTextFile">Choose folder</label>
+                                    </div>
+                                </div>
+                                <p id="selectedFiles"></p>
+                            </div>
+                            <div class="col" id='pgOption'>
+                                <label for="pgHost">Host</label>
+                                <input type="text" aria-label="Host" id="pgHost" class="form-control"
+                                       value="localhost"><br>
+                                <label for="pgPort">Port</label>
+                                <input type="number" aria-label="Port" id="pgPort" class="form-control"
+                                       value="5432" min="1" , max="65535"><br>
+                                <label for="pgDBName">DN name</label>
+                                <input type="text" aria-label="DB" id="pgDBName" class="form-control"
+                                       value="postgres"><br>
+                                <label for="pgUser">User</label>
+                                <input type="text" aria-label="User" id="pgUser" class="form-control"
+                                       value="postgres"><br>
+                                <label for="pgPassword">Password</label>
+                                <input type="password" aria-label="Password" id="pgPassword" class="form-control" value="postgres"><br>
+                                <label for="queryTextarea" id="queryTextarea">SQL query</label>
+                                <textarea class="form-control" rows='2' id="pgQuery" 
+                                          placeholder="SELECT text statement">SELECT text &#13;&#10;  FROM tabel_name</textarea>
+                            </div>
+                        </div>  
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -146,24 +155,6 @@
     </div>
 </div>
 
-<div id="updateModelModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="gridModalLabel">Update model</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                    
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script src="{{ url_for('static', filename='js/models.js') }}"></script>
 <script type="text/javascript">
     const modelsApiUrl = "{{ url_for('models_api', model_id='model_id') }}";
@@ -183,9 +174,9 @@
 
     const pgOptionDiv = document.getElementById("pgOption");
     const fileLabel = document.getElementById('fileLabel');
-    const fileInput = document.getElementById('trainTextFile');
+    const trainFile = document.getElementById('trainFile');
 
-    fileOptionDiv.style.display = 'none';
+    folderOptionDiv.style.display = 'none';
     pgOptionDiv.style.display = 'none';
 
     const dataSourceChange = () => {
@@ -205,7 +196,7 @@
     };
 
     const setFileLabel = () => {
-        fileLabel.innerText = fileInput.files[0].name;
+        fileLabel.innerText = trainFile.files[0].name;
     };
 
     renderModels(modelsApiUrl, iconUrls);
