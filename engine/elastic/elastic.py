@@ -1,11 +1,13 @@
-from typing import List, Union, Optional, Dict, Any
+import uuid
+from typing import List, Union, Optional, Dict, Any, Iterable
 
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, helpers
 from elasticsearch.exceptions import ConnectionError
 
 
 class ElasticEngine:
     es: Elasticsearch
+    bulk_actions_count: int = 10_000
 
     def __init__(self, es: Elasticsearch):
         self.es = es
@@ -60,6 +62,22 @@ class ElasticEngine:
         self.es.index(index=index_name, body={
             'text': text
         })
+
+    def add_many(self, index_name: str, sentences: Iterable) -> None:
+        actions = []
+        for sentence in sentences:
+            if len(actions) < self.bulk_actions_count:
+                actions.append({
+                    '_op_type': 'create',
+                    '_index': index_name,
+                    '_id': uuid.uuid4(),
+                    'doc': {
+                        'text': sentence
+                    }
+                })
+            else:
+                helpers.bulk(self.es, actions=actions, stats_only=True)
+                actions = []
 
     def delete_index(self, index_name: str) -> None:
         self.es.indices.delete(index=index_name)
