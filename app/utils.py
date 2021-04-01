@@ -1,5 +1,6 @@
 import os
 import re
+import pathlib
 from typing import Generator, Iterable, Optional, List, Tuple, Dict, Any
 
 import textract
@@ -47,15 +48,21 @@ def get_text_corpus_from_postgres(request_dict: Dict[str, Any]) -> Iterable[str]
     return (row[0] for row in pg_storage.exec_query(query, params))
 
 
-def get_text_corpus_from_file(request, filename: str) -> Iterable[str]:
-    file = request.files[filename]
-    if file.filename.endswith('.pdf'):
+def get_text_corpus_from_file(file) -> Iterable[str]:
+    filename = pathlib.Path(file.filename).name
+    if filename.endswith('.pdf'):
         pdf = pdftotext.PDF(file)
         return (page.replace('\n', ' ') for page in pdf)
-    filepath = os.path.join(app.instance_path, Config.TMP_DATA_FOLDER, file.filename)
+    filepath = os.path.join(app.instance_path, Config.TMP_DATA_FOLDER, filename)
     file.save(filepath)
     content = textract.process(filepath)
     os.remove(filepath)
     return (text.replace('\n', ' ') for text in content.decode().split('\n\n'))
 
-# def get_text_corpus_from_folder()
+
+def get_text_corpus_gen_from_folder(request):
+    for filename in request.files:
+        try:
+            yield True, filename, get_text_corpus_from_file(request.files[filename])
+        except ExtensionNotSupported:
+            yield False, filename, None

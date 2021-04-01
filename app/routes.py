@@ -1,5 +1,7 @@
 import re
 import logging
+import traceback
+from bson import ObjectId
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -60,12 +62,13 @@ def document(document_id):
 
 
 class IndexView(MethodView):
+    title = 'Documents'
     template = 'documents.html'
     decorators = [login_required]
 
     def get(self):
         context = {
-            'title': 'Documents',
+            'title': self.title,
             'documents': Document.query.filter_by(user_id=current_user.id).all(),
             'doc_form': DocumentForm()
         }
@@ -107,7 +110,7 @@ class LoginView(MethodView):
 
 
 class T9API(MethodView):
-    decorators = [csrf.exempt]
+    decorators = [csrf.exempt, login_required]
     remove_punctuation = re.compile(r'[^a-zA-Zа-яА-Я ]')
 
     def post(self):
@@ -123,52 +126,21 @@ class T9API(MethodView):
 class ModelsView(MethodView):
     title = 'Models'
     template = 'models.html'
+    decorators = [login_required]
 
     def get(self):
         context = {
             'title': self.title,
-            'models': ModelIndex.query.all(),
-            'models_stats': ModelIndex.get_indices_stats(),
             'model_form': ModelForm()
         }
         return render_template(self.template, **context)
 
     def post(self):
-        model_form = ModelForm()
-        if model_form.validate_on_submit():
-            try:
-                data_source = request.form.get('data_source')
-                if data_source == 'file':
-                    train_corpus = utils.get_text_corpus_from_file(request, filename='train_file')
-                elif data_source == 'postgres':
-                    train_corpus = utils.get_text_corpus_from_postgres(request.form)
-                elif data_source == 'folder':
-                    train_corpus = utils.get_text_corpus_from_postgres(request.form)
-                else:
-                    flash('Data source must be specified for added model.')
-                    return self.get()
-
-                model = ModelIndex(name=model_form.name.data)
-                db.session.add(model)
-                db.session.commit()
-
-                model.create_index()
-                model.update_index(
-                    train_sentences=(' '.join(words) for words in TextProcessor.get_words_gen(train_corpus)))
-                flash("New model '%s' was successfully added." % model.name)
-            except ExtensionNotSupported as e:
-                flash("Error: %s" % str(e))
-            except Exception as e:
-                db.session.delete(model)
-                db.session.commit()
-                flash("Error: %s" % str(e))
-        elif model_form.is_submitted():
-            flash(''.join(model_form.name.errors))
         return self.get()
 
 
 class ModelsAPI(MethodView):
-    decorators = [csrf.exempt]
+    decorators = [csrf.exempt, login_required]
 
     def get(self, model_id: str):
         try:
@@ -183,7 +155,7 @@ class ModelsAPI(MethodView):
                         'size': indices_stats[model.index_name]['size']
                     } for model in ModelIndex.query.all()
                 ])
-            model = ModelIndex.query.filter_by(id=int(model_id)).first()
+            model = ModelIndex.query.filter_by(id=model_id).first()
             index_stats = ModelIndex.get_indices_stats(index_name=model.index_name)
             return jsonify({
                 'id': model.id,
@@ -198,7 +170,7 @@ class ModelsAPI(MethodView):
             })
 
     def delete(self, model_id: str):
-        model = ModelIndex.query.filter_by(id=int(model_id)).first()
+        model = ModelIndex.query.filter_by(id=model_id).first()
         if model:
             msg = "Model '%s' was successfully deleted." % model.name
             model.delete_index()
@@ -212,7 +184,7 @@ class ModelsAPI(MethodView):
         })
 
     def put(self, model_id: str):
-        model = ModelIndex.query.filter_by(id=int(model_id)).first()
+        model = ModelIndex.query.filter_by(id=model_id).first()
         if model:
             model.name = request.form['name']
             db.session.commit()
@@ -223,7 +195,7 @@ class ModelsAPI(MethodView):
                 elif data_source == 'postgres':
                     train_corpus = utils.get_text_corpus_from_postgres(request.form)
                 elif data_source == 'folder':
-                    train_corpus = utils.get_text_corpus_from_postgres(request.form)
+                    train_corpus = utils.get_text_corpus_from_folder(request)
                 else:
                     return jsonify({
                         'error': 'Data source must be specified for added model.'
@@ -247,37 +219,50 @@ class ModelsAPI(MethodView):
 
     def post(self, model_id: str):
         if model_id == 'new':
-            model = ModelIndex(name=request.form['name'])
-            db.session.add(model)
-            db.session.commit()
+            model = ModelIndex(id=str(ObjectId()), name=request.form['name'])
+            model.create_index()
             try:
                 data_source = request.form.get('data_source')
                 if data_source == 'file':
-                    train_corpus = utils.get_text_corpus_from_file(request, filename='train_file')
+                    file = request.files['train_file']
+                    train_corpus = utils.get_text_corpus_from_file(file)
+                    model.update_index(train_sentences=TextProcessor.get_train_sentences(train_corpus))
+                    msg = "New model '%s' based on '%s' file was successfully added." % (model.name, file.filename)
                 elif data_source == 'postgres':
                     train_corpus = utils.get_text_corpus_from_postgres(request.form)
+                    model.update_index(train_sentences=TextProcessor.get_train_sentences(train_corpus))
+                    msg = "New model '%s' based on PostgreSQL request was successfully added." % model.name
                 elif data_source == 'folder':
-                    train_corpus = utils.get_text_corpus_from_postgres(request.form)
+                    msg = "New model '%s' was successfully added. Train files:\n" % model.name
+                    is_empty = True
+                    for ok, filename, train_corpus in utils.get_text_corpus_gen_from_folder(request):
+                        if ok:
+                            model.update_index(train_sentences=TextProcessor.get_train_sentences(train_corpus))
+                            msg += f' + {filename}\n'
+                            is_empty = False
+                        else:
+                            msg += f' - {filename} - error on parsing\n'
+                    if is_empty:
+                        raise Exception('All specified train files were not parsed.')
                 else:
                     return jsonify({
                         'error': 'Data source must be specified for added model.'
                     })
-                model.create_index()
-                model.update_index(
-                    train_sentences=(' '.join(words) for words in TextProcessor.get_words_gen(train_corpus)))
-                return jsonify({
-                    'success': "New model '%s' was successfully added." % model.name
-                })
-            except ExtensionNotSupported as e:
-                return jsonify({
-                    'error': "Error: %s" % str(e)
-                })
-            except Exception as e:
-                db.session.delete(model)
+
+                db.session.add(model)
                 db.session.commit()
                 return jsonify({
+                    'success': msg
+                })
+            except Exception as e:
+                traceback.print_exc()
+                model.delete_index()
+                return jsonify({
                     'error': "Error: %s" % str(e)
                 })
+        return jsonify({
+            'error': "Incorrect post request"
+        })
 
 
 # class GeneratorView(MethodView):

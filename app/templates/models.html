@@ -3,7 +3,7 @@
 {% block navbar %}
 
 <div class="d-flex justify-content-between">
-    <a href="" class="navbar-brand d-flex align-items-center" data-toggle="modal" data-target="#addModelModal">
+    <a href="" class="navbar-brand d-flex align-items-center" data-toggle="modal" onclick="fillAddModal()" data-target="#addModelModal">
         <img src='{{ add_icon() }}'>&nbsp;Add model
     </a>
     <div class="nav-item dropdown">
@@ -32,41 +32,27 @@
         <table class="table table-dark table-hover">
             <thead>
             <tr>
-                <th scope="col">ID</th>
                 <th scope="col">Action</th>
+                <th scope="col">ID</th>
                 <th scope="col">Name</th>
                 <th scope="col">Index name</th>
                 <th scope="col">Sentences in index</th>
                 <th scope="col">Size</th>
             </tr>
             </thead>
-            <tbody id="modelsTBody">
-            {% for model in models %}
-            <tr onmouseover='showImages(`{{ loop.index }}`)' onmouseout='hideImages(`{{ loop.index }}`)'>
-                <th scope="row">{{ model.id }}</th>
-                <td id="row_{{ loop.index }}"><img id="delImg{{ loop.index }}" title="Delete" src="{{ delete_icon() }}" style="display: none; cursor: pointer;" data-toggle="modal" data-target="#deleteModelModal" onclick='fillDeleteModal("{{ model.id }}", "{{ model.name }}", modelsApiUrl)'>     <img id="updImg{{ loop.index }}" title="Update" src="{{ update_icon() }}" style="display: none; cursor: pointer;" data-toggle="modal" data-target="#updateModelModal" onclick='fillUpdateModal("{{ model.id }}")'></td>
-                <td>{{ model.name }}</td>
-                <td>{{ model.index_name }}</td>
-                <td>{{ models_stats[model.index_name].doc_count }}</td>
-                <td>{{ models_stats[model.index_name].size }}</td>
-            </tr>
-            {% endfor %}
-            </tbody>
+            <tbody id="modelsTBody"></tbody>
         </table>
     </div>
 </header>
 
-<div id="addModelModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="gridModalLabel"
-     aria-hidden="true">
+<div id="addModelModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title" id="gridModalLabel">New model</h4>
+                <h4 class="modal-title" id="addModelModalTitle"></h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="" method="post" enctype="multipart/form-data">
-                {{ model_form.hidden_tag() }}
                 <div class="modal-body">
                     <div class="container-fluid bd-example-row">
                         <div class="col">
@@ -82,8 +68,8 @@
                                 </div>
                                 <select class="custom-select" id="dataSourceOptionSelect" name="data_source"
                                         onchange="dataSourceChange()">
-                                    <option value="" selected>Choose...</option>
-                                    <option value="file">Text file</option>
+                                    <option value="file" selected>Single text file</option>
+                                    <option value="folder">Folder with text files</option>
                                     <option value="postgres">PostgreSQL</option>
                                 </select>
                             </div>
@@ -92,16 +78,23 @@
                             <label>Text corpus file</label>
                             <div class="input-group">
                                 <div class="custom-file">
-                                    <input type="file" name='train_file' class="custom-file-input" id="trainTextFile"
+                                    <input id="trainFile" type="file" name='train_file' class="custom-file-input" id="trainTextFile"
                                            aria-describedby="trainTextFile" onchange="setFileLabel()">
                                     <label id="fileLabel" class="custom-file-label" for="trainTextFile">Choose
                                         file</label>
                                 </div>
                             </div>
-                            <br>
-                            <label for="textsSeparator">Texts separator</label>
-                            <input type="text" name='text_separator' class="form-control" id="textsSeparator"
-                                   placeholder="<|endoftext|>" value="<|endoftext|>"><br>
+                        </div>
+                        <div class="col" id='folderOption'>
+                            <label>Folder with text files</label>
+                            <div class="input-group">
+                                <div class="custom-file">
+                                    <input id="trainFiles" type="file" class="custom-file-input" name='train_files' onchange="selectFolder(event)" webkitdirectory mozdirectory msdirectory odirectory directory multiple />
+                                    <input type="hidden" name="files_names" id="filesNames" value="">
+                                    <label id="fileLabel" class="custom-file-label" for="trainTextFile">Choose folder</label>
+                                </div>
+                            </div>
+                            <p id="selectedFiles"></p>
                         </div>
                         <div class="col" id='pgOption'>
                             <label for="pgHost">Host</label>
@@ -120,16 +113,15 @@
                             <input type="password" aria-label="Password" id="pgPassword" name="pg_password"
                                    class="form-control" value="postgres"><br>
                             <label for="queryTextarea" id="queryTextarea">SQL query</label>
-                            <textarea class="form-control" rows='2' id="queryTextarea" name='sql_query'
+                            <textarea class="form-control" rows='2' id="pgQuery" name='sql_query'
                                       placeholder="SELECT text statement">SELECT text &#13;&#10;  FROM tabel_name</textarea>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    {{ model_form.submit(class="btn btn-light") }}
+                    <button id="addModelButton" type="button" class="btn btn-light" data-dismiss="modal">Add</button>
                 </div>
-            </form>
         </div>
     </div>
 </div>
@@ -148,7 +140,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-danger" data-dismiss="modal" id="deleteModelButton" data-toggle="infoModal">Delete</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" id="deleteModelButton">Delete</button>
             </div>
         </div>
     </div>
@@ -172,7 +164,6 @@
     </div>
 </div>
 
-<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/models.js') }}"></script>
 <script type="text/javascript">
     const modelsApiUrl = "{{ url_for('models_api', model_id='model_id') }}";
@@ -181,13 +172,15 @@
         update: "{{ update_icon() }}"
     }
 
-    $(':input[value="Add"]')[0].onclick = () => {
+    document.getElementById('addModelButton').onclick = () => {
         document.getElementById('loading-container').style.display = '';
         $('#addModelModal').hide();
     };
 
     const dataSource = document.getElementById("dataSourceOptionSelect");
     const fileOptionDiv = document.getElementById("fileOption");
+    const folderOptionDiv = document.getElementById("folderOption");
+
     const pgOptionDiv = document.getElementById("pgOption");
     const fileLabel = document.getElementById('fileLabel');
     const fileInput = document.getElementById('trainTextFile');
@@ -196,21 +189,25 @@
     pgOptionDiv.style.display = 'none';
 
     const dataSourceChange = () => {
-        if (dataSource.selectedIndex === 1) {
+        if (dataSource.selectedIndex === 0) {
             fileOptionDiv.style.display = '';
+            folderOptionDiv.style.display = 'none';
+            pgOptionDiv.style.display = 'none';
+        } else if (dataSource.selectedIndex === 1) {
+            fileOptionDiv.style.display = 'none';
+            folderOptionDiv.style.display = '';
             pgOptionDiv.style.display = 'none';
         } else if (dataSource.selectedIndex === 2) {
+            fileOptionDiv.style.display = 'none';
+            folderOptionDiv.style.display = 'none';
             pgOptionDiv.style.display = '';
-            fileOptionDiv.style.display = 'none';
-        } else {
-            pgOptionDiv.style.display = 'none';
-            fileOptionDiv.style.display = 'none';
         }
     };
 
     const setFileLabel = () => {
         fileLabel.innerText = fileInput.files[0].name;
     };
+
     renderModels(modelsApiUrl, iconUrls);
 </script>
 

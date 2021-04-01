@@ -12,7 +12,6 @@ function renderModels() {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <tr>
-                            <th scope="row">${model.id}</th>
                             <td id="row_${idx}">
                                 <img
                                     id="delImg${idx}" alt="Del" 
@@ -20,7 +19,7 @@ function renderModels() {
                                     style="display: none; cursor: pointer;" 
                                     data-toggle="modal" 
                                     data-target="#deleteModelModal" 
-                                    onclick='fillDeleteModal(${model.id}, "${model.name}")'
+                                    onclick='fillDeleteModal("${model.id}", "${model.name}")'
                                  >     
                                 <img 
                                     id="updImg${idx}" alt="Edit"
@@ -28,9 +27,10 @@ function renderModels() {
                                     style="display: none; cursor: pointer;" 
                                     data-toggle="modal" 
                                     data-target="#updateModelModal" 
-                                    onclick='fillEditModal(${model.id}, "${model.name}")'
+                                    onclick='fillEditModal("${model.id}", "${model.name}")'
                                 >
                             </td>
+                            <th>${model.id}</th>
                             <td>${model.name}</t>
                             <td>${model.index_name}</td>
                             <td>${model.doc_count}</td>
@@ -46,15 +46,17 @@ function renderModels() {
 }
 
 function selectFolder(e) {
-    let theFiles = e.target.files;
-    let relativePath = theFiles[0].webkitRelativePath;
-    let folder = relativePath.split("/");
+    const filesNamesInput = document.getElementById('filesNames');
+    const selectedFilesP = document.getElementById('selectedFiles');
+
     let filesStr = '';
-    for (let filePath of theFiles) {
-        filesStr += (filePath.name.split('.')[0] + '<separator>');
+    selectedFilesP.innerText = '\nSelected files:\n';
+    for (let file of e.target.files) {
+        filesStr += (file.name.split('.')[0] + '<separator>');
+        selectedFilesP.innerText += ` - ${file.name}\n`
     }
-    document.getElementById('files_names').value = filesStr.substr(0, filesStr.length - 11);
-    document.getElementById('load-subject-name-label').children[1].value = folder[0];
+    filesNamesInput.value = filesStr.substr(0, filesStr.length - 11);
+
 }
 
 
@@ -79,6 +81,69 @@ function fillEditModal(modelID, modelName) {
     // const subjectDescriptionP = document.getElementById(`subject-description-${subjectID}`)
     // const descriptionInput = document.getElementById('edit-description');
     // descriptionInput.value = subjectDescriptionP.innerHTML;
+}
+
+function fillAddModal() {
+    const addModelModalTitle = document.getElementById('addModelModalTitle');
+    addModelModalTitle.innerHTML = 'Add model';
+    const addModelButton = document.getElementById('addModelButton');
+    addModelButton.onclick = () => {
+        const modelName = document.getElementById('name');
+        const dataSource = document.getElementById("dataSourceOptionSelect");
+
+        let formData = new FormData();
+        formData.append('name', modelName.value);
+
+        if (dataSource.selectedIndex === 0) { // single file
+            formData.append('data_source', 'file');
+            const trainFile = document.getElementById('trainFile');
+            formData.append('train_file', trainFile.files[0]);
+
+        } else if (dataSource.selectedIndex === 1) { // folder with text files
+            formData.append('data_source', 'folder');
+            const trainFiles = document.getElementById('trainFiles');
+            for (let file of trainFiles.files) {
+                formData.append(file.name, file);
+            }
+
+        } else if (dataSource.selectedIndex === 2) { // postgresql
+            formData.append('data_source', 'postgres');
+            const pgHost = document.getElementById('pgHost');
+            const pgPort = document.getElementById('pgPort');
+            const pgUser = document.getElementById('pgUser');
+            const pgPassword = document.getElementById('pgPassword');
+            const pgDBName = document.getElementById('pgDBName');
+            const pgQuery = document.getElementById('pgQuery');
+
+            formData.append('pg_host', pgHost.value);
+            formData.append('pg_port', pgPort.value);
+            formData.append('pg_user', pgUser.value);
+            formData.append('pg_password', pgPassword.value);
+            formData.append('pg_dbname', pgDBName.value);
+            formData.append('sql_query', pgQuery.value);
+        }
+        for (let key of formData) {
+            console.log(key, formData[key]);
+        }
+
+        $.ajax({
+            url: modelsApiUrl.replace('model_id', 'new'),
+            type: 'post',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: (response) => {
+                if (response.success) {
+                    renderModels();
+                    renderInfoModal("New model", response.success);
+                } else {
+                    renderInfoModal("Error", response.error);
+                }
+            }
+        });
+
+    };
+
 }
 
 function fillDeleteModal(modelID, modelName) {

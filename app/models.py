@@ -43,7 +43,7 @@ class Document(db.Model):
 
 class ModelIndex(db.Model):
     __tablename__ = 'models'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(db.String, primary_key=True)
     name = db.Column(db.String(128), unique=True)
 
     @classmethod

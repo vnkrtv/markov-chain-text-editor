@@ -32,3 +32,7 @@ class TextProcessor:
     def get_ngram_gen(cls, text_gen: Iterable, ngram_size: int = 3) -> Generator:
         for sentence in cls.get_sentences_gens(text_gen):
             yield [''.join(item) for item in nltk.ngrams(sentence, ngram_size)]
+
+    @classmethod
+    def get_train_sentences(cls, train_corpus: Iterable) -> Generator:
+        return (' '.join(words) for words in cls.get_words_gen(train_corpus))
