@@ -6,8 +6,6 @@ from typing import Generator, Iterable, Optional, List, Tuple, Dict, Any
 import textract
 import pdftotext
 from textract.exceptions import ExtensionNotSupported
-from werkzeug.datastructures import FileStorage
-from werkzeug.utils import secure_filename
 
 from app import app
 from config import Config
