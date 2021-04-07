@@ -65,8 +65,7 @@ class ModelIndex(db.Model):
 
     def update_index(self, train_sentences: Iterable[str]):
         es = utils.get_elastic_engine()
-        for sentence in train_sentences:
-            es.add_doc(index_name=self.index_name, text=sentence)
+        es.add_many(index_name=self.index_name, sentences=train_sentences)
 
     def generate_samples(self, beginning: str, samples_num: int) -> List[str]:
         es = utils.get_elastic_engine()
