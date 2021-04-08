@@ -71,9 +71,7 @@ class ElasticEngine:
                     '_op_type': 'create',
                     '_index': index_name,
                     '_id': uuid.uuid4(),
-                    'doc': {
-                        'text': sentence
-                    }
+                    'text': sentence
                 })
             else:
                 helpers.bulk(self.es, actions=actions, stats_only=True)
