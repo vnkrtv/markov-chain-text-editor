@@ -4,6 +4,7 @@ import pathlib
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'you-will-never-guess')
+    # CORS_HEADERS = ['Access-Control-Allow-Origin', 'Content-Type']
     ELASTIC_HOST = os.environ.get('ELASTIC_HOST', 'localhost')
     ELASTIC_PORT = os.environ.get('ELASTIC_PORT', 9200)
     ELASTIC_USER = os.environ.get('ELASTIC_USER', None)

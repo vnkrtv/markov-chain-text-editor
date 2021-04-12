@@ -197,7 +197,7 @@ function fillAddModal() {
 
         document.getElementById("loadingContainer").style.display = "";
         $.ajax({
-            url: modelsApiUrl.replace('model_id', 'new'),
+            url: modelsApiUrl.replace('model_id', ''),
             type: 'post',
             data: formData,
             contentType: false,

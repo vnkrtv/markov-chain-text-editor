@@ -76,6 +76,8 @@ class ElasticEngine:
             else:
                 helpers.bulk(self.es, actions=actions, stats_only=True)
                 actions = []
+        else:
+            helpers.bulk(self.es, actions=actions, stats_only=True)
 
     def delete_index(self, index_name: str) -> None:
         self.es.indices.delete(index=index_name)

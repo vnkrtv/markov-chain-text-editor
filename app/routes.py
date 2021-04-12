@@ -8,6 +8,7 @@ from typing import Optional
 
 from flask import render_template, jsonify, request, redirect, url_for, flash
 from flask.views import MethodView
+from flask_cors import cross_origin
 from flask_login import login_user, logout_user, login_required, current_user
 from textract.exceptions import ExtensionNotSupported
 
@@ -111,7 +112,8 @@ class LoginView(MethodView):
 
 
 class T9API(MethodView):
-    decorators = [csrf.exempt, login_required]
+    # decorators = [csrf.exempt, cross_origin(origin='*', headers=['Access-Control-Allow-Origin', 'Content-Type'])]
+    decorators = [csrf.exempt]
     remove_punctuation = re.compile(r'[^a-zA-Zа-яА-Я ]')
 
     def post(self):
@@ -122,6 +124,11 @@ class T9API(MethodView):
         return jsonify({
             'sentences': sentences
         })
+        # response = jsonify({
+        #     'sentences': sentences
+        # })
+        # response.headers.add('Access-Control-Allow-Origin', '*')
+        # return response
 
 
 class ModelsView(MethodView):
@@ -233,51 +240,47 @@ class ModelsAPI(MethodView):
         })
 
     def post(self, model_id: str):
-        if model_id == 'new':
-            model = ModelIndex(id=str(ObjectId()), name=request.form['name'])
-            model.create_index()
-            try:
-                data_source = request.form.get('data_source')
-                if data_source == 'file':
-                    file = request.files['train_file']
-                    train_corpus = utils.get_text_corpus_from_file(file)
-                    model.update_index(train_sentences=TextProcessor.get_train_sentences(train_corpus))
-                    msg = "New model '%s' based on '%s' file was successfully added." % (model.name, file.filename)
-                elif data_source == 'postgres':
-                    train_corpus = utils.get_text_corpus_from_postgres(request.form)
-                    model.update_index(train_sentences=TextProcessor.get_train_sentences(train_corpus))
-                    msg = "New model '%s' based on PostgreSQL data was successfully added." % model.name
-                elif data_source == 'folder':
-                    msg = "New model '%s' was successfully added. Train files:\n" % model.name
-                    is_empty = True
-                    for ok, filename, train_corpus in utils.get_text_corpus_gen_from_folder(request):
-                        if ok:
-                            model.update_index(train_sentences=TextProcessor.get_train_sentences(train_corpus))
-                            msg += f' + {filename}\n'
-                            is_empty = False
-                        else:
-                            msg += f' - {filename} - error on parsing\n'
-                    if is_empty:
-                        raise Exception('All specified train files were not parsed.')
-                else:
-                    return jsonify({
-                        'error': 'Data source must be specified for added model.'
-                    })
+        model = ModelIndex(id=str(ObjectId()), name=request.form['name'])
+        model.create_index()
+        try:
+            data_source = request.form.get('data_source')
+            if data_source == 'file':
+                file = request.files['train_file']
+                train_corpus = utils.get_text_corpus_from_file(file)
+                model.update_index(train_sentences=TextProcessor.get_train_sentences(train_corpus))
+                msg = "New model '%s' based on '%s' file was successfully added." % (model.name, file.filename)
+            elif data_source == 'postgres':
+                train_corpus = utils.get_text_corpus_from_postgres(request.form)
+                model.update_index(train_sentences=TextProcessor.get_train_sentences(train_corpus))
+                msg = "New model '%s' based on PostgreSQL data was successfully added." % model.name
+            elif data_source == 'folder':
+                msg = "New model '%s' was successfully added. Train files:\n" % model.name
+                is_empty = True
+                for ok, filename, train_corpus in utils.get_text_corpus_gen_from_folder(request):
+                    if ok:
+                        model.update_index(train_sentences=TextProcessor.get_train_sentences(train_corpus))
+                        msg += f' + {filename}\n'
+                        is_empty = False
+                    else:
+                        msg += f' - {filename} - error on parsing\n'
+                if is_empty:
+                    raise Exception('All specified train files were not parsed.')
+            else:
+                return jsonify({
+                    'error': 'Data source must be specified for added model.'
+                })
 
-                db.session.add(model)
-                db.session.commit()
-                return jsonify({
-                    'success': msg
-                })
-            except Exception as e:
-                traceback.print_exc()
-                model.delete_index()
-                return jsonify({
-                    'error': "Error: %s" % str(e)
-                })
-        return jsonify({
-            'error': "Incorrect post request"
-        })
+            db.session.add(model)
+            db.session.commit()
+            return jsonify({
+                'success': msg
+            })
+        except Exception as e:
+            traceback.print_exc()
+            model.delete_index()
+            return jsonify({
+                'error': "Error: %s" % str(e)
+            })
 
 
 # class GeneratorView(MethodView):
