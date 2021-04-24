@@ -120,14 +120,13 @@ class T9API(MethodView):
         phrase = self.remove_punctuation.sub('', request.form['beginning'])
         es = utils.get_elastic_engine()
         sentences = es.get(index_name=request.form['indexName'], phrase=phrase)
-        print('phrase: ', phrase, '\nsentences: ', sentences)
         return jsonify({
             'sentences': sentences
         })
         # response = jsonify({
         #     'sentences': sentences
         # })
-        # response.headers.add('Access-Control-Allow-Origin', '*')
+        # response.headers.add('Access-Control-Allow-Origin: *')
         # return response
 
 

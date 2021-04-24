@@ -112,22 +112,28 @@ function t9Plugin(textInput, phrasesDiv, t9ApiURL, userIndexName) {
         formData.append('firstWordsCount', wordsCount.toString());
         formData.append('phraseLength', '1');
 
+        let headers = new Headers();
+        // headers.append('Content-Type', 'application/json');
+        // headers.append('Access-Control-Allow-Origin', '*');
+
         $.ajax({
             url: apiURL,
             type: 'post',
             data: formData,
             contentType: false,
             processData: false,
-            // headers: {
-            //     'Content-Type': 'application/json',
-            //     "Access-Control-Allow-Origin": "*"
-            // },
+            // headers: headers,
             success: (response) => {
                 if (response["sentences"] !== undefined) {
                     arr = response["sentences"];
                     console.log('arr: ', arr);
                     updateLists();
                 }
+            },
+            error: (jqXHR, textStatus, errorThrown) => {
+                console.log('jqXHR: ', jqXHR);
+                console.log('textStatus: ', textStatus);
+                console.log('errorThrown: ', errorThrown);
             }
         });
     }
@@ -193,8 +199,8 @@ function t9Plugin(textInput, phrasesDiv, t9ApiURL, userIndexName) {
     });
 }
 
-function activatePlugin(t9ApiURL, indexName, t9CssClassName) {
-    for (let textInput of document.getElementsByTagName('textarea')) {
+function activatePlugin(querySelector, t9ApiURL, indexName, t9CssClassName) {
+    for (let textInput of document.querySelectorAll(querySelector)) {
         let phrasesDiv = document.createElement('div');
         textInput.parentNode.insertBefore(phrasesDiv, textInput.nextSibling);
 
@@ -214,26 +220,19 @@ function activatePlugin(t9ApiURL, indexName, t9CssClassName) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    const t9ApiURLHiddenInput = document.createElement('input');
-    t9ApiURLHiddenInput.setAttribute('id', 't9ApiURLHiddenInput');
-    t9ApiURLHiddenInput.setAttribute('type', 'hidden');
-    t9ApiURLHiddenInput.setAttribute('value', '/api/t9');
-
-    const indexNameHiddenInput = document.createElement('input');
-    indexNameHiddenInput.setAttribute('id', 'indexNameHiddenInput');
-    indexNameHiddenInput.setAttribute('type', 'hidden');
-    indexNameHiddenInput.setAttribute('value', 't9-index-606ed615e7c351fd86f46c1e');
-
-    const t9ApiURL = t9ApiURLHiddenInput.value;
-    const indexName = indexNameHiddenInput.value;
+let PredictiveInput = function (querySelectors, t9ApiURL, indexName, accessToken) {
     const t9CssClassName = 'autocomplete';
-
-    activatePlugin(t9ApiURL, indexName, t9CssClassName);
-
-    indexNameHiddenInput.onchange = () => {
-        const t9ApiURL = t9ApiURLHiddenInput.value;
-        const indexName = indexNameHiddenInput.value;
-        activatePlugin(t9ApiURL, indexName, t9CssClassName);
+    for (let querySelector of querySelectors) {
+        activatePlugin(querySelector, t9ApiURL, indexName, t9CssClassName);
     }
+};
+
+document.addEventListener('DOMContentLoaded', function () {
+    PredictiveInput(
+        querySelectors=['textarea', 'input'],
+        t9ApiURL='http://serverurl/api/t9',
+        indexName='t9-index-606ed615e7c351fd86f46c1e'
+    );
 }); // end ready
+
+export default PredictiveInput;

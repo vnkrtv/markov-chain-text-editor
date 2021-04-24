@@ -14,7 +14,7 @@ from app.context_procesor import (
 
 app = Flask(__name__)
 app.config.from_object(Config)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
