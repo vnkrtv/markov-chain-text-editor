@@ -117,11 +117,10 @@ class T9API(MethodView):
     remove_punctuation = re.compile(r'[^a-zA-Zа-яА-Я ]')
 
     def post(self):
-        phrase = self.remove_punctuation.sub('', request.form['beginning'])
-        es = utils.get_elastic_engine()
-        sentences = es.get(index_name=request.form['indexName'], phrase=phrase)
+        beginning = self.remove_punctuation.sub('', request.form['beginning'])
+        model = ModelIndex.query.filter_by(name=request.form['modelName']).first()
         return jsonify({
-            'sentences': sentences
+            'sentences': model.generate_samples(beginning=beginning)
         })
         # response = jsonify({
         #     'sentences': sentences

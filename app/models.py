@@ -67,7 +67,7 @@ class ModelIndex(db.Model):
         es = utils.get_elastic_engine()
         es.add_many(index_name=self.index_name, sentences=train_sentences)
 
-    def generate_samples(self, beginning: str, samples_num: int) -> List[str]:
+    def generate_samples(self, beginning: str, samples_num: int = 10) -> List[str]:
         es = utils.get_elastic_engine()
         return es.get(index_name=self.index_name, phrase=beginning, count=samples_num)
 

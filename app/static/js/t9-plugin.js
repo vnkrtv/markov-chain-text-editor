@@ -107,7 +107,7 @@ function t9Plugin(textInput, phrasesDiv, t9ApiURL, userIndexName) {
         console.debug('beginning: ', beginning);
 
         let formData = new FormData();
-        formData.append('indexName', indexName);
+        formData.append('modelName', indexName);
         formData.append('beginning', beginning.toLowerCase());
         formData.append('firstWordsCount', wordsCount.toString());
         formData.append('phraseLength', '1');
@@ -220,13 +220,14 @@ function activatePlugin(querySelector, t9ApiURL, indexName, t9CssClassName) {
     }
 }
 
-let PredictiveInput = function (querySelectors, t9ApiURL, indexName, accessToken) {
+function PredictiveInput(querySelectors, t9ApiURL, indexName, accessToken) {
     const t9CssClassName = 'autocomplete';
     for (let querySelector of querySelectors) {
         activatePlugin(querySelector, t9ApiURL, indexName, t9CssClassName);
     }
 };
 
+/*
 document.addEventListener('DOMContentLoaded', function () {
     PredictiveInput(
         querySelectors=['textarea', 'input'],
@@ -234,5 +235,4 @@ document.addEventListener('DOMContentLoaded', function () {
         indexName='t9-index-606ed615e7c351fd86f46c1e'
     );
 }); // end ready
-
-export default PredictiveInput;
+*/

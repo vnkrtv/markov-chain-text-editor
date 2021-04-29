@@ -83,7 +83,8 @@
   </div>
 </div>
 </form>
-  <script src="{{ url_for('static', filename='js/autocomplete3.0.js') }}"></script>
+  <!--script src="{{ url_for('static', filename='js/autocomplete3.0.js') }}"></script-->
+  <script src="{{ url_for('static', filename='js/t9-plugin.js') }}"></script>
   <script>
     const t9ApiUrl = "{{ url_for('t9_api') }}";
     const modelsApiUrl = "{{ url_for('models_api', model_id='all') }}";
@@ -94,7 +95,7 @@
         modelsArr = response;
         for (let model of modelsArr) {
           const modelOption = document.createElement('option');
-          modelOption.value = model.index_name;
+          modelOption.value = model.name;
           modelOption.innerText = model.name;
           modelSelect.appendChild(modelOption);
         }
@@ -112,7 +113,12 @@
 
     let textarea = document.getElementById("text");
     let words = [];
-    autocomplete(textarea, words, t9ApiUrl);
+    PredictiveInput(
+        querySelectors=['#text'],
+        t9ApiURL='/api/t9',
+        indexName='РОИ Мальцев'
+    );
+    // autocomplete(textarea, words, t9ApiUrl);
   </script>
 
 {% endblock %}
