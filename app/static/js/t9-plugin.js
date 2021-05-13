@@ -113,12 +113,12 @@ function t9Plugin(textInput, phrasesDiv, t9ApiURL, userIndexName, csrfToken) {
         formData.append('firstWordsCount', wordsCount.toString());
         formData.append('phraseLength', '1');
 
-        let headers = new Headers();
+        // let headers = new Headers();
         // headers.append('Content-Type', 'application/json');
         // headers.append('Access-Control-Allow-Origin', '*');
 
         $.ajax({
-            url: 2,
+            url: apiURL,
             type: 'post',
             data: formData,
             contentType: false,
