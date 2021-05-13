@@ -63,7 +63,8 @@ class ElasticEngine:
             'text': text
         })
 
-    def add_many(self, index_name: str, sentences: Iterable) -> None:
+    def add_many(self, index_name: str, sentences: Iterable, bulk_actions_count: int = 10_000) -> None:
+        self.bulk_actions_count = bulk_actions_count
         actions = []
         for sentence in sentences:
             if len(actions) < self.bulk_actions_count:

@@ -1,5 +1,6 @@
-function t9Plugin(textInput, phrasesDiv, t9ApiURL, userIndexName) {
+function t9Plugin(textInput, phrasesDiv, t9ApiURL, userIndexName, csrfToken) {
     const apiURL = t9ApiURL;
+    const csrfTokenStr = csrfToken;
 
     let indexName = userIndexName;
     let arr = [];
@@ -117,12 +118,14 @@ function t9Plugin(textInput, phrasesDiv, t9ApiURL, userIndexName) {
         // headers.append('Access-Control-Allow-Origin', '*');
 
         $.ajax({
-            url: apiURL,
+            url: 2,
             type: 'post',
             data: formData,
             contentType: false,
             processData: false,
-            // headers: headers,
+            headers: {
+                'X-CSRFToken': csrfTokenStr
+            },
             success: (response) => {
                 if (response["sentences"] !== undefined) {
                     arr = response["sentences"];
@@ -199,7 +202,7 @@ function t9Plugin(textInput, phrasesDiv, t9ApiURL, userIndexName) {
     });
 }
 
-function activatePlugin(querySelector, t9ApiURL, indexName, t9CssClassName) {
+function activatePlugin(querySelector, t9ApiURL, indexName, t9CssClassName, csrfToken) {
     for (let textInput of document.querySelectorAll(querySelector)) {
         let phrasesDiv = document.createElement('div');
         textInput.parentNode.insertBefore(phrasesDiv, textInput.nextSibling);
@@ -207,7 +210,7 @@ function activatePlugin(querySelector, t9ApiURL, indexName, t9CssClassName) {
         textInput.classList.add(t9CssClassName);
         phrasesDiv.classList.add(t9CssClassName);
 
-        t9Plugin(textInput, phrasesDiv, t9ApiURL, indexName);
+        t9Plugin(textInput, phrasesDiv, t9ApiURL, indexName, csrfToken);
     }
     for (let textInput of document.getElementsByTagName('input')) {
         let phrasesDiv = document.createElement('div');
@@ -216,14 +219,14 @@ function activatePlugin(querySelector, t9ApiURL, indexName, t9CssClassName) {
         textInput.classList.add(t9CssClassName);
         phrasesDiv.classList.add(t9CssClassName);
 
-        t9Plugin(textInput, phrasesDiv, t9ApiURL, indexName);
+        t9Plugin(textInput, phrasesDiv, t9ApiURL, indexName, csrfToken);
     }
 }
 
-function PredictiveInput(querySelectors, t9ApiURL, indexName, accessToken) {
+function PredictiveInput(querySelectors, t9ApiURL, indexName, csrfToken) {
     const t9CssClassName = 'autocomplete';
     for (let querySelector of querySelectors) {
-        activatePlugin(querySelector, t9ApiURL, indexName, t9CssClassName);
+        activatePlugin(querySelector, t9ApiURL, indexName, t9CssClassName, csrfToken);
     }
 };
 

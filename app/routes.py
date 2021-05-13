@@ -116,17 +116,21 @@ class T9API(MethodView):
     decorators = [csrf.exempt]
     remove_punctuation = re.compile(r'[^a-zA-Zа-яА-Я ]')
 
+    def options(self):
+        response = jsonify({})
+        response.headers["Access-Control-Allow-Methods"] = "POST"
+        response.headers["Access-Control-Allow-Headers"] = "Content-type"
+        response.headers["Access-Control-Allow-Origin"] = '*'
+        return response
+
     def post(self):
         beginning = self.remove_punctuation.sub('', request.form['beginning'])
         model = ModelIndex.query.filter_by(name=request.form['modelName']).first()
-        return jsonify({
+        response = jsonify({
             'sentences': model.generate_samples(beginning=beginning)
         })
-        # response = jsonify({
-        #     'sentences': sentences
-        # })
-        # response.headers.add('Access-Control-Allow-Origin: *')
-        # return response
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
 
 
 class ModelsView(MethodView):
@@ -327,7 +331,7 @@ app.add_url_rule('/models',
                  methods=['POST', 'GET'])
 app.add_url_rule('/api/t9',
                  view_func=T9API.as_view('t9_api'),
-                 methods=['POST', 'GET'])
+                 methods=['POST', 'GET', 'OPTIONS'])
 app.add_url_rule('/api/models/<model_id>',
                  view_func=ModelsAPI.as_view('models_api'),
                  methods=['POST', 'GET', 'PUT', 'DELETE'])

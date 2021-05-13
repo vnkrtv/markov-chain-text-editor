@@ -113,10 +113,13 @@
 
     let textarea = document.getElementById("text");
     let words = [];
+    let csrfToken = '{{ csrf_token() }}';
+
     PredictiveInput(
         querySelectors=['#text'],
-        t9ApiURL='/api/t9',
-        indexName='РОИ Мальцев'
+        t9ApiURL='http://localhost:5000/api/t9',
+        indexName='РОИ Мальцев',
+        csrfToken=csrfToken
     );
     // autocomplete(textarea, words, t9ApiUrl);
   </script>
