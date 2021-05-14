@@ -1,8 +1,9 @@
-function t9Plugin(textInput, phrasesDiv, t9ApiURL, userIndexName, csrfToken) {
+function t9Plugin(textInput, phrasesDiv, t9ApiURL, userIndexName, firstWordsCount, phraseLength) {
     const apiURL = t9ApiURL;
-    const csrfTokenStr = csrfToken;
 
     let indexName = userIndexName;
+    let wordsCount = firstWordsCount;
+    let phraseLen = phraseLength;
     let arr = [];
 
     let currentFocus;
@@ -25,14 +26,11 @@ function t9Plugin(textInput, phrasesDiv, t9ApiURL, userIndexName, csrfToken) {
         phrasesContainer.setAttribute("class", "autocomplete-items");
         phrasesDiv.appendChild(phrasesContainer);
 
-        let phraseLen = 1;
-
         let phraseList = val.split(" ");
         let isNewWord = (phraseList[phraseList.length - 1] === '')
         if (isNewWord) {
             phraseList = phraseList.slice(0, phraseList.length - 1);
         }
-        let wordsCount = 1;
         let bufArray = [];
         let count = (wordsCount < phraseList.length ? wordsCount : phraseList.length);
         for (let i = 0; i < count; i++) {
@@ -95,7 +93,6 @@ function t9Plugin(textInput, phrasesDiv, t9ApiURL, userIndexName, csrfToken) {
         if (phraseList[phraseList.length - 1] === '') {
             phraseList = phraseList.slice(0, phraseList.length - 1);
         }
-        let wordsCount = 1;
         let bufArray = [];
         let count = (wordsCount < phraseList.length ? wordsCount : phraseList.length);
         for (let i = 0; i < count; i++) {
@@ -113,19 +110,12 @@ function t9Plugin(textInput, phrasesDiv, t9ApiURL, userIndexName, csrfToken) {
         formData.append('firstWordsCount', wordsCount.toString());
         formData.append('phraseLength', '1');
 
-        // let headers = new Headers();
-        // headers.append('Content-Type', 'application/json');
-        // headers.append('Access-Control-Allow-Origin', '*');
-
         $.ajax({
             url: apiURL,
             type: 'post',
             data: formData,
             contentType: false,
             processData: false,
-            headers: {
-                'X-CSRFToken': csrfTokenStr
-            },
             success: (response) => {
                 if (response["sentences"] !== undefined) {
                     arr = response["sentences"];
@@ -202,33 +192,60 @@ function t9Plugin(textInput, phrasesDiv, t9ApiURL, userIndexName, csrfToken) {
     });
 }
 
-function activatePlugin(querySelector, t9ApiURL, indexName, t9CssClassName, csrfToken) {
-    for (let textInput of document.querySelectorAll(querySelector)) {
-        let phrasesDiv = document.createElement('div');
-        textInput.parentNode.insertBefore(phrasesDiv, textInput.nextSibling);
 
-        textInput.classList.add(t9CssClassName);
-        phrasesDiv.classList.add(t9CssClassName);
+class PredictiveInput {
 
-        t9Plugin(textInput, phrasesDiv, t9ApiURL, indexName, csrfToken);
+    constructor(querySelectors, t9ApiURL, indexName, firstWordsCount = 1, phraseLength = 1) {
+        this.querySelectors = querySelectors;
+
+        this.t9CssClassName = 'autocomplete';
+        this.t9ApiURL = t9ApiURL;
+
+        this.indexName = indexName;
+        this.firstWordsCount = firstWordsCount;
+        this.phraseLength = phraseLength;
+
+        this.elements = [];
+
+        for (let querySelector of querySelectors) {
+            for (let textInput of document.querySelectorAll(querySelector)) {
+                let phrasesDiv = document.createElement('div');
+                textInput.parentNode.insertBefore(phrasesDiv, textInput.nextSibling);
+
+                textInput.classList.add(this.t9CssClassName);
+                phrasesDiv.classList.add(this.t9CssClassName);
+
+                this.elements.push([textInput, phrasesDiv]);
+
+                t9Plugin(textInput, phrasesDiv, this.t9ApiURL, this.indexName, this.firstWordsCount, this.phraseLength);
+            }
+        }
     }
-    for (let textInput of document.getElementsByTagName('input')) {
-        let phrasesDiv = document.createElement('div');
-        textInput.parentNode.insertBefore(phrasesDiv, textInput.nextSibling);
 
-        textInput.classList.add(t9CssClassName);
-        phrasesDiv.classList.add(t9CssClassName);
 
-        t9Plugin(textInput, phrasesDiv, t9ApiURL, indexName, csrfToken);
+    setIndex(indexName) {
+        this.indexName = indexName;
+        for (let elemPair of this.elements) {
+            t9Plugin(elemPair[0], elemPair[1], this.t9ApiURL, this.indexName, this.firstWordsCount, this.phraseLength);
+        }
     }
+
+    setFirstWordsCount(firstWordsCount) {
+        this.firstWordsCount = firstWordsCount;
+        for (let elemPair of this.elements) {
+            t9Plugin(elemPair[0], elemPair[1], this.t9ApiURL, this.indexName, this.firstWordsCount, this.phraseLength);
+        }
+    }
+
+    setPhraseLength(phraseLength) {
+        this.phraseLength = phraseLength;
+        for (let elemPair of this.elements) {
+            t9Plugin(elemPair[0], elemPair[1], this.t9ApiURL, this.indexName, this.firstWordsCount, this.phraseLength);
+        }
+    }
+
 }
 
-function PredictiveInput(querySelectors, t9ApiURL, indexName, csrfToken) {
-    const t9CssClassName = 'autocomplete';
-    for (let querySelector of querySelectors) {
-        activatePlugin(querySelector, t9ApiURL, indexName, t9CssClassName, csrfToken);
-    }
-};
 
 /*
 document.addEventListener('DOMContentLoaded', function () {

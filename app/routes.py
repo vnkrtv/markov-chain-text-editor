@@ -112,7 +112,6 @@ class LoginView(MethodView):
 
 
 class T9API(MethodView):
-    # decorators = [csrf.exempt, cross_origin(origin='*', headers=['Access-Control-Allow-Origin', 'Content-Type'])]
     decorators = [csrf.exempt]
     remove_punctuation = re.compile(r'[^a-zA-Zа-яА-Я ]')
 
@@ -124,6 +123,7 @@ class T9API(MethodView):
         return response
 
     def post(self):
+        print(request.form)
         beginning = self.remove_punctuation.sub('', request.form['beginning'])
         model = ModelIndex.query.filter_by(name=request.form['modelName']).first()
         response = jsonify({
@@ -144,9 +144,6 @@ class ModelsView(MethodView):
             'model_form': ModelForm()
         }
         return render_template(self.template, **context)
-
-    def post(self):
-        return self.get()
 
 
 class ModelsAPI(MethodView):

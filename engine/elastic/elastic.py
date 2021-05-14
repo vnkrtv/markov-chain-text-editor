@@ -86,7 +86,7 @@ class ElasticEngine:
     def get_indices_stats(self, index_name: str) -> Dict[str, Any]:
         return self.es.indices.stats(index=index_name, human=True).get("indices", {})
 
-    def get(self, index_name: str, phrase: str, count: int = 10) -> List[str]:
+    def get(self, index_name: str, phrase: str, count: int = 10, phrase_len: int = 10) -> List[str]:
         sentences = [
             doc['_source']['text']
             for doc in self.es.search(
@@ -101,6 +101,6 @@ class ElasticEngine:
                 })['hits']['hits']
         ]
         return [
-            sentence[sentence.find(phrase):]
+            ' '.join(sentence[sentence.find(phrase):].split()[:phrase_len])
             for sentence in sentences
         ]

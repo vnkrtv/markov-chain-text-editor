@@ -1,127 +1,131 @@
 {% extends "base.html" %}
 
-{% block navbar %}          
-        <a href="" class="navbar-brand d-flex align-items-center" data-toggle="modal" data-target="#model-modal">
-          Model
-        </a>
-        <a href="" class="navbar-brand d-flex align-items-center" data-toggle="modal" data-target="#doc-modal">
-          Document
-        </a>
+{% block navbar %}
+<a href="" class="navbar-brand d-flex align-items-center" data-toggle="modal" data-target="#model-modal">
+    Model
+</a>
+<a href="" class="navbar-brand d-flex align-items-center" data-toggle="modal" data-target="#doc-modal">
+    Document
+</a>
 {% endblock navbar %}
 
 
 {% block content %}
 
 <form action="" method="post">
-{{ form.hidden_tag() }}
-    
-<header class="header">
-	<div class='jumbotron'>
-		<div class="form-group shadow-textarea autocomplete">
-		  <textarea id="text" name="doc-body" class="form-control z-depth-1" style="overflow:hidden;" placeholder="Print here...">{{ doc.body }}</textarea>
-		  <!--div id="t9-words"></div>
-		  <div id="t9-phrases" class="hide-element"></div-->
-      <div id="t9-phrases"></div>
-		</div>
-	</div>
-</header>
+    {{ form.hidden_tag() }}
 
-
-<div id="model-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="model-modal" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4 class="modal-title" id="model-modal">Model parameters</h4>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      </div>
-      <div class="modal-body">
-        <div class="container-fluid bd-example-row">
-        	<div class="col">
-            <div class="row">
-              <h5>Select model</h5>
-              <label for="model-select"></label>
-              <select class="form-control custom-select" id="model-select"></select>
+    <header class="header">
+        <div class='jumbotron'>
+            <div class="form-group shadow-textarea autocomplete">
+                <textarea id="text" name="doc-body" class="form-control z-depth-1" style="overflow:hidden;"
+                          placeholder="Print here...">{{ doc.body }}</textarea>
+                <!--div id="t9-words"></div>
+                <div id="t9-phrases" class="hide-element"></div-->
+                <div id="t9-phrases"></div>
             </div>
-            <br>
-        		<div class="row">
-        	        <h5>First words count</h5> <input class="form-control" value="1" type="number" min="1" max="6" id="first-words">
-        		</div>
-        		<br>
-        		<div class="row">
-        			<h5>Phrase length</h5> <input class="form-control" value="1" type="number" min="1" max="10" id="phrase-len">
-        		</div>
-        	</div>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
+    </header>
 
-<div id="doc-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="doc-modal" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4 class="modal-title" id="doc-modal">Document</h4>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      </div>
-      <div class="modal-body">
-        <div class="container-fluid bd-example-row">
-          <div class="col">
-            {{ form.title.label }}<br>
-            {{ form.title(size=20, value=doc.title, class="form-control") }}<br>
-          </div>
+
+    <div id="model-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="model-modal"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="model-modal">Model parameters</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid bd-example-row">
+                        <div class="col">
+                            <div class="row">
+                                <h5>Select model</h5>
+                                <label for="model-select"></label>
+                                <select class="form-control custom-select" id="model-select"></select>
+                            </div>
+                            <br>
+                            <div class="row">
+                                <h5>First words count</h5> <input class="form-control" value="1" type="number" min="1"
+                                                                  max="6" id="first-words">
+                            </div>
+                            <br>
+                            <div class="row">
+                                <h5>Phrase length</h5> <input class="form-control" value="1" type="number" min="1"
+                                                              max="10" id="phrase-len">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        {{ form.submit(value="Save", class="btn btn-light") }}
-      </div>
     </div>
-  </div>
-</div>
+
+    <div id="doc-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="doc-modal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="doc-modal">Document</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid bd-example-row">
+                        <div class="col">
+                            {{ form.title.label }}<br>
+                            {{ form.title(size=20, value=doc.title, class="form-control") }}<br>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    {{ form.submit(value="Save", class="btn btn-light") }}
+                </div>
+            </div>
+        </div>
+    </div>
 </form>
-  <!--script src="{{ url_for('static', filename='js/autocomplete3.0.js') }}"></script-->
-  <script src="{{ url_for('static', filename='js/t9-plugin.js') }}"></script>
-  <script>
+<script src="{{ url_for('static', filename='js/t9-plugin.js') }}"></script>
+<script>
     const t9ApiUrl = "{{ url_for('t9_api') }}";
     const modelsApiUrl = "{{ url_for('models_api', model_id='all') }}";
+
+    const textarea = document.getElementById("text");
     const modelSelect = document.getElementById('model-select');
+    const firstWordsInput = document.getElementById('first-words');
+    const phraseLengthInput = document.getElementById('phrase-len');
 
     let modelsArr = [];
-    $.get(modelsApiUrl).done(function(response) {
+    $.get(modelsApiUrl).done(function (response) {
         modelsArr = response;
         for (let model of modelsArr) {
-          const modelOption = document.createElement('option');
-          modelOption.value = model.name;
-          modelOption.innerText = model.name;
-          modelSelect.appendChild(modelOption);
+            const modelOption = document.createElement('option');
+            modelOption.value = model.name;
+            modelOption.innerText = model.name;
+            modelSelect.appendChild(modelOption);
+        }
+
+        let predictiveInput = new PredictiveInput(
+            querySelectors = ['#text'],
+            t9ApiURL = t9ApiUrl,
+            indexName = modelsArr[0].name
+        );
+
+        $('#model-select').on('change', function (e) {
+            let indexName = this.value;
+            predictiveInput.setIndex(indexName);
+        });
+        firstWordsInput.onchange = () => {
+            predictiveInput.setFirstWordsCount(parseInt(phraseLengthInput.value));
+        }
+        phraseLengthInput.onchange = () => {
+            predictiveInput.setPhraseLength(parseInt(phraseLengthInput.value));
         }
     });
-    $('#model-select').on('change', function (e) {
-      //   let optionSelected = $("option:selected", this);
-      //   let valueSelected = this.value;
-      //   loadingContainer.style.display = "";
-      //   $.post(modelsApiUrl, {
-      //     modelName: valueSelected,
-      //   }).done(function(response) {
-      //     loadingContainer.style.display = "none";
-      // });
-    });
-
-    let textarea = document.getElementById("text");
-    let words = [];
-    let csrfToken = '{{ csrf_token() }}';
-
-    PredictiveInput(
-        querySelectors=['#text'],
-        t9ApiURL='http://localhost:5000/api/t9',
-        indexName='РОИ Мальцев',
-        csrfToken=csrfToken
-    );
-    // autocomplete(textarea, words, t9ApiUrl);
-  </script>
+</script>
 
 {% endblock %}
